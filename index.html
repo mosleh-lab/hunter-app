@@ -1333,13 +1333,36 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   setInterval(tick, 1000);
 
   // ---------- health sync (via iOS Shortcuts clipboard) ----------
+  // Each key may hold one value or a list (one per line) straight from a Health action; lists are summed.
+  const firstNum = (line) => { const mt = String(line).match(/[\d٠-٩۰-۹][\d٠-٩۰-۹,٬.٫]*/); return mt ? num(mt[0]) : 0; };
+  function durHours(line) {
+    const raw = String(line).replace(/[٠-٩]/g, (c) => '٠١٢٣٤٥٦٧٨٩'.indexOf(c));
+    const clock = raw.match(/(\d+):(\d{1,2})(?::(\d{1,2}))?/);
+    if (clock) return { h: +clock[1] + +clock[2] / 60 + (clock[3] ? +clock[3] / 3600 : 0) };
+    const hm = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:hr|hrs|hour|hours|h|ساعة|ساعات|س)/i);
+    const mm = raw.match(/(\d+)\s*(?:min|mins|minute|minutes|m|دقيقة|دقائق|د)/i);
+    if (hm || (mm && /min|دقيق/i.test(raw))) return { h: (hm ? parseFloat(hm[1].replace(',', '.')) : 0) + (mm && (!hm || mm.index > hm.index) ? +mm[1] / 60 : 0) };
+    return { plain: firstNum(raw) };
+  }
   function parseHealth(text) {
-    const t = String(text || '');
-    const i = t.toUpperCase().indexOf('HUNTER'); if (i < 0) return null;
+    const t0 = String(text || '');
+    const i = t0.toUpperCase().indexOf('HUNTER'); if (i < 0) return null;
+    const t = t0.slice(i + 6).replace(/\r/g, '').replace(/\n(?=\s*[a-zA-Z]+\s*[=:])/g, ';');
     const out = {};
-    for (const part of t.slice(i + 6).replace(/=\s*\n\s*/g, '=').split(/[;\n|&]/)) {
-      const m = part.match(/^\s*([a-zA-Z]+)\s*[=:]\s*(.+)$/); if (!m) continue;
-      const k = m[1].toLowerCase(); let v = num(m[2]);
+    for (const part of t.split(/[;|&]/)) {
+      const m = part.match(/^\s*([a-zA-Z]+)\s*[=:]([\s\S]*)$/); if (!m) continue;
+      const k = m[1].toLowerCase();
+      const lines = m[2].split('\n').map((x) => x.trim()).filter(Boolean);
+      if (!lines.length) continue;
+      if (k === 'sleep') {
+        let h = 0, plain = 0;
+        for (const l of lines) { const r = durHours(l); if (r.h) h += r.h; else plain += r.plain || 0; }
+        if (plain > 1440) plain /= 3600; else if (plain > 24) plain /= 60;
+        const v = h + plain;
+        if (v > 0 && v <= 24) out.sleep = Math.round(v * 10) / 10;
+        continue;
+      }
+      let v = k === 'weight' ? firstNum(lines[0]) : lines.reduce((a, l) => a + firstNum(l), 0);
       if (!(v > 0)) continue;
       if (k === 'steps') out.steps = Math.round(v);
       else if (k === 'cal' || k === 'calories' || k === 'kcal') out.cal = Math.round(v);
@@ -1348,16 +1371,6 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       else if (k === 'water') { if (v > 20) v = v / 1000; out.water = Math.round(v * 100) / 100; }
       else if (k === 'fat') out.fat = Math.round(v);
       else if (k === 'weight') out.weight = Math.round(v * 10) / 10;
-      else if (k === 'sleep') {
-        const raw = m[2].replace(/[٠-٩]/g, (c) => '٠١٢٣٤٥٦٧٨٩'.indexOf(c));
-        const clock = raw.match(/(\d+):(\d{1,2})(?::(\d{1,2}))?/);
-        const hm = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:hr|hrs|hour|hours|h|ساعة|ساعات|س)/i);
-        const mm = raw.match(/(\d+)\s*(?:min|mins|minute|minutes|m|دقيقة|دقائق|د)/i);
-        if (clock) v = +clock[1] + +clock[2] / 60;
-        else if (hm || (mm && /min|دقيق/i.test(raw))) v = (hm ? parseFloat(hm[1].replace(',', '.')) : 0) + (mm && (!hm || mm.index > hm.index) ? +mm[1] / 60 : 0);
-        else if (v > 1440) v = v / 3600; else if (v > 24) v = v / 60;
-        if (v > 0 && v <= 24) out.sleep = Math.round(v * 10) / 10;
-      }
     }
     return Object.keys(out).length ? out : null;
   }
