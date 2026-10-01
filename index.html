@@ -54,6 +54,25 @@ button { touch-action: manipulation; }
 .steps-list { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
 .steps-list b { color: var(--fg); font-weight: 600; }
 .steps-list code { font-family: var(--f-num); direction: ltr; unicode-bidi: embed; background: rgba(0,0,0,0.35); padding: 1px 6px; border-radius: 3px; color: var(--glow-2); overflow-wrap: anywhere; }
+.rest-box { display: grid; justify-items: center; gap: 8px; margin-top: 4px; }
+.rest-box .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.recovery { width: 100%; border: 1px dashed rgba(255,210,122,0.55); background: rgba(255,210,122,0.07); border-radius: var(--r); padding: 10px 12px; text-align: center; display: grid; gap: 6px; justify-items: center; }
+.recovery b { color: var(--gold); font-family: var(--f-disp); font-size: 16px; font-weight: 600; }
+.recovery span { color: var(--muted); font-size: 13px; }
+.link-btn { background: none; border: 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; padding: 4px; }
+.cell.rest { border-color: rgba(255,210,122,0.6); border-style: dashed; color: var(--gold); }
+.setup { margin-top: 14px; border: 1px dashed var(--line); border-radius: var(--r); padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.calc { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+.calc div { border: 1px solid var(--line-soft); border-radius: var(--r); padding: 8px 10px; }
+.calc b { display: block; font-family: var(--f-num); font-size: 18px; font-variant-numeric: tabular-nums; color: var(--fg); }
+.calc span { font-size: 12px; color: var(--muted); }
+.calc .hl { border-color: var(--line); background: rgba(87,184,255,0.08); }
+.calc .hl b { color: var(--glow-2); }
+.auto-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+.wchart { width: 100%; height: 110px; display: block; }
+.wchart .ln { fill: none; stroke: var(--glow); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.wchart .ar { fill: rgba(87,184,255,0.12); stroke: none; }
+.wchart .gd { stroke: var(--line-soft); stroke-width: 1; vector-effect: non-scaling-stroke; }
 @media (max-width: 520px) { .goal-edit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .goal-edit .field:first-child { grid-column: 1 / -1; } }
 html, body { background: var(--bg); color: var(--fg); }
 body {
@@ -276,6 +295,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <div class="r"><span class="k">الاسم</span><span class="v" id="pName">اللاعب</span></div>
         <div class="r"><span class="k">الرتبة</span><span class="v" id="pRank">صياد من الرتبة E</span></div>
         <div class="r"><span class="k">اللقب</span><span class="v" id="pTitle">المستيقظ</span></div>
+        <div class="r"><span class="k">الهدف</span><span class="v" id="pBody">—</span></div>
       </div>
       <div class="rank" id="rankBadge" data-r="E">E</div>
     </div>
@@ -289,6 +309,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <span>أطول سلسلة <b id="mBest">0</b></span>
       <span>أيام مكتملة <b id="mDays">0</b></span>
       <span>عقوبات <b id="mPen">0</b></span>
+      <span>أيام تعافي <b id="mRest">0</b></span>
+    </div>
+    <div class="setup" id="setupCard" hidden>
+      <span>سجّل عمرك وطولك ووزنك وهدفك، والنظام يحسب سعراتك وبروتينك.</span>
+      <button class="btn" type="button" id="setupBtn">تسجيل اللاعب</button>
     </div>
   </section>
 
@@ -320,6 +345,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <button class="btn" id="healthBtn" type="button">مزامنة من الصحة / الساعة</button>
         <button class="btn ghost" id="healthHelp" type="button">طريقة الربط</button>
       </div>
+      <div class="rest-box" id="restBox"></div>
       <div class="paste-box" id="pasteBox" hidden>
         <span class="hint">ما قدرت أقرأ الحافظة. شغّل اختصار «الصياد» ثم الصق النتيجة هنا:</span>
         <textarea id="pasteTa" placeholder="HUNTER;steps=8500;cal=1900;protein=140;sleep=7.5"></textarea>
@@ -366,6 +392,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <span><i style="background: rgba(87,184,255,0.18)"></i>جزئي</span>
       <span><i style="border-color: rgba(255,90,118,0.55)"></i>عقوبة</span>
       <span><i style="border-color: rgba(255,90,118,0.55); border-style: dashed"></i>عقوبة مُسدّدة</span>
+      <span><i style="border-color: rgba(255,210,122,0.6); border-style: dashed"></i>يوم تعافي</span>
     </div>
     <div class="kpis">
       <div class="kpi"><b id="kXp">0</b><span>إجمالي الخبرة</span></div>
@@ -374,10 +401,20 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <div class="kpi"><b id="kInc">0</b><span>دخل إضافي (ريال)</span></div>
     </div>
     <div class="sect">
+      <h3>الوزن</h3>
+      <form class="inc-form" id="wForm">
+        <label class="field"><span>وزن اليوم</span><span class="inwrap"><input id="w-in" inputmode="decimal" autocomplete="off" placeholder="0.0"><em>كجم</em></span></label>
+        <button class="btn" type="submit">سجّل</button>
+      </form>
+      <div id="wChart"></div>
+      <div class="legend" id="wStats"></div>
+    </div>
+    <div class="sect">
       <h3>قوانين النظام</h3>
       <ul class="rules">
         <li>إكمال كل المهام الإجبارية في يوم = <b>+50 XP</b> مكافأة وسلسلة +1.</li>
         <li>يوم ناقص = <b>-50 XP</b> ومنطقة العقاب. مهمة العقاب في اليوم التالي تسترجعها.</li>
+        <li>يوم تعافي (مريض، مرهق، مسافر): المطلوب الصلاة بس، بدون عقوبة والسلسلة ما تنكسر ولا تزيد. لك <b id="ruleRest">4</b> أيام بالشهر.</li>
         <li>النادي <b id="ruleGym">4</b> مرات في الأسبوع (الأحد إلى السبت) = <b>+100 XP</b> قوة.</li>
         <li>الادخار والاستثمار الشهري = حتى <b>300 XP</b> ثروة لكل واحد.</li>
         <li>المستوى التالي يحتاج <b>100 + 50 × (المستوى − 1)</b> XP. كل 100 XP في صفة = نقطة.</li>
@@ -388,16 +425,30 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   <section class="win" id="tab-settings" role="tabpanel" hidden>
     <div class="win-title"><span>الإعدادات</span></div>
     <div class="sect">
-      <h3>اللاعب والأهداف</h3>
+      <h3>بيانات اللاعب</h3>
       <div class="set-grid">
         <label class="field"><span>اسم اللاعب</span><span class="inwrap"><input id="s-name" data-s="name" autocomplete="off" placeholder="اللاعب" style="direction: rtl"></span></label>
+        <label class="field"><span>الجنس</span><select id="s-sex" data-sel="sex"><option value="m">ذكر</option><option value="f">أنثى</option></select></label>
+        <label class="field"><span>العمر</span><span class="inwrap"><input id="s-age" data-s="age" inputmode="numeric" placeholder="0"><em>سنة</em></span></label>
+        <label class="field"><span>الطول</span><span class="inwrap"><input id="s-height" data-s="height" inputmode="numeric" placeholder="0"><em>سم</em></span></label>
+        <label class="field"><span>الوزن</span><span class="inwrap"><input id="s-weight" data-s="weight" inputmode="decimal" placeholder="0"><em>كجم</em></span></label>
+        <label class="field"><span>مستوى النشاط</span><select id="s-act" data-sel="act"></select></label>
+      </div>
+      <div class="days-pick" id="bodyGoal"></div>
+      <div class="calc" id="calcBox"></div>
+      <div class="auto-row" id="autoRow"></div>
+    </div>
+    <div class="sect">
+      <h3>الأهداف اليومية</h3>
+      <div class="set-grid">
         <label class="field"><span>هدف الخطوات</span><span class="inwrap"><input id="s-steps" data-s="steps" inputmode="numeric"><em>خطوة</em></span></label>
-        <label class="field"><span>حد السعرات (تنشيف)</span><span class="inwrap"><input id="s-cal" data-s="cal" inputmode="numeric"><em>kcal</em></span></label>
+        <label class="field"><span>سعرات اليوم</span><span class="inwrap"><input id="s-cal" data-s="cal" inputmode="numeric"><em>kcal</em></span></label>
         <label class="field"><span>هدف البروتين</span><span class="inwrap"><input id="s-protein" data-s="protein" inputmode="numeric"><em>g</em></span></label>
         <label class="field"><span>ساعات النوم</span><span class="inwrap"><input id="s-sleep" data-s="sleep" inputmode="decimal"><em>ساعة</em></span></label>
         <label class="field"><span>صفحات القرآن يوميًا</span><span class="inwrap"><input id="s-quran" data-s="quran" inputmode="numeric"><em>صفحة</em></span></label>
         <label class="field"><span>تطوير الذات يوميًا</span><span class="inwrap"><input id="s-dev" data-s="dev" inputmode="numeric"><em>دقيقة</em></span></label>
         <label class="field"><span>النادي أسبوعيًا</span><span class="inwrap"><input id="s-gym" data-s="gym" inputmode="numeric"><em>مرات</em></span></label>
+        <label class="field"><span>أيام التعافي شهريًا</span><span class="inwrap"><input id="s-restMax" data-s="restMax" inputmode="numeric"><em>أيام</em></span></label>
       </div>
     </div>
     <div class="sect">
@@ -414,7 +465,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <li>أضف إجراء <b>البحث عن عينات الصحة</b> (Find Health Samples): النوع <b>الخطوات</b>، تاريخ البدء <b>اليوم</b>. بعده <b>حساب الإحصائيات</b> (Calculate Statistics) = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>steps</code>.</li>
         <li>كرر نفس الثلاث خطوات للـ<b>الطاقة الغذائية</b> (Dietary Energy) باسم <code>cal</code>، و<b>البروتين</b> باسم <code>protein</code>.</li>
         <li>للنوم: <b>البحث عن عينات الصحة</b> بنوع <b>تحليل النوم</b>، تاريخ البدء <b>آخر يوم واحد</b>، والقيمة <b>ليست «في السرير»</b> و<b>ليست «مستيقظ»</b>. بعده <b>الحصول على تفاصيل عينات الصحة</b> = <b>المدة</b>، بعده <b>حساب الإحصائيات</b> = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>sleep</code>.</li>
-        <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;sleep=sleep</code></li>
+        <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;sleep=sleep</code>. وتقدر تضيف الوزن (Body Mass) بنفس الطريقة باسم <code>weight</code> لكن بدل «المجموع» استخدم <b>آخر عينة</b>.</li>
         <li>أضف <b>نسخ إلى الحافظة</b>. احفظ الاختصار.</li>
         <li>كل يوم: شغّل الاختصار (أو من ودجت الشاشة الرئيسية)، افتح التطبيق، اضغط <b>مزامنة من الصحة / الساعة</b>.</li>
       </ol>
@@ -492,12 +543,32 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { name: '', sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
   ];
   const LKEY = 'hunter-system-v1';
+  const ACT = { sed: [1.2, 'قليل الحركة (دوام مكتبي)'], light: [1.375, 'خفيف (1-3 تمارين بالأسبوع)'], mod: [1.55, 'متوسط (3-5 تمارين)'], high: [1.725, 'عالي (6-7 تمارين)'], athlete: [1.9, 'رياضي جدًا أو شغل بدني'] };
+  const BODY = { cut: { ar: 'تنشيف', long: 'تنشيف (إنقاص دهون)', calF: 0.8, pro: 2.2 }, maintain: { ar: 'محافظة', long: 'محافظة على الوزن', calF: 1, pro: 1.8 }, bulk: { ar: 'تضخيم', long: 'تضخيم (زيادة عضل)', calF: 1.1, pro: 2.0 } };
+  const REST = { sick: 'مريض', tired: 'مرهق', travel: 'مسافر', excuse: 'عذر شرعي' };
+  function macros(s) {
+    if (!(s.age > 0 && s.height > 0 && s.weight > 0)) return null;
+    const bmr = 10 * s.weight + 6.25 * s.height - 5 * s.age + (s.sex === 'f' ? -161 : 5);
+    const tdee = bmr * (ACT[s.act] || ACT.light)[0];
+    const b = BODY[s.body] || BODY.cut;
+    const cal = Math.max(s.sex === 'f' ? 1200 : 1500, Math.round(tdee * b.calF / 10) * 10);
+    const hM = s.height / 100, bmi = s.weight / (hM * hM);
+    const lean = Math.min(s.weight, 25 * hM * hM);
+    const protein = Math.round(lean * b.pro / 5) * 5;
+    return { bmr: Math.round(bmr), tdee: Math.round(tdee), cal, protein, bmi: Math.round(bmi * 10) / 10 };
+  }
+  const splitMacros = (cal, protein) => { const fat = Math.round(cal * 0.25 / 9); return { fat, carbs: Math.max(0, Math.round((cal - protein * 4 - fat * 9) / 4)) }; };
+  function applyAuto() {
+    const s = S(); if (!s.autoMacros) return;
+    const m = macros(s); if (!m) return;
+    s.cal = m.cal; s.protein = m.protein;
+  }
   const CUR = { SAR: { ar: 'ريال', toSar: 1 }, USD: { ar: 'دولار', toSar: 3.75 } };
   const money = (n, c) => c === 'USD' ? `${fmt(n)}$` : `${fmt(n)} ريال`;
   function normSettings(o) {
@@ -542,7 +613,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     q.push({ id: 'tasbeeh', req: true, done: !!d.tasbeeh, xp: { FTH: d.tasbeeh ? 15 : 0 }, prog: d.tasbeeh ? 1 : 0 });
     const st = d.steps || 0, sg = Math.max(1, s.steps);
     q.push({ id: 'steps', req: true, done: st >= sg, xp: { AGI: Math.floor(40 * Math.min(1, st / sg)) + (st >= sg * 1.5 ? 10 : 0) }, prog: Math.min(1, st / sg) });
-    const calOk = (d.cal || 0) > 0 && d.cal <= s.cal, proOk = (d.protein || 0) >= s.protein;
+    const cv = d.cal || 0, bg = s.body || 'cut';
+    const calOk = cv > 0 && (bg === 'cut' ? cv <= s.cal : bg === 'bulk' ? cv >= s.cal * 0.95 && cv <= s.cal * 1.15 : Math.abs(cv - s.cal) <= s.cal * 0.1);
+    const proOk = (d.protein || 0) >= s.protein;
     q.push({ id: 'diet', req: true, done: !!d.clean && calOk && proOk, xp: { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0), STR: proOk ? 15 : 0 }, prog: ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk });
     const sl = d.sleep || 0, slg = Math.max(1, s.sleep);
     q.push({ id: 'sleep', req: true, done: sl >= slg, xp: { VIT: sl >= slg ? 25 : 0 }, prog: Math.min(1, sl / slg) });
@@ -555,9 +628,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       if (c.archived && !on) continue;
       q.push({ id: 'c_' + c.id, custom: c, req: !!c.req && !c.archived, done: on, xp: { [c.stat]: on ? c.xp : 0 }, prog: on ? 1 : 0 });
     }
-    const reqs = q.filter((x) => x.req);
+    const rest = REST[d.rest] ? d.rest : null;
+    if (rest) for (const x of q) x.req = x.id === 'prayer' && rest !== 'excuse';
+    const reqs = q.filter((x) => x.req), allReq = reqs.every((x) => x.done);
     const xp = q.reduce((a, x) => a + Object.values(x.xp).reduce((b, v) => b + v, 0), 0);
-    return { q, xp, complete: reqs.every((x) => x.done), reqDone: reqs.filter((x) => x.done).length, reqTotal: reqs.length };
+    return { q, xp, rest, complete: !rest && allReq, restOk: !!rest && allReq, reqDone: reqs.filter((x) => x.done).length, reqTotal: reqs.length };
   }
 
   function levelOf(xp) {
@@ -579,13 +654,14 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   function compute() {
     const today = todayStr(), start = startDate();
     const stats = Object.fromEntries(Object.keys(STATS).map((k) => [k, 0]));
-    let total = 0, penalty = 0, penDays = 0, completeDays = 0, pastDays = 0;
+    let total = 0, penalty = 0, penDays = 0, completeDays = 0, pastDays = 0, restDays = 0, pastRest = 0;
     const evals = {};
     for (let d = start; d <= today; d = addDays(d, 1)) {
       const e = dayEval(d); evals[d] = e;
       for (const q of e.q) for (const k in q.xp) { stats[k] += q.xp[k]; total += q.xp[k]; }
       if (d < today) pastDays++;
       if (e.complete) { completeDays++; total += 50; }
+      else if (e.restOk) { restDays++; if (d < today) pastRest++; }
       else if (d < today) { penDays++; if (!getDay(d)?.penaltyCleared) penalty += 50; }
     }
     // weekly gym bonus
@@ -600,13 +676,14 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       incomeTotal += ((state.months[mk].monthly || {}).extra || []).reduce((a, e) => a + incSar(e), 0);
     }
     total = Math.max(0, total - penalty);
-    let streak = 0, k = evals[today]?.complete ? today : addDays(today, -1);
-    while (evals[k]?.complete) { streak++; k = addDays(k, -1); }
+    const okDay = (e) => e && (e.complete || e.restOk);
+    let streak = 0, k = okDay(evals[today]) ? today : addDays(today, -1);
+    while (okDay(evals[k])) { if (evals[k].complete) streak++; k = addDays(k, -1); }
     let best = 0, run = 0;
-    for (const d in evals) { if (evals[d].complete) { run++; best = Math.max(best, run); } else if (d < today) run = 0; }
+    for (const d in evals) { if (evals[d].complete) { run++; best = Math.max(best, run); } else if (evals[d].restOk) continue; else if (d < today) run = 0; }
     const yest = addDays(today, -1);
-    const penaltyActive = yest >= start && evals[yest] && !evals[yest].complete && !getDay(yest)?.penaltyCleared;
-    return { stats, total, penalty, penDays, completeDays, pastDays, streak, best, evals, gymTotal, incomeTotal, penaltyActive, lv: levelOf(total) };
+    const penaltyActive = yest >= start && evals[yest] && !okDay(evals[yest]) && !getDay(yest)?.penaltyCleared;
+    return { stats, total, penalty, penDays, completeDays, pastDays, restDays, pastRest, streak, best, evals, gymTotal, incomeTotal, penaltyActive, lv: levelOf(total) };
   }
 
   // ---------- persistence ----------
@@ -697,6 +774,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#mBest').textContent = C.best;
     $('#mDays').textContent = C.completeDays;
     $('#mPen').textContent = C.penDays;
+    $('#mRest').textContent = C.restDays;
+    const s = S(), prof = macros(s);
+    $('#pBody').textContent = s.weight > 0 ? `${(BODY[s.body] || BODY.cut).ar} · ${s.weight} كجم` : (BODY[s.body] || BODY.cut).ar;
+    $('#setupCard').hidden = !!prof;
     $('#penalty').hidden = !C.penaltyActive;
   }
 
@@ -710,7 +791,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'quran': return ['ورد القرآن', `${s.quran} صفحة على الأقل`];
       case 'tasbeeh': return ['التسبيح والأذكار', 'أذكار الصباح والمساء'];
       case 'steps': return [`${fmt(s.steps)} خطوة`, 'من تطبيق الصحة أو الساعة'];
-      case 'diet': return ['أكل نظيف + تنشيف', `سعرات ≤ ${fmt(s.cal)} · بروتين ≥ ${fmt(s.protein)}g`];
+      case 'diet': {
+        const bg = s.body || 'cut', sm = splitMacros(s.cal, s.protein);
+        const rule = bg === 'cut' ? `سعرات ≤ ${fmt(s.cal)}` : bg === 'bulk' ? `سعرات ${fmt(s.cal * 0.95)}–${fmt(s.cal * 1.15)}` : `سعرات ${fmt(s.cal * 0.9)}–${fmt(s.cal * 1.1)}`;
+        return [`أكل نظيف + ${(BODY[bg] || BODY.cut).ar}`, `${rule} · بروتين ≥ ${fmt(s.protein)}g · كارب ~${fmt(sm.carbs)}g · دهون ~${fmt(sm.fat)}g`];
+      }
       case 'sleep': return ['النوم', `${s.sleep} ساعات على الأقل`];
       case 'work': return ['الدوام', 'حضور يوم العمل'];
       case 'gym': return ['النادي', `هدف الأسبوع ${s.gym} مرات`];
@@ -774,7 +859,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       }
       if (q.id === 'diet' && hint) {
         const cal = d.cal || 0, pro = d.protein || 0;
-        const calTxt = cal === 0 ? 'سجّل سعراتك' : cal <= s.cal ? `<span class="good">باقي ${fmt(s.cal - cal)} سعرة</span>` : `<span class="bad">زيادة ${fmt(cal - s.cal)} سعرة</span>`;
+        const bg = s.body || 'cut', lo = bg === 'bulk' ? s.cal * 0.95 : bg === 'maintain' ? s.cal * 0.9 : 0, hi = bg === 'bulk' ? s.cal * 1.15 : bg === 'maintain' ? s.cal * 1.1 : s.cal;
+        const calTxt = cal === 0 ? 'سجّل سعراتك' : cal > hi ? `<span class="bad">زيادة ${fmt(cal - hi)} سعرة</span>` : cal < lo ? `<span class="bad">تحتاج ${fmt(lo - cal)} سعرة زيادة</span>` : `<span class="good">ضمن الهدف${bg === 'cut' ? ' · باقي ' + fmt(s.cal - cal) : ''}</span>`;
         const proTxt = pro >= s.protein ? '<span class="good">البروتين مكتمل</span>' : `باقي ${fmt(s.protein - pro)}g بروتين`;
         hint.innerHTML = `${calTxt} · ${proTxt}`;
       }
@@ -789,12 +875,49 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     for (const b of document.querySelectorAll('#quests [data-act="toggle"]')) b.setAttribute('aria-pressed', d[b.dataset.f] ? 'true' : 'false');
     for (const b of document.querySelectorAll('#quests [data-act="custom"]')) b.setAttribute('aria-pressed', d.c && d.c[b.dataset.id] ? 'true' : 'false');
     $('#reqCount').textContent = `${e.reqDone}/${e.reqTotal}`;
+    renderRest();
     $('#dayXp').textContent = fmt(e.xp + (e.complete ? 50 : 0));
     const w = $('#warn');
-    if (e.complete) { w.textContent = 'اكتملت المهمة اليومية. المكافأة: +50 XP وسلسلة +1.'; w.className = 'warn okmsg'; }
+    if (e.restOk) { w.textContent = 'يوم تعافي مقبول. السلسلة محفوظة وما فيه عقوبة.'; w.className = 'warn okmsg'; }
+    else if (e.rest) { w.textContent = 'وضع التعافي: المطلوب اليوم الصلوات الخمس بس.'; w.className = 'warn'; }
+    else if (e.complete) { w.textContent = 'اكتملت المهمة اليومية. المكافأة: +50 XP وسلسلة +1.'; w.className = 'warn okmsg'; }
     else if (viewDate < todayStr()) { w.textContent = 'هذا اليوم انتهى بدون إكمال المهام الإجبارية.'; w.className = 'warn'; }
     else { w.textContent = 'تحذير: عدم إكمال المهام الإجبارية قبل منتصف الليل يدخلك منطقة العقاب.'; w.className = 'warn'; }
     tick();
+  }
+
+  let restOpen = false;
+  const restUsed = (mk, except) => Object.entries(getMonth(mk)?.days || {}).filter(([d, r]) => d !== except && r.rest && r.rest !== 'excuse' && REST[r.rest]).length;
+  function renderRest() {
+    const box = $('#restBox'); if (!box) return;
+    const d = getDay(viewDate) || {}, s = S(), mk = monthOf(viewDate);
+    const used = restUsed(mk, viewDate), left = Math.max(0, s.restMax - used);
+    if (REST[d.rest]) {
+      box.innerHTML = `<div class="recovery"><b>حالة: تعافي · ${REST[d.rest]}</b><span>${d.rest === 'excuse' ? 'الصلاة غير مطلوبة اليوم.' : 'المطلوب الصلوات الخمس بس.'} ما فيه عقوبة والسلسلة محفوظة. ارتاح وارجع أقوى.</span><button class="link-btn" type="button" data-rest="">إلغاء وضع التعافي</button></div>`;
+      return;
+    }
+    if (!restOpen) { box.innerHTML = `<button class="link-btn" type="button" data-rest-open>تعبان اليوم؟</button>`; return; }
+    const types = ['sick', 'tired', 'travel'].concat(s.sex === 'f' ? ['excuse'] : []);
+    box.innerHTML = `<span class="hint" style="text-align:center">باقي لك <b>${left}</b> من ${s.restMax} أيام تعافي هذا الشهر${s.sex === 'f' ? ' (العذر الشرعي ما يُحسب منها)' : ''}</span>
+      <div class="chips">${types.map((t) => `<button class="chip" type="button" data-rest="${t}" ${t !== 'excuse' && left <= 0 ? 'disabled' : ''}>${REST[t]}</button>`).join('')}<button class="chip" type="button" data-rest-close>إلغاء</button></div>`;
+  }
+  $('#restBox').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b || b.disabled) return;
+    if (b.hasAttribute('data-rest-open')) { restOpen = true; renderRest(); return; }
+    if (b.hasAttribute('data-rest-close')) { restOpen = false; renderRest(); return; }
+    if (!b.hasAttribute('data-rest')) return;
+    const v = b.dataset.rest || null;
+    restOpen = false;
+    act(() => setDay({ rest: v }));
+    buildDaily();
+    if (v) toast('SYSTEM', 'تم تفعيل وضع التعافي. السلسلة محفوظة. خذ راحتك.', 'gold');
+  });
+
+  function setDayAt(date, patch) {
+    touchStart();
+    const mk = monthOf(date), m = ensureMonth(mk);
+    m.days[date] = { ...(m.days[date] || {}), ...patch };
+    save('m' + mk);
   }
 
   function setDay(patch) {
@@ -933,18 +1056,59 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       let cls = 'cell', style = '';
       if (d > t || d < start || !e) cls += ' void';
       else if (e.complete) cls += ' full';
+      else if (e.restOk) cls += ' rest';
       else { style = `--p:${(e.reqDone / Math.max(1, e.reqTotal)).toFixed(2)}`; if (d < t) cls += ' fail' + (getDay(d)?.penaltyCleared ? ' cleared' : ''); }
       if (d === t) cls += ' today';
       html += `<div class="${cls}" style="${style}" title="${d}">${day}</div>`;
     }
     $('#cal').innerHTML = html;
     $('#kXp').textContent = fmt(C.total);
-    const denom = C.pastDays + (C.evals[t]?.complete ? 1 : 0);
+    const denom = C.pastDays - C.pastRest + (C.evals[t]?.complete ? 1 : 0);
     $('#kRate').textContent = denom ? Math.round(100 * C.completeDays / denom) + '%' : '—';
     $('#kGym').textContent = C.gymTotal;
     $('#kInc').textContent = fmt(C.incomeTotal);
     $('#ruleGym').textContent = S().gym;
+    $('#ruleRest').textContent = S().restMax;
+    renderWeight();
   }
+  function weightSeries() {
+    const pts = [];
+    for (const mk in state.months) for (const [d, r] of Object.entries(state.months[mk].days || {})) if (r.weight > 0) pts.push([d, r.weight]);
+    return pts.sort((a, b) => (a[0] < b[0] ? -1 : 1));
+  }
+  function renderWeight() {
+    const pts = weightSeries().slice(-90);
+    const tw = getDay(todayStr())?.weight;
+    if (document.activeElement !== $('#w-in')) $('#w-in').value = tw || '';
+    if (pts.length < 2) {
+      $('#wChart').innerHTML = `<p class="empty">${pts.length ? 'سجّل وزنك في يوم ثاني عشان يطلع لك الرسم.' : 'سجّل وزنك كل أسبوع أو كل يوم الصبح، ويطلع لك منحنى التقدم هنا.'}</p>`;
+      $('#wStats').textContent = pts.length ? `آخر وزن ${pts[0][1]} كجم` : '';
+      return;
+    }
+    const ws = pts.map((p) => p[1]), lo = Math.min(...ws) - 0.5, hi = Math.max(...ws) + 0.5;
+    const t0 = parseDs(pts[0][0]).getTime(), t1 = parseDs(pts[pts.length - 1][0]).getTime() || t0 + 1;
+    const X = (d) => ((parseDs(d).getTime() - t0) / Math.max(1, t1 - t0)) * 300, Y = (w) => 100 - ((w - lo) / (hi - lo)) * 92 - 4;
+    const line = pts.map((p) => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(' ');
+    $('#wChart').innerHTML = `<svg class="wchart" viewBox="0 0 300 100" preserveAspectRatio="none" aria-label="منحنى الوزن">
+      <line class="gd" x1="0" y1="${Y((lo + hi) / 2)}" x2="300" y2="${Y((lo + hi) / 2)}"/>
+      <polygon class="ar" points="0,100 ${line} 300,100"/><polyline class="ln" points="${line}"/></svg>`;
+    const first = ws[0], last = ws[ws.length - 1], diff = Math.round((last - first) * 10) / 10;
+    const bg = S().body || 'cut', good = bg === 'cut' ? diff < 0 : bg === 'bulk' ? diff > 0 : Math.abs(diff) <= 1;
+    $('#wStats').innerHTML = `<span>البداية <b>${first}</b> كجم</span><span>الحالي <b>${last}</b> كجم</span><span style="color:var(${good ? '--ok' : '--bad'})">التغير ${diff > 0 ? '+' : ''}${diff} كجم</span><span>أقل ${Math.min(...ws)} · أعلى ${Math.max(...ws)}</span>`;
+  }
+  function logWeight(w) {
+    if (!(w > 20 && w < 400)) return false;
+    w = Math.round(w * 10) / 10;
+    setDayAt(todayStr(), { weight: w });
+    S().weight = w; applyAuto(); save('settings');
+    return true;
+  }
+  $('#wForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if (!logWeight(num($('#w-in').value))) { toast('خطأ', 'اكتب وزن صحيح بالكيلو.', 'bad'); return; }
+    toast('SYSTEM', `سجلت وزنك ${S().weight} كجم.`);
+    fillSettings(); buildDaily(); render(false);
+  });
 
   // ---------- UI: settings ----------
   $('#cq-stat').innerHTML = Object.keys(STATS).map((k) => `<option value="${k}">${STATS[k]} (${k})</option>`).join('');
@@ -958,9 +1122,28 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <button class="x" data-gdel="${esc(g.id)}" aria-label="حذف الهدف">×</button>
       </div>`).join('') || '<p class="empty">ما فيه أهداف. اضغط «أضف هدف شهري».</p>';
   }
+  $('#s-act').innerHTML = Object.entries(ACT).map(([k, v]) => `<option value="${k}">${v[1]}</option>`).join('');
+  function fillCalc() {
+    const s = S(), m = macros(s);
+    $('#bodyGoal').innerHTML = Object.entries(BODY).map(([k, v]) => `<button type="button" class="chip" data-body="${k}" aria-pressed="${s.body === k}">${v.long}</button>`).join('');
+    if (!m) { $('#calcBox').innerHTML = '<p class="empty">اكتب العمر والطول والوزن، والنظام يحسب سعراتك وبروتينك على حسب هدفك.</p>'; $('#autoRow').innerHTML = ''; return; }
+    const sm = splitMacros(m.cal, m.protein);
+    const bmiTxt = m.bmi < 18.5 ? 'نحافة' : m.bmi < 25 ? 'طبيعي' : m.bmi < 30 ? 'وزن زائد' : 'سمنة';
+    $('#calcBox').innerHTML = `
+      <div><b>${fmt(m.bmr)}</b><span>الحرق وأنت مرتاح (BMR)</span></div>
+      <div><b>${fmt(m.tdee)}</b><span>حرقك اليومي (TDEE)</span></div>
+      <div class="hl"><b>${fmt(m.cal)}</b><span>سعرات ${BODY[s.body].ar}</span></div>
+      <div class="hl"><b>${m.protein}g</b><span>بروتين</span></div>
+      <div><b>${sm.carbs}g · ${sm.fat}g</b><span>كارب · دهون</span></div>
+      <div><b>${m.bmi}</b><span>مؤشر الكتلة · ${bmiTxt}</span></div>`;
+    $('#autoRow').innerHTML = s.autoMacros
+      ? '<span>✓ السعرات والبروتين تتحدث تلقائيًا مع وزنك وهدفك.</span>'
+      : `<span>السعرات والبروتين مكتوبة يدويًا.</span><button class="btn ghost" type="button" id="autoOn">رجّعها تلقائي</button>`;
+  }
   function fillSettings() {
     const s = S();
-    fillGoals();
+    fillGoals(); fillCalc();
+    $('#s-sex').value = s.sex || 'm'; $('#s-act').value = s.act || 'light';
     for (const i of document.querySelectorAll('[data-s]')) {
       if (document.activeElement === i) continue;
       i.value = s[i.dataset.s] || '';
@@ -974,9 +1157,16 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   document.querySelectorAll('[data-s]').forEach((i) => i.addEventListener('input', () => {
     const k = i.dataset.s;
     if (k === 'name') S().name = i.value.slice(0, 40);
-    else { const v = num(i.value); if (!v) return; S()[k] = v; }
+    else {
+      const v = num(i.value); if (!v) return;
+      if (k === 'weight') { if (!logWeight(v)) return; }
+      else S()[k] = k === 'restMax' ? Math.min(31, Math.round(v)) : v;
+      if (k === 'cal' || k === 'protein') S().autoMacros = false;
+      if (k === 'age' || k === 'height') applyAuto();
+    }
     touchStart(); save('settings');
-    buildDaily(); render(false);
+    for (const f of ['cal', 'protein']) { const el = $('#s-' + f); if (document.activeElement !== el) el.value = S()[f] || ''; }
+    fillCalc(); buildDaily(); render(false);
   }));
   const goalChanged = (ev) => {
     const row = ev.target.closest('[data-gid]'), f = ev.target.dataset.gf; if (!row || !f) return;
@@ -999,6 +1189,21 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     touchStart(); save('settings'); fillGoals(); fillMonth(); render(false);
     const el = document.getElementById('g-name-' + g.id); if (el) { el.focus(); el.select(); }
   });
+  for (const id of ['#s-sex', '#s-act']) $(id).addEventListener('change', (ev) => {
+    S()[ev.target.dataset.sel] = ev.target.value; applyAuto();
+    touchStart(); save('settings'); fillSettings(); buildDaily(); render(false);
+  });
+  $('#bodyGoal').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-body]'); if (!b) return;
+    S().body = b.dataset.body; applyAuto();
+    touchStart(); save('settings'); fillSettings(); buildDaily(); render(false);
+    toast('SYSTEM', `الهدف الجديد: ${BODY[b.dataset.body].long}`);
+  });
+  $('#autoRow').addEventListener('click', (ev) => {
+    if (ev.target.id !== 'autoOn') return;
+    S().autoMacros = true; applyAuto(); save('settings'); fillSettings(); buildDaily(); render(false);
+  });
+  $('#setupBtn').addEventListener('click', () => { showTab('settings'); setTimeout(() => { $('#s-age').focus(); $('#s-age').scrollIntoView({ block: 'center' }); }, 50); });
   $('#workDays').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-wd]'); if (!b) return;
     const i = Number(b.dataset.wd), s = S();
@@ -1110,6 +1315,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       else if (k === 'protein') out.protein = Math.round(v);
       else if (k === 'carbs') out.carbs = Math.round(v);
       else if (k === 'fat') out.fat = Math.round(v);
+      else if (k === 'weight') out.weight = Math.round(v * 10) / 10;
       else if (k === 'sleep') {
         if (v > 1440) v = v / 3600; else if (v > 24) v = v / 60;
         out.sleep = Math.round(v * 10) / 10;
@@ -1122,12 +1328,14 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (!h) { toast('خطأ', 'ما لقيت بيانات «الصياد». شغّل الاختصار أول وبعدها اضغط مزامنة.', 'bad'); return false; }
     viewDate = todayStr(); buildDaily();
     act(() => setDay(h));
+    if (h.weight) { logWeight(h.weight); fillSettings(); render(false); }
     buildDaily();
     const parts = [];
     if (h.steps) parts.push(`${fmt(h.steps)} خطوة`);
     if (h.sleep) parts.push(`نوم ${h.sleep} ساعة`);
     if (h.cal) parts.push(`${fmt(h.cal)} سعرة`);
     if (h.protein) parts.push(`بروتين ${h.protein}g`);
+    if (h.weight) parts.push(`وزن ${h.weight} كجم`);
     toast('SYNC', 'تمت المزامنة: ' + parts.join(' · '));
     $('#pasteBox').hidden = true;
     return true;
