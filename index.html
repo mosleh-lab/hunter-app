@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050913">
+<meta name="description" content="نظام الصياد: حوّل يومك إلى مهام وخبرة ومستويات">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الصياد">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>نظام الصياد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
+<style>
+/* Layout: one narrow column of glowing "System" windows — status window on top, quest windows below, tabs switch between daily / goals / log / settings. Single dark look by choice (the System's blue holo screen). */
+:root {
+  color-scheme: dark;
+  --bg: #050913;
+  --bg-2: #0a1428;
+  --panel: rgba(9, 20, 44, 0.86);
+  --panel-2: rgba(16, 34, 70, 0.7);
+  --line: rgba(84, 170, 255, 0.42);
+  --line-soft: rgba(84, 170, 255, 0.16);
+  --glow: #57b8ff;
+  --glow-2: #9fd8ff;
+  --fg: #dfeaff;
+  --muted: #8ea6cc;
+  --dim: #4d6591;
+  --ok: #5fe3ad;
+  --bad: #ff5a76;
+  --gold: #ffd27a;
+  --f-disp: "Reem Kufi", "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-body: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --f-num: "Chakra Petch", "IBM Plex Sans Arabic", ui-monospace, monospace;
+  --r: 4px;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-text-size-adjust: 100%; }
+body { margin: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+button { touch-action: manipulation; }
+.backup { display: flex; flex-wrap: wrap; gap: 8px; }
+html, body { background: var(--bg); color: var(--fg); }
+body {
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.6;
+  background:
+    radial-gradient(1100px 520px at 50% -180px, rgba(60, 130, 255, 0.22), transparent 70%),
+    linear-gradient(var(--line-soft) 1px, transparent 1px) 0 0 / 100% 44px,
+    var(--bg);
+  min-height: 100%;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--glow-2); outline-offset: 2px; }
+.app { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 96px; display: flex; flex-direction: column; gap: 16px; }
+
+/* System bar */
+.sysbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+.sysbar .brand { font-family: var(--f-num); font-weight: 700; letter-spacing: 0.22em; color: var(--glow-2); text-shadow: 0 0 12px rgba(87, 184, 255, 0.7); font-size: 13px; }
+.sysbar .dates { color: var(--muted); font-size: 13px; display: flex; gap: 10px; flex-wrap: wrap; }
+.sysbar .sync { font-size: 12px; color: var(--dim); }
+.sysbar .sync.on { color: var(--ok); }
+
+/* Window */
+.win { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; box-shadow: 0 0 0 1px rgba(87,184,255,0.06), 0 0 28px rgba(60,140,255,0.16), inset 0 0 36px rgba(60,140,255,0.08); backdrop-filter: blur(4px); }
+.win::before, .win::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--glow-2); border-style: solid; pointer-events: none; }
+.win::before { top: -2px; right: -2px; border-width: 2px 2px 0 0; }
+.win::after { bottom: -2px; left: -2px; border-width: 0 0 2px 2px; }
+.win-title { display: flex; justify-content: center; margin-block: -4px 14px; }
+.win-title span { font-family: var(--f-disp); font-size: 15px; letter-spacing: 0.04em; padding: 3px 18px; border: 1px solid var(--line); background: rgba(87,184,255,0.08); color: var(--glow-2); text-shadow: 0 0 10px rgba(87,184,255,0.6); }
+
+/* Status window */
+.st-top { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; }
+.lv { text-align: center; min-width: 84px; }
+.lv-num { display: block; font-family: var(--f-num); font-weight: 700; font-size: 56px; line-height: 1; color: #fff; text-shadow: 0 0 18px rgba(87,184,255,0.9); font-variant-numeric: tabular-nums; }
+.lv-label { font-family: var(--f-num); letter-spacing: 0.3em; font-size: 12px; color: var(--muted); }
+.st-id { display: grid; gap: 2px; min-width: 0; }
+.st-id .r { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+.st-id .k { color: var(--muted); font-size: 13px; width: 48px; flex: none; }
+.st-id .v { font-weight: 600; overflow-wrap: anywhere; }
+.rank { width: 64px; height: 64px; display: grid; place-items: center; font-family: var(--f-num); font-weight: 700; font-size: 34px; border: 1px solid var(--line); color: var(--glow-2); background: radial-gradient(circle, rgba(87,184,255,0.18), transparent 70%); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.rank[data-r="S"], .rank[data-r="N"] { color: var(--gold); text-shadow: 0 0 14px rgba(255,210,122,0.7); }
+.xp { margin-top: 16px; }
+.xp-row { display: flex; justify-content: space-between; font-family: var(--f-num); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 8px; background: rgba(87,184,255,0.1); border: 1px solid var(--line-soft); overflow: hidden; margin-top: 4px; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--glow), var(--glow-2)); box-shadow: 0 0 12px var(--glow); transition: width .4s ease; margin-inline-start: auto; }
+[dir="rtl"] .bar i { margin-inline-start: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 16px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-soft); }
+.stat { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-width: 0; }
+.stat .n { color: var(--muted); font-size: 13px; }
+.stat .n b { font-family: var(--f-num); color: var(--glow-2); font-weight: 600; letter-spacing: 0.08em; margin-inline-end: 6px; font-size: 12px; }
+.stat .val { font-family: var(--f-num); font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.meta b { font-family: var(--f-num); color: var(--fg); font-size: 15px; margin-inline-start: 4px; }
+.meta .fire b { color: var(--gold); }
+
+/* Penalty */
+.penalty { border-color: rgba(255,90,118,0.6); box-shadow: 0 0 28px rgba(255,90,118,0.2), inset 0 0 36px rgba(255,90,118,0.08); }
+.penalty::before, .penalty::after { border-color: var(--bad); }
+.penalty .win-title span { color: #ffd0d8; border-color: rgba(255,90,118,0.6); background: rgba(255,90,118,0.1); text-shadow: 0 0 10px rgba(255,90,118,0.7); }
+.penalty p { margin: 0 0 12px; text-align: center; }
+.penalty .pq { font-family: var(--f-disp); font-size: 17px; color: #ffd0d8; }
+
+/* Tabs */
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tabs button { background: transparent; border: 1px solid var(--line-soft); color: var(--muted); padding: 9px 4px; font-size: 13px; font-weight: 600; border-radius: var(--r); }
+.tabs button[aria-selected="true"] { color: #fff; border-color: var(--line); background: rgba(87,184,255,0.12); box-shadow: 0 0 14px rgba(87,184,255,0.2); }
+
+/* Daily header */
+.dq-head { text-align: center; display: grid; gap: 4px; }
+.dq-name { font-family: var(--f-disp); font-size: 22px; margin: 0; text-wrap: balance; }
+.daynav { display: flex; justify-content: center; align-items: center; gap: 12px; color: var(--muted); font-size: 14px; }
+.daynav button { background: transparent; border: 1px solid var(--line-soft); width: 32px; height: 32px; border-radius: var(--r); color: var(--glow-2); }
+.daynav button:disabled { opacity: 0.3; cursor: default; }
+.daynav .lbl { min-width: 140px; }
+.goalline { font-family: var(--f-num); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.goalline b { color: var(--fg); }
+.timer { font-family: var(--f-num); font-size: 26px; font-weight: 700; letter-spacing: 0.08em; color: #fff; text-shadow: 0 0 14px rgba(87,184,255,0.7); font-variant-numeric: tabular-nums; }
+.warn { color: var(--bad); font-size: 13px; }
+.warn.okmsg { color: var(--ok); }
+
+/* Quests */
+.quests { display: grid; gap: 10px; margin-top: 16px; }
+.quest { border: 1px solid var(--line-soft); background: var(--panel-2); padding: 12px 14px 0; border-radius: var(--r); display: grid; gap: 10px; transition: border-color .25s, box-shadow .25s; }
+.quest.done { border-color: rgba(95,227,173,0.5); box-shadow: inset 0 0 22px rgba(95,227,173,0.07); }
+.q-head { display: flex; align-items: flex-start; gap: 10px; }
+.q-check { flex: none; width: 20px; height: 20px; margin-top: 3px; border: 1.5px solid var(--dim); border-radius: 3px; position: relative; }
+.quest.done .q-check { border-color: var(--ok); background: rgba(95,227,173,0.15); }
+.quest.done .q-check::after { content: ""; position: absolute; inset: 3px 6px 6px 5px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.q-title { flex: 1; min-width: 0; }
+.q-title h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.q-desc { margin: 0; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.q-tags { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+.q-req { font-size: 11px; padding: 0 8px; border: 1px solid rgba(255,90,118,0.45); color: #ffc0cb; border-radius: 2px; }
+.q-req.opt { border-color: var(--line-soft); color: var(--muted); }
+.q-xp { font-family: var(--f-num); font-size: 12px; color: var(--glow-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.q-body { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.q-bar { height: 3px; margin-inline: -14px; background: rgba(87,184,255,0.08); }
+.q-bar i { display: block; height: 100%; width: 0; background: var(--glow); transition: width .35s ease; }
+.quest.done .q-bar i { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.chip, .tog { background: rgba(87,184,255,0.05); border: 1px solid var(--line-soft); padding: 6px 12px; border-radius: var(--r); font-size: 14px; color: var(--muted); min-height: 36px; }
+.chip[aria-pressed="true"], .tog[aria-pressed="true"] { color: #062016; background: var(--ok); border-color: var(--ok); font-weight: 600; }
+.stepper { display: flex; align-items: center; border: 1px solid var(--line-soft); border-radius: var(--r); }
+.stepper button { width: 36px; height: 36px; background: transparent; border: 0; color: var(--glow-2); font-size: 18px; }
+.stepper output { min-width: 64px; text-align: center; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.field { display: grid; gap: 2px; font-size: 12px; color: var(--muted); min-width: 0; flex: 1 1 120px; max-width: 200px; }
+.inwrap { display: flex; align-items: center; border: 1px solid var(--line-soft); border-radius: var(--r); background: rgba(0,0,0,0.25); }
+.inwrap input { width: 100%; min-width: 0; background: transparent; border: 0; padding: 7px 10px; font-family: var(--f-num); font-size: 15px; color: var(--fg); direction: ltr; text-align: right; }
+.inwrap input:focus { outline: none; }
+.inwrap:focus-within { border-color: var(--glow); box-shadow: 0 0 10px rgba(87,184,255,0.3); }
+.inwrap em { font-style: normal; padding-inline: 8px; color: var(--dim); font-size: 12px; white-space: nowrap; }
+.hint { flex-basis: 100%; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hint .bad { color: var(--bad); } .hint .good { color: var(--ok); }
+
+/* Goals */
+.goal-grid { display: grid; gap: 16px; }
+.pips { display: flex; gap: 8px; margin-block: 8px; }
+.pip { width: 30px; height: 30px; border: 1px solid var(--line); transform: rotate(45deg); display: grid; place-items: center; }
+.pip.on { background: var(--glow); box-shadow: 0 0 12px var(--glow); }
+.wk-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+.wk-day { text-align: center; font-size: 12px; color: var(--muted); border: 1px solid var(--line-soft); padding: 6px 0; border-radius: var(--r); }
+.wk-day.gym { color: var(--glow-2); border-color: var(--line); }
+.wk-day.full { background: rgba(95,227,173,0.14); border-color: rgba(95,227,173,0.45); color: var(--ok); }
+.wk-day.today { outline: 1px dashed var(--glow-2); outline-offset: 2px; }
+.sub { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.mrow { display: grid; gap: 8px; padding-block: 12px; border-bottom: 1px dashed var(--line-soft); }
+.mrow:last-child { border-bottom: 0; }
+.mrow .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.state-pill { font-size: 12px; padding: 0 10px; border-radius: 99px; border: 1px solid var(--line-soft); color: var(--muted); }
+.state-pill.ok { color: #062016; background: var(--ok); border-color: var(--ok); }
+.inc-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.inc-form .field { max-width: none; }
+.btn { background: rgba(87,184,255,0.14); border: 1px solid var(--line); color: #fff; padding: 7px 16px; border-radius: var(--r); font-weight: 600; min-height: 38px; }
+.btn:hover { background: rgba(87,184,255,0.24); }
+.btn.danger { border-color: rgba(255,90,118,0.6); background: rgba(255,90,118,0.12); }
+.btn.ghost { background: transparent; border-color: var(--line-soft); color: var(--muted); }
+.inc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.inc-list li { display: flex; gap: 10px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: var(--r); }
+.inc-list .amt { font-family: var(--f-num); color: var(--ok); font-variant-numeric: tabular-nums; }
+.inc-list .note { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--muted); font-size: 13px; }
+.x { background: transparent; border: 0; color: var(--dim); font-size: 18px; width: 30px; height: 30px; }
+.x:hover { color: var(--bad); }
+.empty { color: var(--dim); font-size: 13px; }
+
+/* Log */
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal .h { font-size: 11px; color: var(--dim); text-align: center; }
+.cell { aspect-ratio: 1; max-width: 100%; border: 1px solid var(--line-soft); border-radius: 3px; display: grid; place-items: center; font-family: var(--f-num); font-size: 12px; color: var(--dim); background: rgba(87,184,255, calc(var(--p, 0) * 0.35)); }
+.cell.full { background: rgba(95,227,173,0.25); border-color: rgba(95,227,173,0.6); color: var(--ok); }
+.cell.fail { border-color: rgba(255,90,118,0.55); color: var(--bad); }
+.cell.cleared { border-style: dashed; }
+.cell.today { outline: 1px solid var(--glow-2); outline-offset: 1px; color: #fff; }
+.cell.void { opacity: 0.25; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-inline-end: 6px; border: 1px solid var(--line-soft); vertical-align: middle; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.kpi { border: 1px solid var(--line-soft); padding: 10px; border-radius: var(--r); text-align: center; }
+.kpi b { display: block; font-family: var(--f-num); font-size: 22px; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 12px; color: var(--muted); }
+.rules { margin: 0; padding-inline-start: 18px; color: var(--muted); font-size: 13px; display: grid; gap: 4px; }
+.rules b { color: var(--fg); font-family: var(--f-num); font-weight: 600; }
+
+/* Settings */
+.set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.set-grid .field { max-width: none; }
+.days-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.custom-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.custom-list li { display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: var(--r); }
+.custom-list .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.custom-list .xpv { font-family: var(--f-num); font-size: 12px; color: var(--glow-2); }
+select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 7px 8px; color: var(--fg); }
+.sect { display: grid; gap: 12px; padding-block: 14px; border-bottom: 1px dashed var(--line-soft); }
+.sect:last-child { border-bottom: 0; }
+.sect h3 { margin: 0; font-size: 15px; }
+.confirm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* Toasts & level up */
+.toasts { position: fixed; inset-inline: 0; bottom: 0; padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; justify-items: center; gap: 8px; pointer-events: none; z-index: 20; }
+.toast { pointer-events: auto; max-width: 440px; width: 100%; background: rgba(6,14,32,0.95); border: 1px solid var(--line); padding: 10px 14px; border-radius: var(--r); box-shadow: 0 0 24px rgba(87,184,255,0.3); font-size: 14px; animation: tin .3s ease; }
+.toast .t { font-family: var(--f-num); color: var(--glow-2); font-size: 11px; letter-spacing: 0.2em; display: block; }
+.toast.gold { border-color: var(--gold); box-shadow: 0 0 24px rgba(255,210,122,0.3); }
+.toast.gold .t { color: var(--gold); }
+.toast.bad { border-color: var(--bad); }
+.toast.bad .t { color: var(--bad); }
+@keyframes tin { from { transform: translateY(12px); opacity: 0; } }
+.levelup { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(2,6,16,0.78); z-index: 30; padding: 16px; }
+.levelup .box { text-align: center; padding: 28px 36px; }
+.levelup .big { font-family: var(--f-num); font-size: clamp(40px, 12vw, 72px); font-weight: 700; letter-spacing: 0.12em; color: #fff; text-shadow: 0 0 24px var(--glow), 0 0 48px var(--glow); animation: pulse 1.6s ease-in-out infinite; }
+.levelup p { margin: 6px 0 0; color: var(--muted); }
+.levelup p b { color: var(--gold); font-family: var(--f-num); font-size: 20px; }
+@keyframes pulse { 50% { text-shadow: 0 0 10px var(--glow); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+@media (max-width: 520px) {
+  .st-top { grid-template-columns: auto 1fr; }
+  .rank { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; width: 52px; height: 52px; font-size: 28px; }
+  .st-id { grid-column: 1 / -1; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tabs button { font-size: 12px; }
+  .win { padding: 16px 14px; }
+}
+</style>
+
+</head>
+<body>
+<div class="app" dir="rtl" lang="ar">
+  <header class="sysbar">
+    <span class="brand">[ SYSTEM ]</span>
+    <span class="dates"><span id="gDate"></span><span id="hDate"></span></span>
+    <span class="sync" id="sync">جارٍ الاتصال…</span>
+  </header>
+
+  <section class="win" aria-label="نافذة الحالة">
+    <div class="win-title"><span>الحالة</span></div>
+    <div class="st-top">
+      <div class="lv"><span class="lv-label">LEVEL</span><span class="lv-num" id="lvNum">1</span></div>
+      <div class="st-id">
+        <div class="r"><span class="k">الاسم</span><span class="v" id="pName">اللاعب</span></div>
+        <div class="r"><span class="k">الرتبة</span><span class="v" id="pRank">صياد من الرتبة E</span></div>
+        <div class="r"><span class="k">اللقب</span><span class="v" id="pTitle">المستيقظ</span></div>
+      </div>
+      <div class="rank" id="rankBadge" data-r="E">E</div>
+    </div>
+    <div class="xp">
+      <div class="xp-row"><span id="xpTxt">XP 0 / 100</span><span id="xpTotal">TOTAL 0</span></div>
+      <div class="bar"><i id="xpBar"></i></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="meta">
+      <span class="fire">السلسلة <b id="mStreak">0</b> يوم</span>
+      <span>أطول سلسلة <b id="mBest">0</b></span>
+      <span>أيام مكتملة <b id="mDays">0</b></span>
+      <span>عقوبات <b id="mPen">0</b></span>
+    </div>
+  </section>
+
+  <section class="win penalty" id="penalty" hidden aria-live="polite">
+    <div class="win-title"><span>منطقة العقاب</span></div>
+    <p>لم تُكمل المهمة اليومية أمس. خُصم <b>50 XP</b> وانكسرت السلسلة.</p>
+    <p class="pq">مهمة العقاب: 100 ضغط · 100 بطن · 100 سكوات</p>
+    <p><button class="btn danger" id="clearPenalty">أكملت مهمة العقاب (استرجاع 50 XP)</button></p>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="daily" aria-selected="true">المهام اليومية</button>
+    <button role="tab" data-tab="goals" aria-selected="false">الأسبوع والشهر</button>
+    <button role="tab" data-tab="log" aria-selected="false">السجل</button>
+    <button role="tab" data-tab="settings" aria-selected="false">الإعدادات</button>
+  </nav>
+
+  <section class="win" id="tab-daily" role="tabpanel">
+    <div class="win-title"><span>مهمة يومية</span></div>
+    <div class="dq-head">
+      <h2 class="dq-name">الاستعداد لتصبح أقوى</h2>
+      <div class="daynav">
+        <button id="prevDay" aria-label="اليوم السابق">›</button>
+        <span class="lbl" id="dayLbl">اليوم</span>
+        <button id="nextDay" aria-label="اليوم التالي">‹</button>
+      </div>
+      <div class="goalline">الإجباري <b id="reqCount">0/0</b> · خبرة اليوم <b id="dayXp">0</b> XP</div>
+      <div class="timer" id="timer">--:--:--</div>
+      <div class="warn" id="warn">تحذير: عدم إكمال المهام الإجبارية قبل منتصف الليل يدخلك منطقة العقاب.</div>
+    </div>
+    <div class="quests" id="quests"></div>
+  </section>
+
+  <section class="win" id="tab-goals" role="tabpanel" hidden>
+    <div class="win-title"><span>مهام الأسبوع والشهر</span></div>
+    <div class="goal-grid">
+      <div>
+        <h3 class="sub">النادي هذا الأسبوع</h3>
+        <div class="q-desc" id="gymTxt"></div>
+        <div class="pips" id="gymPips"></div>
+        <div class="wk-days" id="wkDays"></div>
+      </div>
+      <div>
+        <h3 class="sub" id="monthTitle">هذا الشهر</h3>
+        <div class="mrow">
+          <div class="top"><span>الادخار الشهري</span><span class="state-pill" id="savePill">0%</span></div>
+          <div class="q-body">
+            <label class="field"><span>أودعت هذا الشهر</span><span class="inwrap"><input id="m-save" data-m="save" inputmode="decimal" autocomplete="off" placeholder="0"><em>ريال</em></span></label>
+            <span class="hint" id="saveHint"></span>
+          </div>
+          <div class="bar"><i id="saveBar"></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span>محفظة الاستثمار</span><span class="state-pill" id="invPill">0%</span></div>
+          <div class="q-body">
+            <label class="field"><span>استثمرت هذا الشهر</span><span class="inwrap"><input id="m-invest" data-m="invest" inputmode="decimal" autocomplete="off" placeholder="0"><em>دولار</em></span></label>
+            <span class="hint" id="invHint"></span>
+          </div>
+          <div class="bar"><i id="invBar"></i></div>
+        </div>
+        <div class="mrow">
+          <div class="top"><span>دخل إضافي</span><span class="state-pill" id="incPill">0 ريال</span></div>
+          <form class="inc-form" id="incForm">
+            <label class="field"><span>المبلغ</span><span class="inwrap"><input id="inc-amt" inputmode="decimal" autocomplete="off" placeholder="500"><em>ريال</em></span></label>
+            <label class="field" style="flex: 2 1 160px"><span>المصدر</span><span class="inwrap"><input id="inc-note" autocomplete="off" placeholder="مشروع جانبي، فريلانس…" style="direction: rtl"></span></label>
+            <button class="btn" type="submit">سجّل</button>
+          </form>
+          <span class="hint">كل 10 ريال = 1 XP ثروة (حتى 300 XP للدفعة)</span>
+          <ul class="inc-list" id="incList"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="win" id="tab-log" role="tabpanel" hidden>
+    <div class="win-title"><span>السجل</span></div>
+    <div class="cal" id="cal"></div>
+    <div class="legend">
+      <span><i style="background: rgba(95,227,173,0.25); border-color: rgba(95,227,173,0.6)"></i>مكتمل</span>
+      <span><i style="background: rgba(87,184,255,0.18)"></i>جزئي</span>
+      <span><i style="border-color: rgba(255,90,118,0.55)"></i>عقوبة</span>
+      <span><i style="border-color: rgba(255,90,118,0.55); border-style: dashed"></i>عقوبة مُسدّدة</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b id="kXp">0</b><span>إجمالي الخبرة</span></div>
+      <div class="kpi"><b id="kRate">0%</b><span>نسبة الالتزام</span></div>
+      <div class="kpi"><b id="kGym">0</b><span>حصص نادي</span></div>
+      <div class="kpi"><b id="kInc">0</b><span>دخل إضافي (ريال)</span></div>
+    </div>
+    <div class="sect">
+      <h3>قوانين النظام</h3>
+      <ul class="rules">
+        <li>إكمال كل المهام الإجبارية في يوم = <b>+50 XP</b> مكافأة وسلسلة +1.</li>
+        <li>يوم ناقص = <b>-50 XP</b> ومنطقة العقاب. مهمة العقاب في اليوم التالي تسترجعها.</li>
+        <li>النادي <b id="ruleGym">4</b> مرات في الأسبوع (الأحد إلى السبت) = <b>+100 XP</b> قوة.</li>
+        <li>الادخار والاستثمار الشهري = حتى <b>300 XP</b> ثروة لكل واحد.</li>
+        <li>المستوى التالي يحتاج <b>100 + 50 × (المستوى − 1)</b> XP. كل 100 XP في صفة = نقطة.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="win" id="tab-settings" role="tabpanel" hidden>
+    <div class="win-title"><span>الإعدادات</span></div>
+    <div class="sect">
+      <h3>اللاعب والأهداف</h3>
+      <div class="set-grid">
+        <label class="field"><span>اسم اللاعب</span><span class="inwrap"><input id="s-name" data-s="name" autocomplete="off" placeholder="اللاعب" style="direction: rtl"></span></label>
+        <label class="field"><span>هدف الخطوات</span><span class="inwrap"><input id="s-steps" data-s="steps" inputmode="numeric"><em>خطوة</em></span></label>
+        <label class="field"><span>حد السعرات (تنشيف)</span><span class="inwrap"><input id="s-cal" data-s="cal" inputmode="numeric"><em>kcal</em></span></label>
+        <label class="field"><span>هدف البروتين</span><span class="inwrap"><input id="s-protein" data-s="protein" inputmode="numeric"><em>g</em></span></label>
+        <label class="field"><span>ساعات النوم</span><span class="inwrap"><input id="s-sleep" data-s="sleep" inputmode="decimal"><em>ساعة</em></span></label>
+        <label class="field"><span>صفحات القرآن يوميًا</span><span class="inwrap"><input id="s-quran" data-s="quran" inputmode="numeric"><em>صفحة</em></span></label>
+        <label class="field"><span>تطوير الذات يوميًا</span><span class="inwrap"><input id="s-dev" data-s="dev" inputmode="numeric"><em>دقيقة</em></span></label>
+        <label class="field"><span>النادي أسبوعيًا</span><span class="inwrap"><input id="s-gym" data-s="gym" inputmode="numeric"><em>مرات</em></span></label>
+        <label class="field"><span>الادخار الشهري</span><span class="inwrap"><input id="s-save" data-s="save" inputmode="numeric" placeholder="اكتب هدفك"><em>ريال</em></span></label>
+        <label class="field"><span>الاستثمار الشهري</span><span class="inwrap"><input id="s-invest" data-s="invest" inputmode="numeric" placeholder="اكتب هدفك"><em>دولار</em></span></label>
+      </div>
+    </div>
+    <div class="sect">
+      <h3>أيام الدوام</h3>
+      <div class="days-pick" id="workDays"></div>
+    </div>
+    <div class="sect">
+      <h3>مهام يومية إضافية</h3>
+      <form class="inc-form" id="cqForm">
+        <label class="field" style="flex: 2 1 180px"><span>المهمة</span><span class="inwrap"><input id="cq-name" autocomplete="off" placeholder="سباحة، قراءة كتاب، بدون سوشال…" style="direction: rtl"></span></label>
+        <label class="field" style="flex: 0 1 120px"><span>الصفة</span><select id="cq-stat"></select></label>
+        <label class="field" style="flex: 0 1 90px"><span>الخبرة</span><span class="inwrap"><input id="cq-xp" inputmode="numeric" value="25"><em>XP</em></span></label>
+        <label class="field" style="flex: 0 1 110px"><span>النوع</span><select id="cq-req"><option value="0">إضافية</option><option value="1">إجبارية</option></select></label>
+        <button class="btn" type="submit">أضف</button>
+      </form>
+      <ul class="custom-list" id="cqList"></ul>
+    </div>
+    <div class="sect">
+      <h3>البيانات</h3>
+      <p class="q-desc" id="syncLong"></p>
+      <div class="backup">
+        <button class="btn" id="exportBtn" type="button">حفظ نسخة احتياطية</button>
+        <label class="btn ghost" for="importFile" style="display:inline-flex;align-items:center;cursor:pointer">استرجاع نسخة</label>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+      <div class="confirm" id="resetBox">
+        <button class="btn danger" id="resetBtn">مسح كل التقدم</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="levelup" id="levelup" hidden>
+    <div class="win box">
+      <div class="big">LEVEL UP!</div>
+      <p>وصلت إلى المستوى <b id="luNum">2</b></p>
+      <p id="luRank"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  document.documentElement.lang = 'ar';
+  document.documentElement.dir = 'rtl';
+
+  // ---------- helpers ----------
+  const $ = (s) => document.querySelector(s);
+  const pad = (n) => String(n).padStart(2, '0');
+  const ds = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parseDs = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const addDays = (s, n) => { const d = parseDs(s); d.setDate(d.getDate() + n); return ds(d); };
+  const todayStr = () => ds(new Date());
+  const weekStart = (s) => addDays(s, -parseDs(s).getDay());
+  const fmt = (n) => Math.round(n).toLocaleString('en-US');
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const num = (v) => {
+    const t = String(v ?? '')
+      .replace(/[٠-٩]/g, (c) => '٠١٢٣٤٥٦٧٨٩'.indexOf(c))
+      .replace(/[۰-۹]/g, (c) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(c))
+      .replace(/[,٬]/g, '').replace(/٫/g, '.').replace(/[^\d.]/g, '');
+    const n = parseFloat(t);
+    return isFinite(n) ? n : 0;
+  };
+  const gFmt = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
+  const mFmt = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { month: 'long', year: 'numeric' });
+  let hFmt;
+  try { hFmt = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { hFmt = null; }
+  const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+  const DAY_SHORT = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+
+  // ---------- model ----------
+  const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
+  const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
+  const DEFAULTS = { name: '', steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, save: 0, invest: 0, workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const RANKS = [
+    [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
+    [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
+  ];
+  const LKEY = 'hunter-system-v1';
+
+  const state = { settings: { ...DEFAULTS }, months: {} };
+  try {
+    const raw = localStorage.getItem(LKEY);
+    if (raw) { const o = JSON.parse(raw); state.settings = { ...DEFAULTS, ...(o.settings || {}) }; state.months = o.months || {}; }
+  } catch {}
+
+  const S = () => state.settings;
+  const monthOf = (date) => date.slice(0, 7);
+  const getMonth = (mk) => state.months[mk] || null;
+  const ensureMonth = (mk) => (state.months[mk] ||= { days: {}, monthly: { save: 0, invest: 0, extra: [] } });
+  const getDay = (date) => getMonth(monthOf(date))?.days?.[date] || null;
+  const isWorkday = (date) => S().workDays.includes(parseDs(date).getDay());
+
+  function startDate() {
+    let st = S().start || todayStr();
+    for (const mk in state.months) for (const d in (state.months[mk].days || {})) if (d < st) st = d;
+    return st;
+  }
+
+  function dayEval(date) {
+    const s = S(), d = getDay(date) || {};
+    const q = [];
+    const p = d.p || {}, pc = PRAYERS.filter(([k]) => p[k]).length;
+    q.push({ id: 'prayer', req: true, done: pc === 5, xp: { FTH: pc * 10 + (pc === 5 ? 20 : 0) }, prog: pc / 5 });
+    const qr = d.quran || 0, qg = Math.max(1, s.quran);
+    q.push({ id: 'quran', req: true, done: qr >= qg, xp: { FTH: qr > 0 ? 20 + 5 * Math.min(qr - 1, 10) : 0 }, prog: Math.min(1, qr / qg) });
+    q.push({ id: 'tasbeeh', req: true, done: !!d.tasbeeh, xp: { FTH: d.tasbeeh ? 15 : 0 }, prog: d.tasbeeh ? 1 : 0 });
+    const st = d.steps || 0, sg = Math.max(1, s.steps);
+    q.push({ id: 'steps', req: true, done: st >= sg, xp: { AGI: Math.floor(40 * Math.min(1, st / sg)) + (st >= sg * 1.5 ? 10 : 0) }, prog: Math.min(1, st / sg) });
+    const calOk = (d.cal || 0) > 0 && d.cal <= s.cal, proOk = (d.protein || 0) >= s.protein;
+    q.push({ id: 'diet', req: true, done: !!d.clean && calOk && proOk, xp: { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0), STR: proOk ? 15 : 0 }, prog: ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk });
+    const sl = d.sleep || 0, slg = Math.max(1, s.sleep);
+    q.push({ id: 'sleep', req: true, done: sl >= slg, xp: { VIT: sl >= slg ? 25 : 0 }, prog: Math.min(1, sl / slg) });
+    if (isWorkday(date)) q.push({ id: 'work', req: true, done: !!d.work, xp: { WLT: d.work ? 30 : 0 }, prog: d.work ? 1 : 0 });
+    q.push({ id: 'gym', req: false, done: !!d.gym, xp: { STR: d.gym ? 50 : 0 }, prog: d.gym ? 1 : 0 });
+    const dv = d.dev || 0, dg = Math.max(1, s.dev);
+    q.push({ id: 'dev', req: false, done: dv >= dg, xp: { INT: Math.round(40 * Math.min(1, dv / dg)) + (dv >= dg * 2 ? 10 : 0) }, prog: Math.min(1, dv / dg) });
+    for (const c of s.custom) {
+      const on = !!(d.c && d.c[c.id]);
+      if (c.archived && !on) continue;
+      q.push({ id: 'c_' + c.id, custom: c, req: !!c.req && !c.archived, done: on, xp: { [c.stat]: on ? c.xp : 0 }, prog: on ? 1 : 0 });
+    }
+    const reqs = q.filter((x) => x.req);
+    const xp = q.reduce((a, x) => a + Object.values(x.xp).reduce((b, v) => b + v, 0), 0);
+    return { q, xp, complete: reqs.every((x) => x.done), reqDone: reqs.filter((x) => x.done).length, reqTotal: reqs.length };
+  }
+
+  function levelOf(xp) {
+    let L = 1, need = 100, rem = xp;
+    while (rem >= need) { rem -= need; L++; need = 100 + 50 * (L - 1); }
+    return { L, into: rem, need };
+  }
+  const rankOf = (L) => RANKS.filter((r) => L >= r[0]).pop();
+
+  function monthXp(m) {
+    const s = S(), mo = (m && m.monthly) || {};
+    const save = s.save > 0 ? Math.round(300 * Math.min(1, (mo.save || 0) / s.save)) : 0;
+    const inv = s.invest > 0 ? Math.round(300 * Math.min(1, (mo.invest || 0) / s.invest)) : 0;
+    const extra = (mo.extra || []).reduce((a, e) => a + Math.min(300, Math.floor((e.a || 0) / 10)), 0);
+    return save + inv + extra;
+  }
+
+  function compute() {
+    const today = todayStr(), start = startDate();
+    const stats = Object.fromEntries(Object.keys(STATS).map((k) => [k, 0]));
+    let total = 0, penalty = 0, penDays = 0, completeDays = 0, pastDays = 0;
+    const evals = {};
+    for (let d = start; d <= today; d = addDays(d, 1)) {
+      const e = dayEval(d); evals[d] = e;
+      for (const q of e.q) for (const k in q.xp) { stats[k] += q.xp[k]; total += q.xp[k]; }
+      if (d < today) pastDays++;
+      if (e.complete) { completeDays++; total += 50; }
+      else if (d < today) { penDays++; if (!getDay(d)?.penaltyCleared) penalty += 50; }
+    }
+    // weekly gym bonus
+    const gymWeeks = {};
+    for (const mk in state.months) for (const d in (state.months[mk].days || {})) if (state.months[mk].days[d].gym) { const w = weekStart(d); gymWeeks[w] = (gymWeeks[w] || 0) + 1; }
+    let gymTotal = 0;
+    for (const w in gymWeeks) { gymTotal += gymWeeks[w]; if (gymWeeks[w] >= S().gym) { stats.STR += 100; total += 100; } }
+    // monthly
+    let incomeTotal = 0;
+    for (const mk in state.months) {
+      const mx = monthXp(state.months[mk]); stats.WLT += mx; total += mx;
+      incomeTotal += ((state.months[mk].monthly || {}).extra || []).reduce((a, e) => a + (e.a || 0), 0);
+    }
+    total = Math.max(0, total - penalty);
+    let streak = 0, k = evals[today]?.complete ? today : addDays(today, -1);
+    while (evals[k]?.complete) { streak++; k = addDays(k, -1); }
+    let best = 0, run = 0;
+    for (const d in evals) { if (evals[d].complete) { run++; best = Math.max(best, run); } else if (d < today) run = 0; }
+    const yest = addDays(today, -1);
+    const penaltyActive = yest >= start && evals[yest] && !evals[yest].complete && !getDay(yest)?.penaltyCleared;
+    return { stats, total, penalty, penDays, completeDays, pastDays, streak, best, evals, gymTotal, incomeTotal, penaltyActive, lv: levelOf(total) };
+  }
+
+  // ---------- persistence ----------
+  let colRef = null, cloud = false;
+  const timers = {}, writing = {};
+  function cacheLocal() { try { localStorage.setItem(LKEY, JSON.stringify(state)); } catch {} }
+  function touchStart() { if (!S().start) { S().start = todayStr(); save('settings'); } }
+  function save(docId) {
+    cacheLocal();
+    if (!colRef) return;
+    clearTimeout(timers[docId]);
+    timers[docId] = setTimeout(() => flush(docId), 600);
+  }
+  async function flush(docId) {
+    if (writing[docId]) { timers[docId] = setTimeout(() => flush(docId), 300); return; }
+    delete timers[docId];
+    writing[docId] = true;
+    const body = docId === 'settings' ? state.settings : state.months[docId.slice(1)];
+    try {
+      if (body) await colRef.doc(docId).set(JSON.parse(JSON.stringify(body)));
+    } catch (e) {
+      if (e && e.code === 'unavailable') { setTimeout(() => save(docId), 1500 + Math.random() * 1000); }
+      else { toast('خطأ', 'تعذّر الحفظ في السحابة. التقدم محفوظ على هذا الجهاز.', 'bad'); }
+    }
+    writing[docId] = false;
+  }
+  const busy = (id) => timers[id] || writing[id];
+  function setSync(mode) {
+    const el = $('#sync'), long = $('#syncLong');
+    if (mode === 'cloud') { el.textContent = '● متزامن'; el.className = 'sync on'; long.textContent = 'تقدمك محفوظ في حسابك ويتزامن بين أجهزتك. لا أحد غيرك يقدر يشوفه.'; }
+    else { el.textContent = 'محفوظ على جوالك'; el.className = 'sync'; long.textContent = 'تقدمك محفوظ داخل التطبيق على هذا الجهاز ويشتغل بدون إنترنت. خذ نسخة احتياطية كل فترة، وبها تنقل تقدمك لجوال جديد.'; }
+  }
+  setSync('local');
+
+  async function initStore() {
+    const api = window.claude;
+    if (!api || !api.use) return;
+    let user = null, db = null, uid = null;
+    try { [user, db] = await Promise.all([api.use('user'), api.use('db')]); } catch {}
+    try { uid = user ? await user.id() : null; } catch {}
+    if (!db || !uid) return;
+    try { colRef = db.collection('data/users/' + uid); } catch { colRef = null; return; }
+    let firstServer = true;
+    colRef.onSnapshot((snap) => {
+      const seen = new Set();
+      for (const doc of snap.docs) {
+        seen.add(doc.id);
+        if (busy(doc.id) || doc.metadata.hasPendingWrites) continue;
+        const data = doc.data() || {};
+        if (doc.id === 'settings') state.settings = { ...DEFAULTS, ...data };
+        else if (doc.id[0] === 'm') state.months[doc.id.slice(1)] = { days: {}, monthly: { save: 0, invest: 0, extra: [] }, ...data };
+      }
+      if (!snap.metadata.fromCache) {
+        if (firstServer) {
+          firstServer = false;
+          if (snap.empty && (S().start || Object.keys(state.months).length)) {
+            save('settings'); for (const mk in state.months) save('m' + mk);
+          }
+        } else {
+          for (const mk of Object.keys(state.months)) if (!seen.has('m' + mk) && !busy('m' + mk)) delete state.months[mk];
+        }
+      }
+      cloud = true; setSync('cloud'); cacheLocal();
+      const typing = document.activeElement && document.activeElement.closest && document.activeElement.closest('input');
+      if (!typing) { buildDaily(); fillSettings(); fillMonth(); }
+      render(false);
+    }, () => { setSync('local'); });
+  }
+
+  // ---------- UI: status ----------
+  let lastLevel = null;
+  let C = compute();
+
+  function renderStatus() {
+    const { lv, stats, total } = C;
+    const r = rankOf(lv.L);
+    $('#lvNum').textContent = lv.L;
+    $('#pName').textContent = S().name || 'اللاعب';
+    $('#pRank').textContent = r[1] === 'N' ? 'صياد بمستوى وطني' : `صياد من الرتبة ${r[1]}`;
+    $('#pTitle').textContent = r[2];
+    const rb = $('#rankBadge'); rb.textContent = r[1] === 'N' ? 'S+' : r[1]; rb.dataset.r = r[1];
+    $('#xpTxt').textContent = `XP ${fmt(lv.into)} / ${fmt(lv.need)}`;
+    $('#xpTotal').textContent = `TOTAL ${fmt(total)}`;
+    $('#xpBar').style.width = (100 * lv.into / lv.need).toFixed(1) + '%';
+    $('#stats').innerHTML = Object.keys(STATS).map((k) =>
+      `<div class="stat"><span class="n"><b>${k}</b>${STATS[k]}</span><span class="val">${10 + Math.floor(stats[k] / 100)}</span></div>`).join('');
+    $('#mStreak').textContent = C.streak;
+    $('#mBest').textContent = C.best;
+    $('#mDays').textContent = C.completeDays;
+    $('#mPen').textContent = C.penDays;
+    $('#penalty').hidden = !C.penaltyActive;
+  }
+
+  // ---------- UI: daily ----------
+  let viewDate = todayStr();
+  const statName = (k) => k;
+  function questMeta(q) {
+    const s = S();
+    switch (q.id) {
+      case 'prayer': return ['الصلوات الخمس', 'في وقتها، كل صلاة 10 XP'];
+      case 'quran': return ['ورد القرآن', `${s.quran} صفحة على الأقل`];
+      case 'tasbeeh': return ['التسبيح والأذكار', 'أذكار الصباح والمساء'];
+      case 'steps': return [`${fmt(s.steps)} خطوة`, 'من تطبيق الصحة أو الساعة'];
+      case 'diet': return ['أكل نظيف + تنشيف', `سعرات ≤ ${fmt(s.cal)} · بروتين ≥ ${fmt(s.protein)}g`];
+      case 'sleep': return ['النوم', `${s.sleep} ساعات على الأقل`];
+      case 'work': return ['الدوام', 'حضور يوم العمل'];
+      case 'gym': return ['النادي', `هدف الأسبوع ${s.gym} مرات`];
+      case 'dev': return ['تطوير الذات', `${s.dev} دقيقة تعلّم أو قراءة أو مهارة`];
+      default: return [esc(q.custom.name), q.custom.archived ? 'مهمة محذوفة' : 'مهمة مخصصة'];
+    }
+  }
+  const numIn = (f, label, unit, val, step) =>
+    `<label class="field"><span>${label}</span><span class="inwrap"><input id="in-${f}" data-act="num" data-f="${f}" inputmode="decimal" autocomplete="off" value="${val ? val : ''}" placeholder="0"><em>${unit}</em></span></label>`;
+  const tog = (f, label, on, extra = '') => `<button type="button" class="tog" data-act="toggle" data-f="${f}" ${extra} aria-pressed="${on ? 'true' : 'false'}">${label}</button>`;
+
+  function controls(q, d) {
+    switch (q.id) {
+      case 'prayer': return PRAYERS.map(([k, n]) => `<button type="button" class="chip" data-act="prayer" data-k="${k}" aria-pressed="${d.p && d.p[k] ? 'true' : 'false'}">${n}</button>`).join('');
+      case 'quran': return `<div class="stepper"><button type="button" data-act="quran" data-d="1" aria-label="زيادة">+</button><output id="quranOut">${d.quran || 0} صفحة</output><button type="button" data-act="quran" data-d="-1" aria-label="إنقاص">−</button></div>`;
+      case 'tasbeeh': return tog('tasbeeh', 'تم', d.tasbeeh);
+      case 'steps': return numIn('steps', 'خطوات اليوم', 'خطوة', d.steps) + `<span class="hint" data-hint></span>`;
+      case 'diet': return tog('clean', 'أكلي نظيف اليوم', d.clean) + numIn('cal', 'السعرات', 'kcal', d.cal) + numIn('protein', 'البروتين', 'g', d.protein) + numIn('carbs', 'كارب', 'g', d.carbs) + numIn('fat', 'دهون', 'g', d.fat) + `<span class="hint" data-hint></span>`;
+      case 'sleep': return numIn('sleep', 'ساعات النوم', 'ساعة', d.sleep);
+      case 'work': return tog('work', 'داومت', d.work);
+      case 'gym': return tog('gym', 'تمرنت', d.gym) + `<span class="hint" data-hint></span>`;
+      case 'dev': return numIn('dev', 'المدة', 'دقيقة', d.dev);
+      default: return `<button type="button" class="tog" data-act="custom" data-id="${esc(q.custom.id)}" aria-pressed="${q.done ? 'true' : 'false'}">تم</button>`;
+    }
+  }
+
+  function buildDaily() {
+    const d = getDay(viewDate) || {};
+    const e = dayEval(viewDate);
+    $('#quests').innerHTML = e.q.map((q) => {
+      const [name, desc] = questMeta(q);
+      return `<article class="quest" data-q="${esc(q.id)}">
+        <div class="q-head"><span class="q-check" aria-hidden="true"></span>
+          <div class="q-title"><h3>${name}</h3><p class="q-desc">${desc}</p></div>
+          <div class="q-tags"><span class="q-req ${q.req ? '' : 'opt'}">${q.req ? 'إجباري' : 'إضافي'}</span><span class="q-xp" data-xp></span></div>
+        </div>
+        <div class="q-body">${controls(q, d)}</div>
+        <div class="q-bar"><i data-bar></i></div>
+      </article>`;
+    }).join('') + (isWorkday(viewDate) ? '' : `<p class="empty" style="text-align:center">${DAY_NAMES[parseDs(viewDate).getDay()]}: يوم إجازة، مهمة الدوام غير مطلوبة.</p>`);
+    const t = todayStr();
+    $('#dayLbl').textContent = viewDate === t ? 'اليوم' : viewDate === addDays(t, -1) ? 'أمس · ' + gFmt.format(parseDs(viewDate)) : gFmt.format(parseDs(viewDate));
+    $('#prevDay').disabled = viewDate <= addDays(t, -30);
+    $('#nextDay').disabled = viewDate >= t;
+    refreshDaily();
+  }
+
+  function refreshDaily() {
+    const e = dayEval(viewDate), d = getDay(viewDate) || {}, s = S();
+    for (const q of e.q) {
+      const el = document.querySelector(`.quest[data-q="${CSS.escape(q.id)}"]`);
+      if (!el) continue;
+      el.classList.toggle('done', q.done);
+      const xp = Object.entries(q.xp).filter(([, v]) => v > 0).map(([k, v]) => `+${v} ${statName(k)}`).join(' · ');
+      el.querySelector('[data-xp]').textContent = xp || '+0 XP';
+      el.querySelector('[data-bar]').style.width = (q.prog * 100).toFixed(0) + '%';
+      const hint = el.querySelector('[data-hint]');
+      if (q.id === 'steps' && hint) {
+        const st = d.steps || 0;
+        hint.innerHTML = st >= s.steps ? `<span class="good">تم الهدف${st >= s.steps * 1.5 ? ' + مكافأة 15 ألف' : ''}</span>` : `باقي ${fmt(s.steps - st)} خطوة`;
+      }
+      if (q.id === 'diet' && hint) {
+        const cal = d.cal || 0, pro = d.protein || 0;
+        const calTxt = cal === 0 ? 'سجّل سعراتك' : cal <= s.cal ? `<span class="good">باقي ${fmt(s.cal - cal)} سعرة</span>` : `<span class="bad">زيادة ${fmt(cal - s.cal)} سعرة</span>`;
+        const proTxt = pro >= s.protein ? '<span class="good">البروتين مكتمل</span>' : `باقي ${fmt(s.protein - pro)}g بروتين`;
+        hint.innerHTML = `${calTxt} · ${proTxt}`;
+      }
+      if (q.id === 'gym' && hint) {
+        const ws = weekStart(viewDate); let n = 0;
+        for (let i = 0; i < 7; i++) if (getDay(addDays(ws, i))?.gym) n++;
+        hint.innerHTML = n >= s.gym ? `<span class="good">${n}/${s.gym} هذا الأسبوع · مكافأة الأسبوع +100</span>` : `${n}/${s.gym} هذا الأسبوع`;
+      }
+    }
+    const qo = $('#quranOut'); if (qo) qo.textContent = `${d.quran || 0} صفحة`;
+    for (const b of document.querySelectorAll('#quests [data-act="prayer"]')) b.setAttribute('aria-pressed', d.p && d.p[b.dataset.k] ? 'true' : 'false');
+    for (const b of document.querySelectorAll('#quests [data-act="toggle"]')) b.setAttribute('aria-pressed', d[b.dataset.f] ? 'true' : 'false');
+    for (const b of document.querySelectorAll('#quests [data-act="custom"]')) b.setAttribute('aria-pressed', d.c && d.c[b.dataset.id] ? 'true' : 'false');
+    $('#reqCount').textContent = `${e.reqDone}/${e.reqTotal}`;
+    $('#dayXp').textContent = fmt(e.xp + (e.complete ? 50 : 0));
+    const w = $('#warn');
+    if (e.complete) { w.textContent = 'اكتملت المهمة اليومية. المكافأة: +50 XP وسلسلة +1.'; w.className = 'warn okmsg'; }
+    else if (viewDate < todayStr()) { w.textContent = 'هذا اليوم انتهى بدون إكمال المهام الإجبارية.'; w.className = 'warn'; }
+    else { w.textContent = 'تحذير: عدم إكمال المهام الإجبارية قبل منتصف الليل يدخلك منطقة العقاب.'; w.className = 'warn'; }
+    tick();
+  }
+
+  function setDay(patch) {
+    touchStart();
+    const mk = monthOf(viewDate), m = ensureMonth(mk);
+    m.days ||= {};
+    m.days[viewDate] = { ...(m.days[viewDate] || {}), ...patch };
+    save('m' + mk);
+  }
+
+  function act(fn) {
+    const before = dayEval(viewDate);
+    fn();
+    const after = dayEval(viewDate);
+    for (const q of after.q) {
+      const b = before.q.find((x) => x.id === q.id);
+      if (q.done && b && !b.done) {
+        const xp = Object.values(q.xp).reduce((a, v) => a + v, 0);
+        toast('QUEST CLEAR', `اكتملت المهمة: ${questMeta(q)[0]} · +${xp} XP`);
+      }
+    }
+    if (after.complete && !before.complete) toast('DAILY QUEST COMPLETE', 'أكملت المهمة اليومية! +50 XP مكافأة.', 'gold');
+    refreshDaily();
+    render(true);
+  }
+
+  $('#quests').addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-act]'); if (!b) return;
+    const d = getDay(viewDate) || {};
+    if (b.dataset.act === 'prayer') act(() => setDay({ p: { ...(d.p || {}), [b.dataset.k]: !(d.p && d.p[b.dataset.k]) } }));
+    else if (b.dataset.act === 'quran') act(() => setDay({ quran: Math.max(0, (d.quran || 0) + Number(b.dataset.d)) }));
+    else if (b.dataset.act === 'toggle') act(() => setDay({ [b.dataset.f]: !d[b.dataset.f] }));
+    else if (b.dataset.act === 'custom') act(() => setDay({ c: { ...(d.c || {}), [b.dataset.id]: !(d.c && d.c[b.dataset.id]) } }));
+  });
+  $('#quests').addEventListener('input', (ev) => {
+    const i = ev.target.closest('input[data-act="num"]'); if (!i) return;
+    act(() => setDay({ [i.dataset.f]: num(i.value) }));
+  });
+  $('#prevDay').addEventListener('click', () => { viewDate = addDays(viewDate, -1); buildDaily(); });
+  $('#nextDay').addEventListener('click', () => { if (viewDate < todayStr()) { viewDate = addDays(viewDate, 1); buildDaily(); } });
+  $('#clearPenalty').addEventListener('click', () => {
+    const y = addDays(todayStr(), -1), mk = monthOf(y), m = ensureMonth(mk);
+    m.days ||= {}; m.days[y] = { ...(m.days[y] || {}), penaltyCleared: true };
+    save('m' + mk);
+    toast('PENALTY CLEARED', 'تم تسديد العقوبة. استرجعت 50 XP.', 'gold');
+    render(true);
+  });
+
+  // ---------- UI: goals ----------
+  function fillMonth() {
+    const mk = monthOf(todayStr()), mo = getMonth(mk)?.monthly || {};
+    $('#m-save').value = mo.save || '';
+    $('#m-invest').value = mo.invest || '';
+  }
+  function renderGoals() {
+    const s = S(), t = todayStr(), ws = weekStart(t);
+    let gym = 0, html = '';
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(ws, i), r = getDay(d), e = C.evals[d];
+      if (r?.gym) gym++;
+      html += `<div class="wk-day${r?.gym ? ' gym' : ''}${e?.complete ? ' full' : ''}${d === t ? ' today' : ''}">${DAY_SHORT[i]}${r?.gym ? '<br>نادي' : '<br>·'}</div>`;
+    }
+    $('#wkDays').innerHTML = html;
+    $('#gymPips').innerHTML = Array.from({ length: Math.max(1, s.gym) }, (_, i) => `<span class="pip${i < gym ? ' on' : ''}"></span>`).join('');
+    $('#gymTxt').textContent = gym >= s.gym ? `أكملت ${gym} من ${s.gym}. مكافأة الأسبوع +100 XP قوة.` : `${gym} من ${s.gym} · باقي ${s.gym - gym}. المكافأة +100 XP قوة.`;
+    const mk = monthOf(t), mo = getMonth(mk)?.monthly || {};
+    $('#monthTitle').textContent = 'مهام شهر ' + mFmt.format(parseDs(t));
+    const sv = mo.save || 0, iv = mo.invest || 0;
+    const sp = s.save > 0 ? Math.min(1, sv / s.save) : 0, ip = s.invest > 0 ? Math.min(1, iv / s.invest) : 0;
+    $('#saveBar').style.width = sp * 100 + '%'; $('#invBar').style.width = ip * 100 + '%';
+    const sPill = $('#savePill'), iPill = $('#invPill');
+    sPill.textContent = !s.save ? 'بدون هدف' : sp >= 1 ? 'مكتمل' : Math.round(sp * 100) + '%'; sPill.className = 'state-pill' + (sp >= 1 ? ' ok' : '');
+    iPill.textContent = !s.invest ? 'بدون هدف' : ip >= 1 ? 'مكتمل' : Math.round(ip * 100) + '%'; iPill.className = 'state-pill' + (ip >= 1 ? ' ok' : '');
+    $('#saveHint').textContent = !s.save ? 'حدد هدف الادخار الشهري من الإعدادات.' : `الهدف ${fmt(s.save)} ريال · ${sv >= s.save ? '+300 XP ثروة' : 'باقي ' + fmt(s.save - sv) + ' ريال'}`;
+    $('#invHint').textContent = !s.invest ? 'حدد هدف الاستثمار الشهري من الإعدادات.' : `الهدف ${fmt(s.invest)}$ · ${iv >= s.invest ? '+300 XP ثروة' : 'باقي ' + fmt(s.invest - iv) + '$'}`;
+    const extra = mo.extra || [];
+    $('#incPill').textContent = fmt(extra.reduce((a, e) => a + (e.a || 0), 0)) + ' ريال';
+    $('#incList').innerHTML = extra.length ? extra.map((e, i) =>
+      `<li><span class="amt">+${fmt(e.a)}</span><span class="note">${esc(e.n || 'دخل إضافي')} · ${gFmt.format(parseDs(e.d))}</span><button class="x" data-del="${i}" aria-label="حذف">×</button></li>`).join('')
+      : '<li class="empty">ما سجّلت دخل إضافي هذا الشهر. كل ريال يحسب.</li>';
+  }
+  for (const id of ['#m-save', '#m-invest']) {
+    $(id).addEventListener('input', (ev) => {
+      touchStart();
+      const mk = monthOf(todayStr()), m = ensureMonth(mk);
+      m.monthly ||= { save: 0, invest: 0, extra: [] };
+      const key = ev.target.dataset.m, target = S()[key];
+      const wasDone = (m.monthly[key] || 0) >= target;
+      m.monthly[key] = num(ev.target.value);
+      save('m' + mk);
+      if (target > 0 && !wasDone && m.monthly[key] >= target) toast('MONTHLY QUEST', key === 'save' ? 'اكتمل هدف الادخار الشهري! +300 XP' : 'اكتمل هدف الاستثمار الشهري! +300 XP', 'gold');
+      render(true);
+    });
+  }
+  $('#incForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const a = num($('#inc-amt').value); if (!a) { $('#inc-amt').focus(); return; }
+    touchStart();
+    const mk = monthOf(todayStr()), m = ensureMonth(mk);
+    m.monthly ||= { save: 0, invest: 0, extra: [] };
+    m.monthly.extra = [...(m.monthly.extra || []), { a, n: $('#inc-note').value.trim().slice(0, 80), d: todayStr() }];
+    save('m' + mk);
+    $('#inc-amt').value = ''; $('#inc-note').value = '';
+    toast('INCOME', `دخل إضافي +${fmt(a)} ريال · +${Math.min(300, Math.floor(a / 10))} XP ثروة`, 'gold');
+    render(true);
+  });
+  $('#incList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-del]'); if (!b) return;
+    const mk = monthOf(todayStr()), m = ensureMonth(mk);
+    m.monthly.extra = (m.monthly.extra || []).filter((_, i) => i !== Number(b.dataset.del));
+    save('m' + mk); render(true);
+  });
+
+  // ---------- UI: log ----------
+  function renderLog() {
+    const t = todayStr(), start = startDate();
+    const first = weekStart(addDays(t, -34));
+    let html = DAY_SHORT.map((n) => `<div class="h">${n}</div>`).join('');
+    for (let d = first; d <= addDays(weekStart(t), 6); d = addDays(d, 1)) {
+      const e = C.evals[d], day = parseDs(d).getDate();
+      let cls = 'cell', style = '';
+      if (d > t || d < start || !e) cls += ' void';
+      else if (e.complete) cls += ' full';
+      else { style = `--p:${(e.reqDone / Math.max(1, e.reqTotal)).toFixed(2)}`; if (d < t) cls += ' fail' + (getDay(d)?.penaltyCleared ? ' cleared' : ''); }
+      if (d === t) cls += ' today';
+      html += `<div class="${cls}" style="${style}" title="${d}">${day}</div>`;
+    }
+    $('#cal').innerHTML = html;
+    $('#kXp').textContent = fmt(C.total);
+    const denom = C.pastDays + (C.evals[t]?.complete ? 1 : 0);
+    $('#kRate').textContent = denom ? Math.round(100 * C.completeDays / denom) + '%' : '—';
+    $('#kGym').textContent = C.gymTotal;
+    $('#kInc').textContent = fmt(C.incomeTotal);
+    $('#ruleGym').textContent = S().gym;
+  }
+
+  // ---------- UI: settings ----------
+  $('#cq-stat').innerHTML = Object.keys(STATS).map((k) => `<option value="${k}">${STATS[k]} (${k})</option>`).join('');
+  function fillSettings() {
+    const s = S();
+    for (const i of document.querySelectorAll('[data-s]')) {
+      if (document.activeElement === i) continue;
+      i.value = s[i.dataset.s] || '';
+    }
+    $('#workDays').innerHTML = DAY_NAMES.map((n, i) => `<button type="button" class="chip" data-wd="${i}" aria-pressed="${s.workDays.includes(i)}">${n}</button>`).join('');
+    const list = s.custom.filter((c) => !c.archived);
+    $('#cqList').innerHTML = list.length ? list.map((c) =>
+      `<li><span class="nm">${esc(c.name)}</span><span class="xpv">+${c.xp} ${c.stat}</span><span class="q-req ${c.req ? '' : 'opt'}">${c.req ? 'إجباري' : 'إضافي'}</span><button class="x" data-cq="${esc(c.id)}" aria-label="حذف">×</button></li>`).join('')
+      : '<li class="empty">مثال: سباحة، قراءة 10 صفحات من كتاب، بدون سكر، ساعة بدون جوال.</li>';
+  }
+  document.querySelectorAll('[data-s]').forEach((i) => i.addEventListener('input', () => {
+    const k = i.dataset.s;
+    if (k === 'name') S().name = i.value.slice(0, 40);
+    else { const v = num(i.value); if (!v) return; S()[k] = v; }
+    touchStart(); save('settings');
+    buildDaily(); render(false);
+  }));
+  $('#workDays').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-wd]'); if (!b) return;
+    const i = Number(b.dataset.wd), s = S();
+    s.workDays = s.workDays.includes(i) ? s.workDays.filter((x) => x !== i) : [...s.workDays, i].sort();
+    touchStart(); save('settings'); fillSettings(); buildDaily(); render(false);
+  });
+  $('#cqForm').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const name = $('#cq-name').value.trim(); if (!name) { $('#cq-name').focus(); return; }
+    const c = { id: Date.now().toString(36), name: name.slice(0, 60), stat: $('#cq-stat').value, xp: Math.min(200, Math.max(5, Math.round(num($('#cq-xp').value) || 25))), req: $('#cq-req').value === '1' };
+    S().custom = [...S().custom, c];
+    touchStart(); save('settings');
+    $('#cq-name').value = '';
+    fillSettings(); buildDaily(); render(false);
+    toast('SYSTEM', `أُضيفت مهمة يومية: ${c.name}`);
+  });
+  $('#cqList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-cq]'); if (!b) return;
+    S().custom = S().custom.map((c) => c.id === b.dataset.cq ? { ...c, archived: true } : c);
+    save('settings'); fillSettings(); buildDaily(); render(false);
+  });
+  function resetBox(confirming) {
+    $('#resetBox').innerHTML = confirming
+      ? '<span>متأكد؟ سيُمسح كل التقدم والمستوى نهائيًا.</span><button class="btn danger" id="resetYes">نعم، امسح</button><button class="btn ghost" id="resetNo">إلغاء</button>'
+      : '<button class="btn danger" id="resetBtn">مسح كل التقدم</button>';
+  }
+  $('#resetBox').addEventListener('click', async (ev) => {
+    if (ev.target.id === 'resetBtn') resetBox(true);
+    else if (ev.target.id === 'resetNo') resetBox(false);
+    else if (ev.target.id === 'resetYes') {
+      const ids = ['settings', ...Object.keys(state.months).map((mk) => 'm' + mk)];
+      state.settings = { ...DEFAULTS }; state.months = {};
+      cacheLocal();
+      if (colRef) for (const id of ids) { clearTimeout(timers[id]); try { await colRef.doc(id).delete(); } catch {} }
+      resetBox(false); lastLevel = null; viewDate = todayStr();
+      fillSettings(); fillMonth(); buildDaily(); render(false);
+      toast('SYSTEM', 'تم مسح التقدم. بداية جديدة يا صياد.');
+    }
+  });
+
+  // ---------- toasts, level up ----------
+  function toast(tag, msg, kind = '') {
+    const el = document.createElement('div');
+    el.className = 'toast ' + kind;
+    el.innerHTML = `<span class="t">[ ${esc(tag)} ]</span>`;
+    el.append(document.createTextNode(msg));
+    $('#toasts').append(el);
+    while ($('#toasts').children.length > 3) $('#toasts').firstChild.remove();
+    setTimeout(() => el.remove(), 3600);
+  }
+  function levelUp(L) {
+    $('#luNum').textContent = L;
+    const r = rankOf(L);
+    $('#luRank').textContent = r[0] === L ? `رتبة جديدة: ${r[1] === 'N' ? 'S+' : r[1]} · لقب «${r[2]}»` : 'كل الصفات تقوى. استمر.';
+    $('#levelup').hidden = false;
+    clearTimeout(levelUp.t); levelUp.t = setTimeout(() => { $('#levelup').hidden = true; }, 3200);
+  }
+  $('#levelup').addEventListener('click', () => { $('#levelup').hidden = true; });
+
+  // ---------- render ----------
+  function render(fromUser) {
+    C = compute();
+    if (fromUser && lastLevel != null && C.lv.L > lastLevel) levelUp(C.lv.L);
+    lastLevel = C.lv.L;
+    renderStatus(); renderGoals(); renderLog(); refreshDaily();
+  }
+
+  // ---------- tabs ----------
+  const tabs = document.querySelectorAll('[data-tab]');
+  function showTab(name) {
+    tabs.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    for (const n of ['daily', 'goals', 'log', 'settings']) $('#tab-' + n).hidden = n !== name;
+    try { sessionStorage.setItem('hunter-tab', name); } catch {}
+  }
+  tabs.forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  const hashTab = (location.hash || '').slice(1);
+  let saved = null; try { saved = sessionStorage.getItem('hunter-tab'); } catch {}
+  showTab(['daily', 'goals', 'log', 'settings'].includes(hashTab) ? hashTab : (saved || 'daily'));
+
+  // ---------- clock ----------
+  let lastToday = todayStr();
+  function tick() {
+    const now = new Date(), t = ds(now);
+    if (t !== lastToday) {
+      if (viewDate === lastToday) viewDate = t;
+      lastToday = t; buildDaily(); fillMonth(); render(false);
+    }
+    $('#gDate').textContent = gFmt.format(now);
+    $('#hDate').textContent = hFmt ? hFmt.format(now) : '';
+    const tm = $('#timer');
+    if (viewDate !== t) { tm.textContent = 'انتهى'; return; }
+    const mid = new Date(now); mid.setHours(24, 0, 0, 0);
+    const sec = Math.max(0, Math.floor((mid - now) / 1000));
+    tm.textContent = `${pad(Math.floor(sec / 3600))}:${pad(Math.floor(sec / 60) % 60)}:${pad(sec % 60)}`;
+  }
+  setInterval(tick, 1000);
+
+  // ---------- backup ----------
+  $('#exportBtn').addEventListener('click', async () => {
+    const name = `hunter-backup-${todayStr()}.json`;
+    const blob = new Blob([JSON.stringify({ app: 'hunter-system', v: 1, savedAt: new Date().toISOString(), ...state })], { type: 'application/json' });
+    try {
+      const file = new File([blob], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'نسخة نظام الصياد' }); toast('BACKUP', 'تم تجهيز النسخة الاحتياطية.'); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    toast('BACKUP', 'تم حفظ النسخة الاحتياطية في التنزيلات.');
+  });
+  $('#importFile').addEventListener('change', async (ev) => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if (!f) return;
+    try {
+      const o = JSON.parse(await f.text());
+      if (!o || typeof o !== 'object' || !o.settings || typeof o.months !== 'object') throw new Error('bad');
+      state.settings = { ...DEFAULTS, ...o.settings }; state.months = o.months || {};
+      cacheLocal(); lastLevel = null; viewDate = todayStr();
+      fillSettings(); fillMonth(); buildDaily(); render(false);
+      toast('SYSTEM', `تم استرجاع تقدمك. المستوى ${C.lv.L}.`, 'gold');
+    } catch { toast('خطأ', 'الملف هذا مو نسخة احتياطية من نظام الصياد.', 'bad'); }
+  });
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+
+  // ---------- boot ----------
+  fillSettings(); fillMonth(); buildDaily(); render(false);
+  initStore();
+})();
+</script>
+</body>
+</html>
