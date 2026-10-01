@@ -45,6 +45,16 @@ html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area
 body { margin: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
 button { touch-action: manipulation; }
 .backup { display: flex; flex-wrap: wrap; gap: 8px; }
+.sync-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+.paste-box { display: grid; gap: 8px; margin-top: 10px; text-align: start; }
+.paste-box textarea { width: 100%; min-height: 70px; background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); border-radius: var(--r); color: var(--fg); padding: 8px 10px; font-family: var(--f-num); direction: ltr; }
+.goal-edit { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 8px; align-items: end; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: var(--r); }
+.goal-edit .field { max-width: none; }
+.goal-edit select { width: 100%; }
+.steps-list { margin: 0; padding-inline-start: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+.steps-list b { color: var(--fg); font-weight: 600; }
+.steps-list code { font-family: var(--f-num); direction: ltr; unicode-bidi: embed; background: rgba(0,0,0,0.35); padding: 1px 6px; border-radius: 3px; color: var(--glow-2); overflow-wrap: anywhere; }
+@media (max-width: 520px) { .goal-edit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .goal-edit .field:first-child { grid-column: 1 / -1; } }
 html, body { background: var(--bg); color: var(--fg); }
 body {
   font-family: var(--f-body);
@@ -306,6 +316,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <button id="nextDay" aria-label="اليوم التالي">‹</button>
       </div>
       <div class="goalline">الإجباري <b id="reqCount">0/0</b> · خبرة اليوم <b id="dayXp">0</b> XP</div>
+      <div class="sync-row">
+        <button class="btn" id="healthBtn" type="button">مزامنة من الصحة / الساعة</button>
+        <button class="btn ghost" id="healthHelp" type="button">طريقة الربط</button>
+      </div>
+      <div class="paste-box" id="pasteBox" hidden>
+        <span class="hint">ما قدرت أقرأ الحافظة. شغّل اختصار «الصياد» ثم الصق النتيجة هنا:</span>
+        <textarea id="pasteTa" placeholder="HUNTER;steps=8500;cal=1900;protein=140;sleep=7.5"></textarea>
+        <div class="sync-row"><button class="btn" id="pasteApply" type="button">تطبيق</button><button class="btn ghost" id="pasteCancel" type="button">إلغاء</button></div>
+      </div>
       <div class="timer" id="timer">--:--:--</div>
       <div class="warn" id="warn">تحذير: عدم إكمال المهام الإجبارية قبل منتصف الليل يدخلك منطقة العقاب.</div>
     </div>
@@ -323,30 +342,16 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       </div>
       <div>
         <h3 class="sub" id="monthTitle">هذا الشهر</h3>
-        <div class="mrow">
-          <div class="top"><span>الادخار الشهري</span><span class="state-pill" id="savePill">0%</span></div>
-          <div class="q-body">
-            <label class="field"><span>أودعت هذا الشهر</span><span class="inwrap"><input id="m-save" data-m="save" inputmode="decimal" autocomplete="off" placeholder="0"><em>ريال</em></span></label>
-            <span class="hint" id="saveHint"></span>
-          </div>
-          <div class="bar"><i id="saveBar"></i></div>
-        </div>
-        <div class="mrow">
-          <div class="top"><span>محفظة الاستثمار</span><span class="state-pill" id="invPill">0%</span></div>
-          <div class="q-body">
-            <label class="field"><span>استثمرت هذا الشهر</span><span class="inwrap"><input id="m-invest" data-m="invest" inputmode="decimal" autocomplete="off" placeholder="0"><em>دولار</em></span></label>
-            <span class="hint" id="invHint"></span>
-          </div>
-          <div class="bar"><i id="invBar"></i></div>
-        </div>
+        <div id="mGoals"></div>
         <div class="mrow">
           <div class="top"><span>دخل إضافي</span><span class="state-pill" id="incPill">0 ريال</span></div>
           <form class="inc-form" id="incForm">
-            <label class="field"><span>المبلغ</span><span class="inwrap"><input id="inc-amt" inputmode="decimal" autocomplete="off" placeholder="500"><em>ريال</em></span></label>
+            <label class="field"><span>المبلغ</span><span class="inwrap"><input id="inc-amt" inputmode="decimal" autocomplete="off" placeholder="500"></span></label>
+            <label class="field" style="flex: 0 1 100px"><span>العملة</span><select id="inc-cur"><option value="SAR">ريال</option><option value="USD">دولار</option></select></label>
             <label class="field" style="flex: 2 1 160px"><span>المصدر</span><span class="inwrap"><input id="inc-note" autocomplete="off" placeholder="مشروع جانبي، فريلانس…" style="direction: rtl"></span></label>
             <button class="btn" type="submit">سجّل</button>
           </form>
-          <span class="hint">كل 10 ريال = 1 XP ثروة (حتى 300 XP للدفعة)</span>
+          <span class="hint">كل 10 ريال (الدولار = 3.75 ريال) = 1 XP ثروة، حتى 300 XP للدفعة</span>
           <ul class="inc-list" id="incList"></ul>
         </div>
       </div>
@@ -393,9 +398,27 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <label class="field"><span>صفحات القرآن يوميًا</span><span class="inwrap"><input id="s-quran" data-s="quran" inputmode="numeric"><em>صفحة</em></span></label>
         <label class="field"><span>تطوير الذات يوميًا</span><span class="inwrap"><input id="s-dev" data-s="dev" inputmode="numeric"><em>دقيقة</em></span></label>
         <label class="field"><span>النادي أسبوعيًا</span><span class="inwrap"><input id="s-gym" data-s="gym" inputmode="numeric"><em>مرات</em></span></label>
-        <label class="field"><span>الادخار الشهري</span><span class="inwrap"><input id="s-save" data-s="save" inputmode="numeric" placeholder="اكتب هدفك"><em>ريال</em></span></label>
-        <label class="field"><span>الاستثمار الشهري</span><span class="inwrap"><input id="s-invest" data-s="invest" inputmode="numeric" placeholder="اكتب هدفك"><em>دولار</em></span></label>
       </div>
+    </div>
+    <div class="sect">
+      <h3>الأهداف المالية الشهرية</h3>
+      <p class="q-desc">سمّ كل هدف باللي تبيه، واختر عملته وكم هدفك بالشهر. كل هدف تكمله يعطيك حتى 300 XP ثروة.</p>
+      <div class="custom-list" id="goalList" style="display:grid;gap:6px"></div>
+      <div><button class="btn ghost" id="goalAdd" type="button">+ أضف هدف شهري</button></div>
+    </div>
+    <div class="sect" id="healthSetup">
+      <h3>الربط مع Apple Health و Apple Watch</h3>
+      <p class="q-desc">الآيفون ما يسمح لتطبيقات الويب تقرأ الصحة مباشرة، فنستخدم تطبيق «الاختصارات» كوسيط: يقرأ أرقام اليوم من الصحة وينسخها، وزر المزامنة يلصقها هنا. أي ساعة تكتب في Apple Health تشتغل (Apple Watch، Fitbit، Garmin، Huawei وغيرها).</p>
+      <ol class="steps-list">
+        <li>افتح تطبيق <b>الاختصارات</b> واضغط <b>+</b> وسمّه <b>الصياد</b>.</li>
+        <li>أضف إجراء <b>البحث عن عينات الصحة</b> (Find Health Samples): النوع <b>الخطوات</b>، تاريخ البدء <b>اليوم</b>. بعده <b>حساب الإحصائيات</b> (Calculate Statistics) = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>steps</code>.</li>
+        <li>كرر نفس الثلاث خطوات للـ<b>الطاقة الغذائية</b> (Dietary Energy) باسم <code>cal</code>، و<b>البروتين</b> باسم <code>protein</code>.</li>
+        <li>للنوم: <b>البحث عن عينات الصحة</b> بنوع <b>تحليل النوم</b>، تاريخ البدء <b>آخر يوم واحد</b>، والقيمة <b>ليست «في السرير»</b> و<b>ليست «مستيقظ»</b>. بعده <b>الحصول على تفاصيل عينات الصحة</b> = <b>المدة</b>، بعده <b>حساب الإحصائيات</b> = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>sleep</code>.</li>
+        <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;sleep=sleep</code></li>
+        <li>أضف <b>نسخ إلى الحافظة</b>. احفظ الاختصار.</li>
+        <li>كل يوم: شغّل الاختصار (أو من ودجت الشاشة الرئيسية)، افتح التطبيق، اضغط <b>مزامنة من الصحة / الساعة</b>.</li>
+      </ol>
+      <p class="q-desc">أي رقم ما تبيه احذفه من النص، والتطبيق يحدّث الموجود بس. أول مرة يطلب منك الآيفون السماح بالوصول للصحة، اضغط سماح.</p>
     </div>
     <div class="sect">
       <h3>أيام الدوام</h3>
@@ -469,23 +492,37 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, save: 0, invest: 0, workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { name: '', steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
   ];
   const LKEY = 'hunter-system-v1';
+  const CUR = { SAR: { ar: 'ريال', toSar: 1 }, USD: { ar: 'دولار', toSar: 3.75 } };
+  const money = (n, c) => c === 'USD' ? `${fmt(n)}$` : `${fmt(n)} ريال`;
+  function normSettings(o) {
+    o = o || {};
+    const s = { ...DEFAULTS, ...o, workDays: [...(o.workDays || DEFAULTS.workDays)], custom: [...(o.custom || [])] };
+    if (!Array.isArray(o.goals)) {
+      s.goals = [
+        { id: 'save', name: 'الادخار الشهري', cur: 'SAR', target: o.save || 0 },
+        { id: 'invest', name: 'محفظة الاستثمار', cur: 'USD', target: o.invest || 0 },
+      ];
+    } else s.goals = o.goals.map((g) => ({ ...g }));
+    delete s.save; delete s.invest;
+    return s;
+  }
 
-  const state = { settings: { ...DEFAULTS }, months: {} };
+  const state = { settings: normSettings({}), months: {} };
   try {
     const raw = localStorage.getItem(LKEY);
-    if (raw) { const o = JSON.parse(raw); state.settings = { ...DEFAULTS, ...(o.settings || {}) }; state.months = o.months || {}; }
+    if (raw) { const o = JSON.parse(raw); state.settings = normSettings(o.settings); state.months = o.months || {}; }
   } catch {}
 
   const S = () => state.settings;
   const monthOf = (date) => date.slice(0, 7);
   const getMonth = (mk) => state.months[mk] || null;
-  const ensureMonth = (mk) => (state.months[mk] ||= { days: {}, monthly: { save: 0, invest: 0, extra: [] } });
+  const ensureMonth = (mk) => { const m = (state.months[mk] ||= { days: {}, monthly: { extra: [] } }); m.monthly ||= { extra: [] }; m.days ||= {}; return m; };
   const getDay = (date) => getMonth(monthOf(date))?.days?.[date] || null;
   const isWorkday = (date) => S().workDays.includes(parseDs(date).getDay());
 
@@ -530,12 +567,13 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   const rankOf = (L) => RANKS.filter((r) => L >= r[0]).pop();
 
+  const incSar = (e) => (e.a || 0) * (CUR[e.c || 'SAR'] || CUR.SAR).toSar;
   function monthXp(m) {
-    const s = S(), mo = (m && m.monthly) || {};
-    const save = s.save > 0 ? Math.round(300 * Math.min(1, (mo.save || 0) / s.save)) : 0;
-    const inv = s.invest > 0 ? Math.round(300 * Math.min(1, (mo.invest || 0) / s.invest)) : 0;
-    const extra = (mo.extra || []).reduce((a, e) => a + Math.min(300, Math.floor((e.a || 0) / 10)), 0);
-    return save + inv + extra;
+    const mo = (m && m.monthly) || {};
+    let xp = 0;
+    for (const g of S().goals) if (g.target > 0) xp += Math.round(300 * Math.min(1, (mo[g.id] || 0) / g.target));
+    for (const e of (mo.extra || [])) xp += Math.min(300, Math.floor(incSar(e) / 10));
+    return xp;
   }
 
   function compute() {
@@ -559,7 +597,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     let incomeTotal = 0;
     for (const mk in state.months) {
       const mx = monthXp(state.months[mk]); stats.WLT += mx; total += mx;
-      incomeTotal += ((state.months[mk].monthly || {}).extra || []).reduce((a, e) => a + (e.a || 0), 0);
+      incomeTotal += ((state.months[mk].monthly || {}).extra || []).reduce((a, e) => a + incSar(e), 0);
     }
     total = Math.max(0, total - penalty);
     let streak = 0, k = evals[today]?.complete ? today : addDays(today, -1);
@@ -618,8 +656,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         seen.add(doc.id);
         if (busy(doc.id) || doc.metadata.hasPendingWrites) continue;
         const data = doc.data() || {};
-        if (doc.id === 'settings') state.settings = { ...DEFAULTS, ...data };
-        else if (doc.id[0] === 'm') state.months[doc.id.slice(1)] = { days: {}, monthly: { save: 0, invest: 0, extra: [] }, ...data };
+        if (doc.id === 'settings') state.settings = normSettings(data);
+        else if (doc.id[0] === 'm') state.months[doc.id.slice(1)] = { days: {}, monthly: { extra: [] }, ...data };
       }
       if (!snap.metadata.fromCache) {
         if (firstServer) {
@@ -807,9 +845,31 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 
   // ---------- UI: goals ----------
   function fillMonth() {
-    const mk = monthOf(todayStr()), mo = getMonth(mk)?.monthly || {};
-    $('#m-save').value = mo.save || '';
-    $('#m-invest').value = mo.invest || '';
+    const mo = getMonth(monthOf(todayStr()))?.monthly || {};
+    const goals = S().goals.filter((g) => !g.archived);
+    $('#mGoals').innerHTML = goals.length ? goals.map((g) => `
+        <div class="mrow" data-goal="${esc(g.id)}">
+          <div class="top"><span>${esc(g.name || 'هدف')}</span><span class="state-pill" data-pill></span></div>
+          <div class="q-body">
+            <label class="field"><span>المبلغ هذا الشهر</span><span class="inwrap"><input id="mg-${esc(g.id)}" data-mg="${esc(g.id)}" inputmode="decimal" autocomplete="off" placeholder="0" value="${mo[g.id] || ''}"><em>${CUR[g.cur]?.ar || 'ريال'}</em></span></label>
+            <span class="hint" data-hint></span>
+          </div>
+          <div class="bar"><i data-bar></i></div>
+        </div>`).join('') : '<p class="empty">ما عندك أهداف شهرية. أضفها من الإعدادات.</p>';
+    if ($('#inc-cur')) $('#inc-cur').value = S().incomeCur || 'SAR';
+  }
+  function refreshMonthGoals() {
+    const mo = getMonth(monthOf(todayStr()))?.monthly || {};
+    for (const g of S().goals) {
+      const row = document.querySelector(`[data-goal="${CSS.escape(g.id)}"]`); if (!row) continue;
+      const v = mo[g.id] || 0, p = g.target > 0 ? Math.min(1, v / g.target) : 0;
+      const pill = row.querySelector('[data-pill]');
+      pill.textContent = !g.target ? 'بدون هدف' : p >= 1 ? 'مكتمل' : Math.round(p * 100) + '%';
+      pill.className = 'state-pill' + (p >= 1 ? ' ok' : '');
+      row.querySelector('[data-bar]').style.width = p * 100 + '%';
+      row.querySelector('[data-hint]').textContent = !g.target ? 'حدد المبلغ المستهدف من الإعدادات.'
+        : `الهدف ${money(g.target, g.cur)} · ${v >= g.target ? '+300 XP ثروة' : 'باقي ' + money(g.target - v, g.cur)}`;
+    }
   }
   function renderGoals() {
     const s = S(), t = todayStr(), ws = weekStart(t);
@@ -824,43 +884,36 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#gymTxt').textContent = gym >= s.gym ? `أكملت ${gym} من ${s.gym}. مكافأة الأسبوع +100 XP قوة.` : `${gym} من ${s.gym} · باقي ${s.gym - gym}. المكافأة +100 XP قوة.`;
     const mk = monthOf(t), mo = getMonth(mk)?.monthly || {};
     $('#monthTitle').textContent = 'مهام شهر ' + mFmt.format(parseDs(t));
-    const sv = mo.save || 0, iv = mo.invest || 0;
-    const sp = s.save > 0 ? Math.min(1, sv / s.save) : 0, ip = s.invest > 0 ? Math.min(1, iv / s.invest) : 0;
-    $('#saveBar').style.width = sp * 100 + '%'; $('#invBar').style.width = ip * 100 + '%';
-    const sPill = $('#savePill'), iPill = $('#invPill');
-    sPill.textContent = !s.save ? 'بدون هدف' : sp >= 1 ? 'مكتمل' : Math.round(sp * 100) + '%'; sPill.className = 'state-pill' + (sp >= 1 ? ' ok' : '');
-    iPill.textContent = !s.invest ? 'بدون هدف' : ip >= 1 ? 'مكتمل' : Math.round(ip * 100) + '%'; iPill.className = 'state-pill' + (ip >= 1 ? ' ok' : '');
-    $('#saveHint').textContent = !s.save ? 'حدد هدف الادخار الشهري من الإعدادات.' : `الهدف ${fmt(s.save)} ريال · ${sv >= s.save ? '+300 XP ثروة' : 'باقي ' + fmt(s.save - sv) + ' ريال'}`;
-    $('#invHint').textContent = !s.invest ? 'حدد هدف الاستثمار الشهري من الإعدادات.' : `الهدف ${fmt(s.invest)}$ · ${iv >= s.invest ? '+300 XP ثروة' : 'باقي ' + fmt(s.invest - iv) + '$'}`;
+    refreshMonthGoals();
     const extra = mo.extra || [];
-    $('#incPill').textContent = fmt(extra.reduce((a, e) => a + (e.a || 0), 0)) + ' ريال';
+    const bySar = extra.filter((e) => (e.c || 'SAR') === 'SAR').reduce((a, e) => a + (e.a || 0), 0);
+    const byUsd = extra.filter((e) => e.c === 'USD').reduce((a, e) => a + (e.a || 0), 0);
+    $('#incPill').textContent = [bySar || !byUsd ? money(bySar, 'SAR') : '', byUsd ? money(byUsd, 'USD') : ''].filter(Boolean).join(' + ');
     $('#incList').innerHTML = extra.length ? extra.map((e, i) =>
-      `<li><span class="amt">+${fmt(e.a)}</span><span class="note">${esc(e.n || 'دخل إضافي')} · ${gFmt.format(parseDs(e.d))}</span><button class="x" data-del="${i}" aria-label="حذف">×</button></li>`).join('')
+      `<li><span class="amt">+${money(e.a, e.c || 'SAR')}</span><span class="note">${esc(e.n || 'دخل إضافي')} · ${gFmt.format(parseDs(e.d))}</span><button class="x" data-del="${i}" aria-label="حذف">×</button></li>`).join('')
       : '<li class="empty">ما سجّلت دخل إضافي هذا الشهر. كل ريال يحسب.</li>';
   }
-  for (const id of ['#m-save', '#m-invest']) {
-    $(id).addEventListener('input', (ev) => {
-      touchStart();
-      const mk = monthOf(todayStr()), m = ensureMonth(mk);
-      m.monthly ||= { save: 0, invest: 0, extra: [] };
-      const key = ev.target.dataset.m, target = S()[key];
-      const wasDone = (m.monthly[key] || 0) >= target;
-      m.monthly[key] = num(ev.target.value);
-      save('m' + mk);
-      if (target > 0 && !wasDone && m.monthly[key] >= target) toast('MONTHLY QUEST', key === 'save' ? 'اكتمل هدف الادخار الشهري! +300 XP' : 'اكتمل هدف الاستثمار الشهري! +300 XP', 'gold');
-      render(true);
-    });
-  }
+  $('#mGoals').addEventListener('input', (ev) => {
+    const i = ev.target.closest('input[data-mg]'); if (!i) return;
+    const g = S().goals.find((x) => x.id === i.dataset.mg); if (!g) return;
+    touchStart();
+    const mk = monthOf(todayStr()), m = ensureMonth(mk);
+    const wasDone = g.target > 0 && (m.monthly[g.id] || 0) >= g.target;
+    m.monthly[g.id] = num(i.value);
+    save('m' + mk);
+    if (g.target > 0 && !wasDone && m.monthly[g.id] >= g.target) toast('MONTHLY QUEST', `اكتمل هدف «${g.name}»! +300 XP`, 'gold');
+    render(true);
+  });
   $('#incForm').addEventListener('submit', (ev) => {
     ev.preventDefault();
     const a = num($('#inc-amt').value); if (!a) { $('#inc-amt').focus(); return; }
     touchStart();
     const mk = monthOf(todayStr()), m = ensureMonth(mk);
-    m.monthly ||= { save: 0, invest: 0, extra: [] };
-    m.monthly.extra = [...(m.monthly.extra || []), { a, n: $('#inc-note').value.trim().slice(0, 80), d: todayStr() }];
+        const c = $('#inc-cur').value; if (S().incomeCur !== c) { S().incomeCur = c; save('settings'); }
+    m.monthly.extra = [...(m.monthly.extra || []), { a, c, n: $('#inc-note').value.trim().slice(0, 80), d: todayStr() }];
     save('m' + mk);
     $('#inc-amt').value = ''; $('#inc-note').value = '';
-    toast('INCOME', `دخل إضافي +${fmt(a)} ريال · +${Math.min(300, Math.floor(a / 10))} XP ثروة`, 'gold');
+    toast('INCOME', `دخل إضافي +${money(a, c)} · +${Math.min(300, Math.floor(a * CUR[c].toSar / 10))} XP ثروة`, 'gold');
     render(true);
   });
   $('#incList').addEventListener('click', (ev) => {
@@ -895,8 +948,19 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 
   // ---------- UI: settings ----------
   $('#cq-stat').innerHTML = Object.keys(STATS).map((k) => `<option value="${k}">${STATS[k]} (${k})</option>`).join('');
+  function fillGoals() {
+    const goals = S().goals.filter((g) => !g.archived);
+    $('#goalList').innerHTML = goals.map((g) => `
+      <div class="goal-edit" data-gid="${esc(g.id)}">
+        <label class="field"><span>اسم الهدف</span><span class="inwrap"><input id="g-name-${esc(g.id)}" data-gf="name" value="${esc(g.name)}" autocomplete="off" style="direction: rtl"></span></label>
+        <label class="field"><span>العملة</span><select id="g-cur-${esc(g.id)}" data-gf="cur">${Object.keys(CUR).map((c) => `<option value="${c}"${g.cur === c ? ' selected' : ''}>${CUR[c].ar}</option>`).join('')}</select></label>
+        <label class="field"><span>المبلغ شهريًا</span><span class="inwrap"><input id="g-target-${esc(g.id)}" data-gf="target" inputmode="decimal" placeholder="اكتب هدفك" value="${g.target || ''}" autocomplete="off"></span></label>
+        <button class="x" data-gdel="${esc(g.id)}" aria-label="حذف الهدف">×</button>
+      </div>`).join('') || '<p class="empty">ما فيه أهداف. اضغط «أضف هدف شهري».</p>';
+  }
   function fillSettings() {
     const s = S();
+    fillGoals();
     for (const i of document.querySelectorAll('[data-s]')) {
       if (document.activeElement === i) continue;
       i.value = s[i.dataset.s] || '';
@@ -914,6 +978,27 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     touchStart(); save('settings');
     buildDaily(); render(false);
   }));
+  const goalChanged = (ev) => {
+    const row = ev.target.closest('[data-gid]'), f = ev.target.dataset.gf; if (!row || !f) return;
+    const g = S().goals.find((x) => x.id === row.dataset.gid); if (!g) return;
+    if (f === 'name') g.name = ev.target.value.slice(0, 40) || 'هدف';
+    else if (f === 'cur') g.cur = ev.target.value;
+    else g.target = num(ev.target.value);
+    touchStart(); save('settings'); fillMonth(); render(false);
+  };
+  $('#goalList').addEventListener('input', goalChanged);
+  $('#goalList').addEventListener('change', (ev) => { if (ev.target.tagName === 'SELECT') goalChanged(ev); });
+  $('#goalList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-gdel]'); if (!b) return;
+    S().goals = S().goals.map((g) => g.id === b.dataset.gdel ? { ...g, archived: true } : g);
+    save('settings'); fillGoals(); fillMonth(); render(false);
+  });
+  $('#goalAdd').addEventListener('click', () => {
+    const g = { id: 'g' + Date.now().toString(36), name: 'هدف جديد', cur: 'SAR', target: 0 };
+    S().goals = [...S().goals, g];
+    touchStart(); save('settings'); fillGoals(); fillMonth(); render(false);
+    const el = document.getElementById('g-name-' + g.id); if (el) { el.focus(); el.select(); }
+  });
   $('#workDays').addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-wd]'); if (!b) return;
     const i = Number(b.dataset.wd), s = S();
@@ -945,7 +1030,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     else if (ev.target.id === 'resetNo') resetBox(false);
     else if (ev.target.id === 'resetYes') {
       const ids = ['settings', ...Object.keys(state.months).map((mk) => 'm' + mk)];
-      state.settings = { ...DEFAULTS }; state.months = {};
+      state.settings = normSettings({}); state.months = {};
       cacheLocal();
       if (colRef) for (const id of ids) { clearTimeout(timers[id]); try { await colRef.doc(id).delete(); } catch {} }
       resetBox(false); lastLevel = null; viewDate = todayStr();
@@ -1011,6 +1096,52 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   setInterval(tick, 1000);
 
+  // ---------- health sync (via iOS Shortcuts clipboard) ----------
+  function parseHealth(text) {
+    const t = String(text || '');
+    const i = t.toUpperCase().indexOf('HUNTER'); if (i < 0) return null;
+    const out = {};
+    for (const part of t.slice(i + 6).split(/[;\n|&]/)) {
+      const m = part.match(/^\s*([a-zA-Z]+)\s*[=:]\s*(.+)$/); if (!m) continue;
+      const k = m[1].toLowerCase(); let v = num(m[2]);
+      if (!(v > 0)) continue;
+      if (k === 'steps') out.steps = Math.round(v);
+      else if (k === 'cal' || k === 'calories' || k === 'kcal') out.cal = Math.round(v);
+      else if (k === 'protein') out.protein = Math.round(v);
+      else if (k === 'carbs') out.carbs = Math.round(v);
+      else if (k === 'fat') out.fat = Math.round(v);
+      else if (k === 'sleep') {
+        if (v > 1440) v = v / 3600; else if (v > 24) v = v / 60;
+        out.sleep = Math.round(v * 10) / 10;
+      }
+    }
+    return Object.keys(out).length ? out : null;
+  }
+  function applyHealth(text) {
+    const h = parseHealth(text);
+    if (!h) { toast('خطأ', 'ما لقيت بيانات «الصياد». شغّل الاختصار أول وبعدها اضغط مزامنة.', 'bad'); return false; }
+    viewDate = todayStr(); buildDaily();
+    act(() => setDay(h));
+    buildDaily();
+    const parts = [];
+    if (h.steps) parts.push(`${fmt(h.steps)} خطوة`);
+    if (h.sleep) parts.push(`نوم ${h.sleep} ساعة`);
+    if (h.cal) parts.push(`${fmt(h.cal)} سعرة`);
+    if (h.protein) parts.push(`بروتين ${h.protein}g`);
+    toast('SYNC', 'تمت المزامنة: ' + parts.join(' · '));
+    $('#pasteBox').hidden = true;
+    return true;
+  }
+  $('#healthBtn').addEventListener('click', async () => {
+    let text = null;
+    try { text = await navigator.clipboard.readText(); } catch {}
+    if (text && parseHealth(text)) { applyHealth(text); return; }
+    $('#pasteBox').hidden = false; $('#pasteTa').value = ''; $('#pasteTa').focus();
+  });
+  $('#pasteApply').addEventListener('click', () => applyHealth($('#pasteTa').value));
+  $('#pasteCancel').addEventListener('click', () => { $('#pasteBox').hidden = true; });
+  $('#healthHelp').addEventListener('click', () => { showTab('settings'); setTimeout(() => $('#healthSetup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
+
   // ---------- backup ----------
   $('#exportBtn').addEventListener('click', async () => {
     const name = `hunter-backup-${todayStr()}.json`;
@@ -1031,7 +1162,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     try {
       const o = JSON.parse(await f.text());
       if (!o || typeof o !== 'object' || !o.settings || typeof o.months !== 'object') throw new Error('bad');
-      state.settings = { ...DEFAULTS, ...o.settings }; state.months = o.months || {};
+      state.settings = normSettings(o.settings); state.months = o.months || {};
       cacheLocal(); lastLevel = null; viewDate = todayStr();
       fillSettings(); fillMonth(); buildDaily(); render(false);
       toast('SYSTEM', `تم استرجاع تقدمك. المستوى ${C.lv.L}.`, 'gold');
