@@ -1337,31 +1337,44 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   const firstNum = (line) => { const mt = String(line).match(/[\d٠-٩۰-۹][\d٠-٩۰-۹,٬.٫]*/); return mt ? num(mt[0]) : 0; };
   function durHours(line) {
     const raw = String(line).replace(/[٠-٩]/g, (c) => '٠١٢٣٤٥٦٧٨٩'.indexOf(c));
+    // Shortcuts prints durations as h:mm:ss, or m:ss when under an hour
     const clock = raw.match(/(\d+):(\d{1,2})(?::(\d{1,2}))?/);
-    if (clock) return { h: +clock[1] + +clock[2] / 60 + (clock[3] ? +clock[3] / 3600 : 0) };
+    if (clock) return { h: clock[3] != null ? +clock[1] + +clock[2] / 60 + +clock[3] / 3600 : +clock[1] / 60 + +clock[2] / 3600 };
     const hm = raw.match(/(\d+(?:[.,]\d+)?)\s*(?:hr|hrs|hour|hours|h|ساعة|ساعات|س)/i);
     const mm = raw.match(/(\d+)\s*(?:min|mins|minute|minutes|m|دقيقة|دقائق|د)/i);
     if (hm || (mm && /min|دقيق/i.test(raw))) return { h: (hm ? parseFloat(hm[1].replace(',', '.')) : 0) + (mm && (!hm || mm.index > hm.index) ? +mm[1] / 60 : 0) };
     return { plain: firstNum(raw) };
+  }
+  // Sleep arrives as one duration per sample. "In bed" and "awake" samples overlap the real sleep stages, so drop them.
+  const NOT_ASLEEP = /in\s*bed|inbed|في السرير|awake|مستيقظ|استيقاظ|صاحي|^\s*[02]\s*$/i;
+  function sleepHours(lines, types) {
+    const items = lines.map(durHours);
+    let keep = items.map(() => true);
+    if (types && types.length === items.length) keep = types.map((tp) => !NOT_ASLEEP.test(tp));
+    let h = 0, plain = 0;
+    const hrs = [];
+    items.forEach((r, i) => { if (!keep[i]) return; if (r.h != null) { h += r.h; hrs.push(r.h); } else plain += r.plain || 0; });
+    if (plain > 1440) plain /= 3600; else if (plain > 24) plain /= 60;
+    if (!types && hrs.length > 2 && !plain) {
+      // No types sent: a single long "in bed" block alongside many short stages means the same night is counted twice
+      const mx = Math.max(...hrs), rest = h - mx;
+      if (rest > 0 && mx >= rest * 0.75 && mx <= rest * 1.35) return Math.min(mx, rest);
+    }
+    return h + plain;
   }
   function parseHealth(text) {
     const t0 = String(text || '');
     const i = t0.toUpperCase().indexOf('HUNTER'); if (i < 0) return null;
     const t = t0.slice(i + 6).replace(/\r/g, '').replace(/\n(?=\s*[a-zA-Z]+\s*[=:])/g, ';');
     const out = {};
+    let sleepLines = null, sleepTypes = null;
     for (const part of t.split(/[;|&]/)) {
       const m = part.match(/^\s*([a-zA-Z]+)\s*[=:]([\s\S]*)$/); if (!m) continue;
       const k = m[1].toLowerCase();
       const lines = m[2].split('\n').map((x) => x.trim()).filter(Boolean);
       if (!lines.length) continue;
-      if (k === 'sleep') {
-        let h = 0, plain = 0;
-        for (const l of lines) { const r = durHours(l); if (r.h) h += r.h; else plain += r.plain || 0; }
-        if (plain > 1440) plain /= 3600; else if (plain > 24) plain /= 60;
-        const v = h + plain;
-        if (v > 0 && v <= 24) out.sleep = Math.round(v * 10) / 10;
-        continue;
-      }
+      if (k === 'sleep') { sleepLines = lines; continue; }
+      if (k === 'sleeptype' || k === 'sleepvalue' || k === 'sleepv') { sleepTypes = lines; continue; }
       let v = k === 'weight' ? firstNum(lines[0]) : lines.reduce((a, l) => a + firstNum(l), 0);
       if (!(v > 0)) continue;
       if (k === 'steps') out.steps = Math.round(v);
@@ -1372,6 +1385,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       else if (k === 'fat') out.fat = Math.round(v);
       else if (k === 'weight') out.weight = Math.round(v * 10) / 10;
     }
+    if (sleepLines) { const sl = sleepHours(sleepLines, sleepTypes); if (sl > 0 && sl <= 24) out.sleep = Math.round(sl * 10) / 10; }
     return Object.keys(out).length ? out : null;
   }
   function applyHealth(text) {

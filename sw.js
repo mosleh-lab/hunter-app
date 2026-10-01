@@ -1,5 +1,5 @@
 // Offline support: app shell is cached on install; Google Fonts are cached on first use.
-const CACHE = 'hunter-v6';
+const CACHE = 'hunter-v7';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
