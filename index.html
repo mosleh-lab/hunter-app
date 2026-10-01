@@ -1337,7 +1337,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const t = String(text || '');
     const i = t.toUpperCase().indexOf('HUNTER'); if (i < 0) return null;
     const out = {};
-    for (const part of t.slice(i + 6).split(/[;\n|&]/)) {
+    for (const part of t.slice(i + 6).replace(/=\s*\n\s*/g, '=').split(/[;\n|&]/)) {
       const m = part.match(/^\s*([a-zA-Z]+)\s*[=:]\s*(.+)$/); if (!m) continue;
       const k = m[1].toLowerCase(); let v = num(m[2]);
       if (!(v > 0)) continue;
