@@ -348,7 +348,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <div class="rest-box" id="restBox"></div>
       <div class="paste-box" id="pasteBox" hidden>
         <span class="hint">ما قدرت أقرأ الحافظة. شغّل اختصار «الصياد» ثم الصق النتيجة هنا:</span>
-        <textarea id="pasteTa" placeholder="HUNTER;steps=8500;cal=1900;protein=140;sleep=7.5"></textarea>
+        <textarea id="pasteTa" placeholder="HUNTER;steps=8500;cal=1900;protein=140;carbs=180;fat=55;water=2.5;sleep=7.5"></textarea>
         <div class="sync-row"><button class="btn" id="pasteApply" type="button">تطبيق</button><button class="btn ghost" id="pasteCancel" type="button">إلغاء</button></div>
       </div>
       <div class="timer" id="timer">--:--:--</div>
@@ -444,6 +444,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <label class="field"><span>هدف الخطوات</span><span class="inwrap"><input id="s-steps" data-s="steps" inputmode="numeric"><em>خطوة</em></span></label>
         <label class="field"><span>سعرات اليوم</span><span class="inwrap"><input id="s-cal" data-s="cal" inputmode="numeric"><em>kcal</em></span></label>
         <label class="field"><span>هدف البروتين</span><span class="inwrap"><input id="s-protein" data-s="protein" inputmode="numeric"><em>g</em></span></label>
+        <label class="field"><span>هدف الكارب</span><span class="inwrap"><input id="s-carbs" data-s="carbs" inputmode="numeric"><em>g</em></span></label>
+        <label class="field"><span>هدف الدهون</span><span class="inwrap"><input id="s-fat" data-s="fat" inputmode="numeric"><em>g</em></span></label>
+        <label class="field"><span>هدف الماء</span><span class="inwrap"><input id="s-water" data-s="water" inputmode="decimal"><em>لتر</em></span></label>
         <label class="field"><span>ساعات النوم</span><span class="inwrap"><input id="s-sleep" data-s="sleep" inputmode="decimal"><em>ساعة</em></span></label>
         <label class="field"><span>صفحات القرآن يوميًا</span><span class="inwrap"><input id="s-quran" data-s="quran" inputmode="numeric"><em>صفحة</em></span></label>
         <label class="field"><span>تطوير الذات يوميًا</span><span class="inwrap"><input id="s-dev" data-s="dev" inputmode="numeric"><em>دقيقة</em></span></label>
@@ -463,13 +466,18 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <ol class="steps-list">
         <li>افتح تطبيق <b>الاختصارات</b> واضغط <b>+</b> وسمّه <b>الصياد</b>.</li>
         <li>أضف إجراء <b>البحث عن عينات الصحة</b> (Find Health Samples): النوع <b>الخطوات</b>، تاريخ البدء <b>اليوم</b>. بعده <b>حساب الإحصائيات</b> (Calculate Statistics) = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>steps</code>.</li>
-        <li>كرر نفس الثلاث خطوات للـ<b>الطاقة الغذائية</b> (Dietary Energy) باسم <code>cal</code>، و<b>البروتين</b> باسم <code>protein</code>.</li>
+        <li>كرر نفس الثلاث خطوات لكل واحد من هذول:
+          <b>الطاقة الغذائية</b> (Dietary Energy) باسم <code>cal</code>،
+          <b>البروتين</b> (Protein) باسم <code>protein</code>،
+          <b>الكربوهيدرات</b> (Carbohydrates) باسم <code>carbs</code>،
+          <b>إجمالي الدهون</b> (Total Fat) باسم <code>fat</code>،
+          <b>الماء</b> (Water) باسم <code>water</code>.</li>
         <li>للنوم: <b>البحث عن عينات الصحة</b> بنوع <b>تحليل النوم</b>، تاريخ البدء <b>آخر يوم واحد</b>، والقيمة <b>ليست «في السرير»</b> و<b>ليست «مستيقظ»</b>. بعده <b>الحصول على تفاصيل عينات الصحة</b> = <b>المدة</b>، بعده <b>حساب الإحصائيات</b> = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>sleep</code>.</li>
-        <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;sleep=sleep</code>. وتقدر تضيف الوزن (Body Mass) بنفس الطريقة باسم <code>weight</code> لكن بدل «المجموع» استخدم <b>آخر عينة</b>.</li>
+        <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;carbs=carbs;fat=fat;water=water;sleep=sleep</code>. وتقدر تضيف الوزن (Body Mass) بنفس الطريقة باسم <code>weight</code> لكن بدل «المجموع» استخدم <b>آخر عينة</b>.</li>
         <li>أضف <b>نسخ إلى الحافظة</b>. احفظ الاختصار.</li>
         <li>كل يوم: شغّل الاختصار (أو من ودجت الشاشة الرئيسية)، افتح التطبيق، اضغط <b>مزامنة من الصحة / الساعة</b>.</li>
       </ol>
-      <p class="q-desc">أي رقم ما تبيه احذفه من النص، والتطبيق يحدّث الموجود بس. أول مرة يطلب منك الآيفون السماح بالوصول للصحة، اضغط سماح.</p>
+      <p class="q-desc">الأكل والماء يوصلون للصحة إذا كنت تسجلهم في تطبيق مربوط فيها (مثل MyFitnessPal أو Lifesum أو تطبيقات الماء). أي رقم ما تبيه احذفه من النص، والتطبيق يحدّث الموجود بس. أول مرة يطلب منك الآيفون السماح بالوصول للصحة، اضغط سماح.</p>
     </div>
     <div class="sect">
       <h3>أيام الدوام</h3>
@@ -543,7 +551,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
@@ -564,6 +572,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     return { bmr: Math.round(bmr), tdee: Math.round(tdee), cal, protein, bmi: Math.round(bmi * 10) / 10 };
   }
   const splitMacros = (cal, protein) => { const fat = Math.round(cal * 0.25 / 9); return { fat, carbs: Math.max(0, Math.round((cal - protein * 4 - fat * 9) / 4)) }; };
+  const macroT = (s) => { const sp = splitMacros(s.cal, s.protein); return { carbs: !s.autoMacros && s.carbs > 0 ? s.carbs : sp.carbs, fat: !s.autoMacros && s.fat > 0 ? s.fat : sp.fat }; };
+  const macroIn = (v, t, bg) => v > 0 && t > 0 && (bg === 'cut' ? v <= t * 1.1 : v >= t * 0.85 && v <= t * 1.15);
+  const waterT = (s) => s.water > 0 ? s.water : s.weight > 0 ? Math.round(s.weight * 0.035 * 4) / 4 : 2.5;
   function applyAuto() {
     const s = S(); if (!s.autoMacros) return;
     const m = macros(s); if (!m) return;
@@ -581,6 +592,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       ];
     } else s.goals = o.goals.map((g) => ({ ...g }));
     delete s.save; delete s.invest;
+    if (!s.waterSince) s.waterSince = todayStr();
     return s;
   }
 
@@ -616,7 +628,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const cv = d.cal || 0, bg = s.body || 'cut';
     const calOk = cv > 0 && (bg === 'cut' ? cv <= s.cal : bg === 'bulk' ? cv >= s.cal * 0.95 && cv <= s.cal * 1.15 : Math.abs(cv - s.cal) <= s.cal * 0.1);
     const proOk = (d.protein || 0) >= s.protein;
-    q.push({ id: 'diet', req: true, done: !!d.clean && calOk && proOk, xp: { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0), STR: proOk ? 15 : 0 }, prog: ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk });
+    const mt = macroT(s), macOk = macroIn(d.carbs || 0, mt.carbs, bg) && macroIn(d.fat || 0, mt.fat, bg);
+    q.push({ id: 'diet', req: true, done: !!d.clean && calOk && proOk, xp: { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0) + (macOk ? 15 : 0), STR: proOk ? 15 : 0 }, prog: ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk, macOk });
+    const wa = d.water || 0, wg = waterT(s);
+    q.push({ id: 'water', req: date >= (s.waterSince || ''), done: wa >= wg, xp: { VIT: wa >= wg ? 20 : 0 }, prog: Math.min(1, wa / wg) });
     const sl = d.sleep || 0, slg = Math.max(1, s.sleep);
     q.push({ id: 'sleep', req: true, done: sl >= slg, xp: { VIT: sl >= slg ? 25 : 0 }, prog: Math.min(1, sl / slg) });
     if (isWorkday(date)) q.push({ id: 'work', req: true, done: !!d.work, xp: { WLT: d.work ? 30 : 0 }, prog: d.work ? 1 : 0 });
@@ -792,10 +807,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'tasbeeh': return ['التسبيح والأذكار', 'أذكار الصباح والمساء'];
       case 'steps': return [`${fmt(s.steps)} خطوة`, 'من تطبيق الصحة أو الساعة'];
       case 'diet': {
-        const bg = s.body || 'cut', sm = splitMacros(s.cal, s.protein);
+        const bg = s.body || 'cut', sm = macroT(s);
         const rule = bg === 'cut' ? `سعرات ≤ ${fmt(s.cal)}` : bg === 'bulk' ? `سعرات ${fmt(s.cal * 0.95)}–${fmt(s.cal * 1.15)}` : `سعرات ${fmt(s.cal * 0.9)}–${fmt(s.cal * 1.1)}`;
         return [`أكل نظيف + ${(BODY[bg] || BODY.cut).ar}`, `${rule} · بروتين ≥ ${fmt(s.protein)}g · كارب ~${fmt(sm.carbs)}g · دهون ~${fmt(sm.fat)}g`];
       }
+      case 'water': { const wg = waterT(s); return ['شرب الماء', `${wg} لتر على الأقل · ${Math.round(wg / 0.25)} كوب`]; }
       case 'sleep': return ['النوم', `${s.sleep} ساعات على الأقل`];
       case 'work': return ['الدوام', 'حضور يوم العمل'];
       case 'gym': return ['النادي', `هدف الأسبوع ${s.gym} مرات`];
@@ -814,6 +830,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'tasbeeh': return tog('tasbeeh', 'تم', d.tasbeeh);
       case 'steps': return numIn('steps', 'خطوات اليوم', 'خطوة', d.steps) + `<span class="hint" data-hint></span>`;
       case 'diet': return tog('clean', 'أكلي نظيف اليوم', d.clean) + numIn('cal', 'السعرات', 'kcal', d.cal) + numIn('protein', 'البروتين', 'g', d.protein) + numIn('carbs', 'كارب', 'g', d.carbs) + numIn('fat', 'دهون', 'g', d.fat) + `<span class="hint" data-hint></span>`;
+      case 'water': return `<button type="button" class="chip" data-act="water" data-d="0.25">+ كوب ٢٥٠مل</button><button type="button" class="chip" data-act="water" data-d="0.5">+ قارورة ٥٠٠مل</button><div class="stepper"><button type="button" data-act="water" data-d="-0.25" aria-label="إنقاص كوب">−</button><output id="waterOut">0 لتر</output></div>`;
       case 'sleep': return numIn('sleep', 'ساعات النوم', 'ساعة', d.sleep);
       case 'work': return tog('work', 'داومت', d.work);
       case 'gym': return tog('gym', 'تمرنت', d.gym) + `<span class="hint" data-hint></span>`;
@@ -862,7 +879,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         const bg = s.body || 'cut', lo = bg === 'bulk' ? s.cal * 0.95 : bg === 'maintain' ? s.cal * 0.9 : 0, hi = bg === 'bulk' ? s.cal * 1.15 : bg === 'maintain' ? s.cal * 1.1 : s.cal;
         const calTxt = cal === 0 ? 'سجّل سعراتك' : cal > hi ? `<span class="bad">زيادة ${fmt(cal - hi)} سعرة</span>` : cal < lo ? `<span class="bad">تحتاج ${fmt(lo - cal)} سعرة زيادة</span>` : `<span class="good">ضمن الهدف${bg === 'cut' ? ' · باقي ' + fmt(s.cal - cal) : ''}</span>`;
         const proTxt = pro >= s.protein ? '<span class="good">البروتين مكتمل</span>' : `باقي ${fmt(s.protein - pro)}g بروتين`;
-        hint.innerHTML = `${calTxt} · ${proTxt}`;
+        const mt = macroT(s), cb = d.carbs || 0, ft = d.fat || 0;
+        const mTxt = (v, t, n) => v === 0 ? `${n} 0/${fmt(t)}g` : macroIn(v, t, bg) ? `<span class="good">${n} ${fmt(v)}/${fmt(t)}g</span>` : `<span class="bad">${n} ${fmt(v)}/${fmt(t)}g</span>`;
+        const macTxt = macroIn(cb, mt.carbs, bg) && macroIn(ft, mt.fat, bg) ? ' · <span class="good">ماكروز مضبوطة +15</span>' : '';
+        hint.innerHTML = `${calTxt} · ${proTxt}<br>${mTxt(cb, mt.carbs, 'كارب')} · ${mTxt(ft, mt.fat, 'دهون')}${macTxt}`;
       }
       if (q.id === 'gym' && hint) {
         const ws = weekStart(viewDate); let n = 0;
@@ -871,6 +891,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       }
     }
     const qo = $('#quranOut'); if (qo) qo.textContent = `${d.quran || 0} صفحة`;
+    const wo = $('#waterOut'); if (wo) wo.textContent = `${d.water || 0} / ${waterT(s)} لتر`;
     for (const b of document.querySelectorAll('#quests [data-act="prayer"]')) b.setAttribute('aria-pressed', d.p && d.p[b.dataset.k] ? 'true' : 'false');
     for (const b of document.querySelectorAll('#quests [data-act="toggle"]')) b.setAttribute('aria-pressed', d[b.dataset.f] ? 'true' : 'false');
     for (const b of document.querySelectorAll('#quests [data-act="custom"]')) b.setAttribute('aria-pressed', d.c && d.c[b.dataset.id] ? 'true' : 'false');
@@ -948,6 +969,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const b = ev.target.closest('button[data-act]'); if (!b) return;
     const d = getDay(viewDate) || {};
     if (b.dataset.act === 'prayer') act(() => setDay({ p: { ...(d.p || {}), [b.dataset.k]: !(d.p && d.p[b.dataset.k]) } }));
+    else if (b.dataset.act === 'water') act(() => setDay({ water: Math.max(0, Math.round(((d.water || 0) + Number(b.dataset.d)) * 100) / 100) }));
     else if (b.dataset.act === 'quran') act(() => setDay({ quran: Math.max(0, (d.quran || 0) + Number(b.dataset.d)) }));
     else if (b.dataset.act === 'toggle') act(() => setDay({ [b.dataset.f]: !d[b.dataset.f] }));
     else if (b.dataset.act === 'custom') act(() => setDay({ c: { ...(d.c || {}), [b.dataset.id]: !(d.c && d.c[b.dataset.id]) } }));
@@ -1135,10 +1157,16 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <div class="hl"><b>${fmt(m.cal)}</b><span>سعرات ${BODY[s.body].ar}</span></div>
       <div class="hl"><b>${m.protein}g</b><span>بروتين</span></div>
       <div><b>${sm.carbs}g · ${sm.fat}g</b><span>كارب · دهون</span></div>
+      <div><b>${waterT({ ...s, water: 0 })} L</b><span>ماء يوميًا (35مل لكل كيلو)</span></div>
       <div><b>${m.bmi}</b><span>مؤشر الكتلة · ${bmiTxt}</span></div>`;
     $('#autoRow').innerHTML = s.autoMacros
-      ? '<span>✓ السعرات والبروتين تتحدث تلقائيًا مع وزنك وهدفك.</span>'
-      : `<span>السعرات والبروتين مكتوبة يدويًا.</span><button class="btn ghost" type="button" id="autoOn">رجّعها تلقائي</button>`;
+      ? '<span>✓ السعرات والبروتين والكارب والدهون تتحدث تلقائيًا مع وزنك وهدفك.</span>'
+      : `<span>السعرات والماكروز مكتوبة يدويًا.</span><button class="btn ghost" type="button" id="autoOn">رجّعها تلقائي</button>`;
+  }
+  function syncTargetFields() {
+    const s = S(), mt = macroT(s), vals = { cal: s.cal, protein: s.protein, carbs: mt.carbs, fat: mt.fat };
+    for (const f in vals) { const el = $('#s-' + f); if (el && document.activeElement !== el) el.value = vals[f] || ''; }
+    const w = $('#s-water'); w.placeholder = `تلقائي ${waterT({ ...s, water: 0 })}`; if (document.activeElement !== w) w.value = s.water || '';
   }
   function fillSettings() {
     const s = S();
@@ -1148,6 +1176,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       if (document.activeElement === i) continue;
       i.value = s[i.dataset.s] || '';
     }
+    syncTargetFields();
     $('#workDays').innerHTML = DAY_NAMES.map((n, i) => `<button type="button" class="chip" data-wd="${i}" aria-pressed="${s.workDays.includes(i)}">${n}</button>`).join('');
     const list = s.custom.filter((c) => !c.archived);
     $('#cqList').innerHTML = list.length ? list.map((c) =>
@@ -1157,15 +1186,17 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   document.querySelectorAll('[data-s]').forEach((i) => i.addEventListener('input', () => {
     const k = i.dataset.s;
     if (k === 'name') S().name = i.value.slice(0, 40);
+    else if (k === 'water' && !i.value.trim()) S().water = 0;
     else {
       const v = num(i.value); if (!v) return;
       if (k === 'weight') { if (!logWeight(v)) return; }
       else S()[k] = k === 'restMax' ? Math.min(31, Math.round(v)) : v;
-      if (k === 'cal' || k === 'protein') S().autoMacros = false;
+      if (k === 'carbs' || k === 'fat') { const mt = macroT(S()); S().carbs ||= mt.carbs; S().fat ||= mt.fat; S()[k] = v; }
+      if (k === 'cal' || k === 'protein' || k === 'carbs' || k === 'fat') S().autoMacros = false;
       if (k === 'age' || k === 'height') applyAuto();
     }
     touchStart(); save('settings');
-    for (const f of ['cal', 'protein']) { const el = $('#s-' + f); if (document.activeElement !== el) el.value = S()[f] || ''; }
+    syncTargetFields();
     fillCalc(); buildDaily(); render(false);
   }));
   const goalChanged = (ev) => {
@@ -1313,7 +1344,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       if (k === 'steps') out.steps = Math.round(v);
       else if (k === 'cal' || k === 'calories' || k === 'kcal') out.cal = Math.round(v);
       else if (k === 'protein') out.protein = Math.round(v);
-      else if (k === 'carbs') out.carbs = Math.round(v);
+      else if (k === 'carbs' || k === 'carbohydrates') out.carbs = Math.round(v);
+      else if (k === 'water') { if (v > 20) v = v / 1000; out.water = Math.round(v * 100) / 100; }
       else if (k === 'fat') out.fat = Math.round(v);
       else if (k === 'weight') out.weight = Math.round(v * 10) / 10;
       else if (k === 'sleep') {
@@ -1335,6 +1367,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (h.sleep) parts.push(`نوم ${h.sleep} ساعة`);
     if (h.cal) parts.push(`${fmt(h.cal)} سعرة`);
     if (h.protein) parts.push(`بروتين ${h.protein}g`);
+    if (h.carbs) parts.push(`كارب ${h.carbs}g`);
+    if (h.fat) parts.push(`دهون ${h.fat}g`);
+    if (h.water) parts.push(`ماء ${h.water} لتر`);
     if (h.weight) parts.push(`وزن ${h.weight} كجم`);
     toast('SYNC', 'تمت المزامنة: ' + parts.join(' · '));
     $('#pasteBox').hidden = true;
@@ -1382,6 +1417,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
 
   // ---------- boot ----------
+  applyAuto(); cacheLocal();
   fillSettings(); fillMonth(); buildDaily(); render(false);
   initStore();
 })();
