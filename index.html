@@ -1639,6 +1639,85 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   $('#pasteCancel').addEventListener('click', () => { $('#pasteBox').hidden = true; });
   $('#healthHelp').addEventListener('click', () => { showTab('settings'); setTimeout(() => $('#healthSetup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
 
+  // ---------- native iOS app (Capacitor): direct Apple Health + local adhan notifications ----------
+  const CAP = window.Capacitor;
+  const NATIVE = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
+  const nativeCall = (plugin, method, opts) => CAP.nativePromise(plugin, method, opts || {});
+  let healthBusy = false;
+  async function nativeHealthSync(quiet) {
+    if (!NATIVE || healthBusy) return false;
+    healthBusy = true;
+    try {
+      await nativeCall('AriseHealth', 'requestAuthorization');
+      const t = todayStr(), changed = [];
+      for (const date of [addDays(t, -1), t]) {
+        const r = await nativeCall('AriseHealth', 'readDay', { date });
+        const h = {};
+        if (r.steps > 0) h.steps = Math.round(r.steps);
+        if (r.sleep > 0 && r.sleep <= 24) h.sleep = Math.round(r.sleep * 10) / 10;
+        if (r.water > 0) h.water = Math.round(r.water * 100) / 100;
+        if (!((getDay(date) || {}).food || []).length) {
+          if (r.cal > 0) h.cal = Math.round(r.cal);
+          if (r.protein > 0) h.protein = Math.round(r.protein);
+          if (r.carbs > 0) h.carbs = Math.round(r.carbs);
+          if (r.fat > 0) h.fat = Math.round(r.fat);
+        }
+        const prev = getDay(date) || {};
+        if (Object.keys(h).some((k) => prev[k] !== h[k])) {
+          if (date === viewDate) act(() => setDay(h)); else setDayAt(date, h);
+          if (date === t) changed.push(h);
+        }
+        if (r.weight > 20) {
+          const w = Math.round(r.weight * 10) / 10;
+          if (date === t) { if (S().weight !== w || prev.weight !== w) { logWeight(w); fillSettings(); } }
+          else if (!prev.weight) setDayAt(date, { weight: w });
+        }
+      }
+      buildDaily(); render(false);
+      const h = changed[0];
+      if (h && !quiet) {
+        const parts = [];
+        if (h.steps) parts.push(`${fmt(h.steps)} خطوة`);
+        if (h.sleep) parts.push(`نوم ${h.sleep} ساعة`);
+        if (h.cal) parts.push(`${fmt(h.cal)} سعرة`);
+        if (h.water) parts.push(`ماء ${h.water} لتر`);
+        toast('SYNC', 'Apple Health: ' + (parts.join(' · ') || 'محدّث'));
+      } else if (!quiet) toast('SYNC', 'Apple Health: كل شيء محدّث');
+      return true;
+    } catch (e) {
+      if (!quiet) toast('خطأ', 'ما قدرت أقرأ Apple Health: ' + ((e && e.message) || e) + ' — افتح الإعدادات ← الصحة ← الوصول إلى البيانات ← ARISE وفعّل كل شيء.', 'bad');
+      return false;
+    } finally { healthBusy = false; }
+  }
+  async function scheduleNativeAdhan() {
+    if (!NATIVE) return;
+    try {
+      const ids = Array.from({ length: 64 }, (_, i) => ({ id: 1000 + i }));
+      await nativeCall('LocalNotifications', 'cancel', { notifications: ids });
+      if (S().muslim === false || !S().adhan || !prayerLoc()) return;
+      const perm = await nativeCall('LocalNotifications', 'requestPermissions');
+      if (perm && perm.display && perm.display !== 'granted') return;
+      const now = new Date(), list = [];
+      for (let i = 0; i < 13 && list.length < 60; i++) {
+        const tt = prayerTimes(addDays(todayStr(), i)); if (!tt) continue;
+        for (const k of PRAYER_KEYS) {
+          const at = tt[k];
+          if (!at || at <= now || list.length >= 60) continue;
+          list.push({ id: 1000 + list.length, title: 'ARISE', body: `حان الآن وقت صلاة ${PRAYER_AR[k]}`, schedule: { at: at.toISOString(), allowWhileIdle: true } });
+        }
+      }
+      if (list.length) await nativeCall('LocalNotifications', 'schedule', { notifications: list });
+    } catch {}
+  }
+  if (NATIVE) {
+    document.documentElement.classList.add('native');
+    $('#healthBtn').textContent = 'مزامنة Apple Health';
+    $('#healthBtn').addEventListener('click', (e) => { e.stopImmediatePropagation(); nativeHealthSync(false); }, true);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') { nativeHealthSync(true); scheduleAdhan(); }
+    });
+  }
+
   // ---------- shared bits for the new sections ----------
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const r1 = (v) => Math.round(v * 10) / 10;
@@ -1732,6 +1811,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   let adhanTimer = null;
   function scheduleAdhan() {
     clearTimeout(adhanTimer);
+    scheduleNativeAdhan();
     if (S().muslim === false) return;
     const np = nextPrayer(); if (!np) return;
     const ms = np.at.getTime() - Date.now();
@@ -2905,6 +2985,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   runCheckin();
   if (!S().onboarded) openOnboard();
   initStore();
+  if (NATIVE) setTimeout(() => nativeHealthSync(true), 800);
 })();
 </script>
 </body>

@@ -1,0 +1,64 @@
+name: iOS build
+
+# Builds an unsigned ARISE.ipa on a free macOS runner.
+# Sideloadly / SideStore re-sign it with your own Apple ID when installing.
+on:
+  push:
+    branches: [main]
+    paths: ['index.html', 'js/**', 'data/**', 'vendor/**', 'icons/**', 'ios/**', 'package*.json', 'capacitor.config.json', 'scripts/**', '.github/workflows/ios.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Copy web app into the iOS project
+        run: npm run ios:sync
+
+      - name: Build (unsigned)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            | tail -n 80
+          test -d build/Build/Products/Release-iphoneos/App.app
+
+      - name: Package IPA
+        run: |
+          APP=build/Build/Products/Release-iphoneos/App.app
+          # Ad-hoc signature that carries the HealthKit entitlement; the sideloading tool replaces it with yours.
+          codesign --force --sign - --entitlements ios/App/App/App.entitlements "$APP"
+          mkdir -p Payload && cp -R "$APP" Payload/
+          zip -qry ARISE.ipa Payload
+          ls -lh ARISE.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ARISE-ipa
+          path: ARISE.ipa
+
+      - name: Publish to the "ios-latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete ios-latest --yes --cleanup-tag || true
+          gh release create ios-latest ARISE.ipa --title "ARISE iOS (latest build)" \
+            --notes "Unsigned build of $(git rev-parse --short HEAD). Install with Sideloadly or SideStore." --prerelease

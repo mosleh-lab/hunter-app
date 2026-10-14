@@ -1,0 +1,7 @@
+{
+  "appId": "com.moslehlab.arise",
+  "appName": "ARISE",
+  "webDir": "www",
+  "ios": { "contentInset": "never", "backgroundColor": "#050913" },
+  "plugins": { "LocalNotifications": { "iconColor": "#57b8ff" } }
+}
