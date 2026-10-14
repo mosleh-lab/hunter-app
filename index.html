@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050913">
-<meta name="description" content="نظام الصياد: حوّل يومك إلى مهام وخبرة ومستويات">
+<meta name="description" content="ARISE · انهض: حوّل يومك إلى مهام وخبرة ومستويات">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="الصياد">
+<meta name="apple-mobile-web-app-title" content="ARISE">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<title>نظام الصياد</title>
+<title>ARISE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
@@ -355,6 +355,27 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 .pt-table b { display: block; font-family: var(--f-num); font-size: 15px; color: var(--fg); font-weight: 600; }
 .pt-table .now { border-color: var(--line); background: rgba(87,184,255,0.1); }
 @media (max-width: 520px) { .item .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rt-row { grid-template-columns: minmax(0, 1fr) 60px 80px 28px; } }
+/* Onboarding & coach */
+.onboard { position: fixed; inset: 0; z-index: 50; background: radial-gradient(900px 500px at 50% -120px, rgba(60,130,255,0.25), transparent 70%), var(--bg); overflow-y: auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; align-items: flex-start; }
+.ob-box { width: 100%; max-width: 560px; display: grid; gap: 14px; margin-block: auto; }
+.ob-progress { height: 4px; background: rgba(87,184,255,0.12); border-radius: 2px; overflow: hidden; }
+.ob-progress i { display: block; height: 100%; width: 0; background: var(--glow); box-shadow: 0 0 10px var(--glow); transition: width .3s ease; }
+.ob-hero { text-align: center; display: grid; gap: 6px; }
+.ob-logo { font-family: var(--f-num); font-weight: 700; font-size: clamp(44px, 14vw, 64px); letter-spacing: 0.25em; direction: ltr; padding-left: 0.25em; color: #fff; text-shadow: 0 0 24px var(--glow), 0 0 48px rgba(87,184,255,0.5); }
+.ob-sub { font-family: var(--f-disp); font-size: 24px; color: var(--glow-2); }
+.ob-title { font-family: var(--f-disp); font-size: 22px; font-weight: 600; margin: 0; text-align: center; }
+.opt-list { display: grid; gap: 8px; }
+.opt { text-align: start; background: rgba(0,0,0,0.2); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 11px 12px; color: var(--fg); font-weight: 600; }
+.opt small { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.opt[aria-pressed="true"] { border-color: var(--glow); background: rgba(87,184,255,0.12); box-shadow: 0 0 12px rgba(87,184,255,0.22); }
+.ob-nav { display: flex; gap: 10px; } .ob-nav .btn { flex: 1; min-height: 44px; }
+.ob-err { color: var(--bad); font-size: 13px; text-align: center; min-height: 1.2em; }
+.coach { border: 1px solid var(--line); border-radius: var(--r); background: rgba(87,184,255,0.06); padding: 12px; display: grid; gap: 8px; margin-top: 12px; }
+.coach-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.coach-head b { font-family: var(--f-disp); font-size: 17px; font-weight: 600; color: var(--glow-2); }
+.stats2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.stats2 div { font-size: 12px; color: var(--muted); }
+.stats2 b { display: block; font-family: var(--f-num); font-size: 17px; color: var(--fg); font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 @media (max-width: 520px) {
@@ -372,7 +393,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 <body>
 <div class="app" dir="rtl" lang="ar">
   <header class="sysbar">
-    <span class="brand">[ SYSTEM ]</span>
+    <span class="brand">[ ARISE ]</span>
     <span class="dates"><span id="gDate"></span><span id="hDate"></span></span>
     <span class="sync" id="sync">جارٍ الاتصال…</span>
   </header>
@@ -447,6 +468,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   <section class="win" id="tab-food" role="tabpanel" hidden>
     <div class="win-title"><span>سجل الأكل</span></div>
     <div class="daynav"><button id="foodPrev" aria-label="اليوم السابق">›</button><span class="lbl" id="foodDay">اليوم</span><button id="foodNext" aria-label="اليوم التالي">‹</button></div>
+    <div id="coachCard"></div>
     <div class="food-summary" id="foodSummary"></div>
     <div class="backup" style="justify-content:center"><button class="btn" type="button" id="quickFood">+ سجّل أكل</button><button class="btn ghost" type="button" id="copyYesterday">انسخ أكل اليوم اللي قبله</button></div>
     <div id="meals"></div>
@@ -478,7 +500,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <div class="pips" id="gymPips"></div>
         <div class="wk-days" id="wkDays"></div>
       </div>
-      <div>
+      <div id="financeBlock">
         <h3 class="sub" id="monthTitle">هذا الشهر</h3>
         <div id="mGoals"></div>
         <div class="mrow">
@@ -537,6 +559,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 
   <section class="win" id="tab-settings" role="tabpanel" hidden>
     <div class="win-title"><span>الإعدادات</span></div>
+    <div class="sect">
+      <h3>ملفك وهدفك</h3>
+      <p class="q-desc" id="profileSum"></p>
+      <div class="backup"><button class="btn" type="button" data-onboard>عدّل ملفك وهدفك وخطتك</button></div>
+    </div>
     <div class="sect">
       <h3>بيانات اللاعب</h3>
       <div class="set-grid">
@@ -641,6 +668,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   </nav>
   <div class="rest-bar" id="restBar" hidden><div><span>راحة</span><b id="restTime">1:30</b><button class="btn ghost" type="button" id="restPlus">+15</button><button class="btn" type="button" id="restSkip">تخطي</button></div></div>
   <div class="sheet-back" id="sheet" hidden><div class="win sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sheet-head"><b id="sheetTitle"></b><button class="x" type="button" id="sheetClose" aria-label="إغلاق">×</button></div><div id="sheetBody" style="display:grid;gap:12px"></div></div></div>
+  <div class="onboard" id="onboard" hidden><div class="win ob-box" role="dialog" aria-modal="true" aria-label="إعداد ملفك">
+    <div class="ob-progress"><i id="obBar"></i></div>
+    <div id="obBody" style="display:grid;gap:14px"></div>
+    <div class="ob-err" id="obErr" aria-live="polite"></div>
+    <div class="ob-nav"><button class="btn ghost" type="button" id="obBack">رجوع</button><button class="btn" type="button" id="obNext">التالي</button></div>
+  </div></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
   <div class="levelup" id="levelup" hidden>
     <div class="win box">
@@ -688,7 +721,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, city: null, loc: null, pMethod: 'uq', asr: 'shafi', adhan: false, myFoods: [], myEx: [], routines: [], schedule: {}, restSec: 90, storeItems: null, purchases: [], steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, onboarded: false, muslim: true, goalW: 0, rateP: 0.5, macroMode: 'balanced', proKg: 2, fatPct: 25, mods: { work: true, finance: true }, coach: null, city: null, loc: null, pMethod: 'uq', asr: 'shafi', adhan: false, myFoods: [], myEx: [], routines: [], schedule: {}, restSec: 90, storeItems: null, purchases: [], steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
@@ -702,18 +735,30 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const lib = (window.HUNTER_EXERCISES || []).concat(state.settings.myEx || []);
     return w.ex.reduce((a, x) => { const e = lib.find((y) => y.id === x.id); return a + (e && e.m === 'cardio' ? x.sets.reduce((b, st) => b + (st.ok ? +st.r || 0 : 0), 0) : 0); }, 0);
   }
+  const FAT_PCT = { balanced: 25, lowcarb: 40, lowfat: 20 };
+  function macroSplit(cal, protein, s) {
+    const mode = (s && s.macroMode) || 'balanced';
+    if (mode === 'keto') { const carbs = 30; return { carbs, fat: Math.max(0, Math.round((cal - protein * 4 - carbs * 4) / 9)) }; }
+    const pct = mode === 'custom' ? (s.fatPct || 25) : (FAT_PCT[mode] || 25);
+    const fat = Math.round(cal * pct / 100 / 9);
+    return { fat, carbs: Math.max(0, Math.round((cal - protein * 4 - fat * 9) / 4)) };
+  }
   function macros(s) {
     if (!(s.age > 0 && s.height > 0 && s.weight > 0)) return null;
     const bmr = 10 * s.weight + 6.25 * s.height - 5 * s.age + (s.sex === 'f' ? -161 : 5);
-    const tdee = bmr * (ACT[s.act] || ACT.light)[0];
-    const b = BODY[s.body] || BODY.cut;
-    const cal = Math.max(s.sex === 'f' ? 1200 : 1500, Math.round(tdee * b.calF / 10) * 10);
+    const formulaTdee = bmr * (ACT[s.act] || ACT.light)[0];
+    const tdee = s.coach && s.coach.tdee > 0 ? s.coach.tdee : formulaTdee;
+    const kgWeek = s.body === 'maintain' ? 0 : s.weight * (s.rateP || 0.5) / 100;
+    const delta = kgWeek * 7700 / 7 * (s.body === 'cut' ? -1 : s.body === 'bulk' ? 1 : 0);
+    const floor = s.sex === 'f' ? 1200 : 1500;
+    const raw = Math.round((tdee + delta) / 10) * 10, cal = Math.max(floor, raw);
     const hM = s.height / 100, bmi = s.weight / (hM * hM);
     const lean = Math.min(s.weight, 25 * hM * hM);
-    const protein = Math.round(lean * b.pro / 5) * 5;
-    return { bmr: Math.round(bmr), tdee: Math.round(tdee), cal, protein, bmi: Math.round(bmi * 10) / 10 };
+    const protein = Math.round(lean * (s.proKg || 2) / 5) * 5;
+    const sp = macroSplit(cal, protein, s);
+    return { bmr: Math.round(bmr), tdee: Math.round(tdee), formulaTdee: Math.round(formulaTdee), cal, protein, carbs: sp.carbs, fat: sp.fat, bmi: Math.round(bmi * 10) / 10, kgWeek, floored: raw < floor };
   }
-  const splitMacros = (cal, protein) => { const fat = Math.round(cal * 0.25 / 9); return { fat, carbs: Math.max(0, Math.round((cal - protein * 4 - fat * 9) / 4)) }; };
+  const splitMacros = (cal, protein) => macroSplit(cal, protein, S());
   const macroT = (s) => { const sp = splitMacros(s.cal, s.protein); return { carbs: !s.autoMacros && s.carbs > 0 ? s.carbs : sp.carbs, fat: !s.autoMacros && s.fat > 0 ? s.fat : sp.fat }; };
   const macroIn = (v, t, bg) => v > 0 && t > 0 && (bg === 'cut' ? v <= t * 1.1 : v >= t * 0.85 && v <= t * 1.15);
   const waterT = (s) => s.water > 0 ? s.water : s.weight > 0 ? Math.round(s.weight * 0.035 * 4) / 4 : 2.5;
@@ -734,7 +779,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       ];
     } else s.goals = o.goals.map((g) => ({ ...g }));
     delete s.save; delete s.invest;
-    for (const k of ['myFoods', 'myEx', 'routines', 'schedule', 'purchases', 'storeItems', 'loc']) s[k] = o[k] != null ? JSON.parse(JSON.stringify(o[k])) : JSON.parse(JSON.stringify(DEFAULTS[k]));
+    for (const k of ['myFoods', 'myEx', 'routines', 'schedule', 'purchases', 'storeItems', 'loc', 'mods', 'coach']) s[k] = o[k] != null ? JSON.parse(JSON.stringify(o[k])) : JSON.parse(JSON.stringify(DEFAULTS[k]));
     if (!s.waterSince) s.waterSince = todayStr();
     return s;
   }
@@ -762,10 +807,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const s = S(), d = getDay(date) || {};
     const q = [];
     const p = d.p || {}, pc = PRAYERS.filter(([k]) => p[k]).length;
-    q.push({ id: 'prayer', req: true, done: pc === 5, xp: { FTH: pc * 10 + (pc === 5 ? 20 : 0) }, prog: pc / 5 });
+    const muslim = s.muslim !== false;
+    if (muslim) q.push({ id: 'prayer', req: true, done: pc === 5, xp: { FTH: pc * 10 + (pc === 5 ? 20 : 0) }, prog: pc / 5 });
     const qr = d.quran || 0, qg = Math.max(1, s.quran);
-    q.push({ id: 'quran', req: true, done: qr >= qg, xp: { FTH: qr > 0 ? 20 + 5 * Math.min(qr - 1, 10) : 0 }, prog: Math.min(1, qr / qg) });
-    q.push({ id: 'tasbeeh', req: true, done: !!d.tasbeeh, xp: { FTH: d.tasbeeh ? 15 : 0 }, prog: d.tasbeeh ? 1 : 0 });
+    if (muslim) q.push({ id: 'quran', req: true, done: qr >= qg, xp: { FTH: qr > 0 ? 20 + 5 * Math.min(qr - 1, 10) : 0 }, prog: Math.min(1, qr / qg) });
+    if (muslim) q.push({ id: 'tasbeeh', req: true, done: !!d.tasbeeh, xp: { FTH: d.tasbeeh ? 15 : 0 }, prog: d.tasbeeh ? 1 : 0 });
+    else q.push({ id: 'mind', req: false, done: !!d.mind, xp: { FTH: d.mind ? 20 : 0 }, prog: d.mind ? 1 : 0 });
     const st = d.steps || 0, sg = Math.max(1, s.steps);
     q.push({ id: 'steps', req: true, done: st >= sg, xp: { AGI: Math.floor(40 * Math.min(1, st / sg)) + (st >= sg * 1.5 ? 10 : 0) }, prog: Math.min(1, st / sg) });
     const cv = d.cal || 0, bg = s.body || 'cut';
@@ -778,7 +825,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     q.push({ id: 'water', req: date >= (s.waterSince || ''), done: wa >= wg, xp: { VIT: wa >= wg ? 20 : 0 }, prog: Math.min(1, wa / wg) });
     const sl = d.sleep || 0, slg = Math.max(1, s.sleep);
     q.push({ id: 'sleep', req: true, done: sl >= slg, xp: { VIT: sl >= slg ? 25 : 0 }, prog: Math.min(1, sl / slg) });
-    if (isWorkday(date)) q.push({ id: 'work', req: true, done: !!d.work, xp: { WLT: d.work ? 30 : 0 }, prog: d.work ? 1 : 0 });
+    if ((!s.mods || s.mods.work !== false) && isWorkday(date)) q.push({ id: 'work', req: true, done: !!d.work, xp: { WLT: d.work ? 30 : 0 }, prog: d.work ? 1 : 0 });
     const prs = Math.min(3, d.prs || 0), cm = cardioMinutes(d.workout);
     q.push({ id: 'gym', req: false, done: !!d.gym, xp: { STR: d.gym ? 50 + prs * 15 : 0, AGI: d.gym && cm >= 20 ? 20 : 0 }, prog: d.gym ? 1 : 0 });
     const dv = d.dev || 0, dg = Math.max(1, s.dev);
@@ -929,7 +976,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#xpTotal').textContent = `TOTAL ${fmt(total)}`;
     $('#xpBar').style.width = (100 * lv.into / lv.need).toFixed(1) + '%';
     $('#stats').innerHTML = Object.keys(STATS).map((k) =>
-      `<div class="stat"><span class="n"><b>${k}</b>${STATS[k]}</span><span class="val">${10 + Math.floor(stats[k] / 100)}</span></div>`).join('');
+      `<div class="stat"><span class="n"><b>${k}</b>${k === 'FTH' && S().muslim === false ? 'التوازن' : STATS[k]}</span><span class="val">${10 + Math.floor(stats[k] / 100)}</span></div>`).join('');
     $('#mStreak').textContent = C.streak;
     $('#mBest').textContent = C.best;
     $('#mDays').textContent = C.completeDays;
@@ -953,6 +1000,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'prayer': return ['الصلوات الخمس', 'في وقتها، كل صلاة 10 XP'];
       case 'quran': return ['ورد القرآن', `${s.quran} صفحة على الأقل`];
       case 'tasbeeh': return ['التسبيح والأذكار', 'أذكار الصباح والمساء'];
+      case 'mind': return ['صفاء الذهن', 'تأمل أو تدوين أو قراءة 10 دقائق'];
       case 'steps': return [`${fmt(s.steps)} خطوة`, 'من تطبيق الصحة أو الساعة'];
       case 'diet': {
         const bg = s.body || 'cut', sm = macroT(s);
@@ -976,6 +1024,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'prayer': { const tt = prayerTimes(viewDate); return PRAYERS.map(([k, n]) => `<button type="button" class="chip" data-act="prayer" data-k="${k}" aria-pressed="${d.p && d.p[k] ? 'true' : 'false'}">${n}${tt ? `<small>${fmtPT(tt[k])}</small>` : ''}</button>`).join(''); }
       case 'quran': return `<div class="stepper"><button type="button" data-act="quran" data-d="1" aria-label="زيادة">+</button><output id="quranOut">${d.quran || 0} صفحة</output><button type="button" data-act="quran" data-d="-1" aria-label="إنقاص">−</button></div>`;
       case 'tasbeeh': return tog('tasbeeh', 'تم', d.tasbeeh);
+      case 'mind': return tog('mind', 'تم', d.mind);
       case 'steps': return numIn('steps', 'خطوات اليوم', 'خطوة', d.steps) + `<span class="hint" data-hint></span>`;
       case 'diet': return tog('clean', 'أكلي نظيف اليوم', d.clean) + numIn('cal', 'السعرات', 'kcal', d.cal) + numIn('protein', 'البروتين', 'g', d.protein) + numIn('carbs', 'كارب', 'g', d.carbs) + numIn('fat', 'دهون', 'g', d.fat) + `<span class="hint" data-hint></span><button class="link-btn" type="button" data-goto-tab="food">سجّل أكلك بالتفصيل من صفحة الأكل ←</button>`;
       case 'water': return `<button type="button" class="chip" data-act="water" data-d="0.25">+ كوب ٢٥٠مل</button><button type="button" class="chip" data-act="water" data-d="0.5">+ قارورة ٥٠٠مل</button><div class="stepper"><button type="button" data-act="water" data-d="-0.25" aria-label="إنقاص كوب">−</button><output id="waterOut">0 لتر</output></div>`;
@@ -1000,7 +1049,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <div class="q-body">${controls(q, d)}</div>
         <div class="q-bar"><i data-bar></i></div>
       </article>`;
-    }).join('') + (isWorkday(viewDate) ? '' : `<p class="empty" style="text-align:center">${DAY_NAMES[parseDs(viewDate).getDay()]}: يوم إجازة، مهمة الدوام غير مطلوبة.</p>`);
+    }).join('') + ((!S().mods || S().mods.work !== false) && !isWorkday(viewDate) ? `<p class="empty" style="text-align:center">${DAY_NAMES[parseDs(viewDate).getDay()]}: يوم إجازة، مهمة الدوام غير مطلوبة.</p>` : '');
     const t = todayStr();
     $('#dayLbl').textContent = viewDate === t ? 'اليوم' : viewDate === addDays(t, -1) ? 'أمس · ' + gFmt.format(parseDs(viewDate)) : gFmt.format(parseDs(viewDate));
     $('#prevDay').disabled = viewDate <= addDays(t, -30);
@@ -1068,7 +1117,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       return;
     }
     if (!restOpen) { box.innerHTML = `<button class="link-btn" type="button" data-rest-open>تعبان اليوم؟</button>`; return; }
-    const types = ['sick', 'tired', 'travel'].concat(s.sex === 'f' ? ['excuse'] : []);
+    const types = ['sick', 'tired', 'travel'].concat(s.sex === 'f' && s.muslim !== false ? ['excuse'] : []);
     box.innerHTML = `<span class="hint" style="text-align:center">باقي لك <b>${left}</b> من ${s.restMax} أيام تعافي هذا الشهر${s.sex === 'f' ? ' (العذر الشرعي ما يُحسب منها)' : ''}</span>
       <div class="chips">${types.map((t) => `<button class="chip" type="button" data-rest="${t}" ${t !== 'excuse' && left <= 0 ? 'disabled' : ''}>${REST[t]}</button>`).join('')}<button class="chip" type="button" data-rest-close>إلغاء</button></div>`;
   }
@@ -1178,6 +1227,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#gymPips').innerHTML = Array.from({ length: Math.max(1, s.gym) }, (_, i) => `<span class="pip${i < gym ? ' on' : ''}"></span>`).join('');
     $('#gymTxt').textContent = gym >= s.gym ? `أكملت ${gym} من ${s.gym}. مكافأة الأسبوع +100 XP قوة.` : `${gym} من ${s.gym} · باقي ${s.gym - gym}. المكافأة +100 XP قوة.`;
     const mk = monthOf(t), mo = getMonth(mk)?.monthly || {};
+    $('#financeBlock').hidden = !!S().mods && S().mods.finance === false;
     $('#monthTitle').textContent = 'مهام شهر ' + mFmt.format(parseDs(t));
     refreshMonthGoals();
     const extra = mo.extra || [];
@@ -1303,8 +1353,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const bmiTxt = m.bmi < 18.5 ? 'نحافة' : m.bmi < 25 ? 'طبيعي' : m.bmi < 30 ? 'وزن زائد' : 'سمنة';
     $('#calcBox').innerHTML = `
       <div><b>${fmt(m.bmr)}</b><span>الحرق وأنت مرتاح (BMR)</span></div>
-      <div><b>${fmt(m.tdee)}</b><span>حرقك اليومي (TDEE)</span></div>
-      <div class="hl"><b>${fmt(m.cal)}</b><span>سعرات ${BODY[s.body].ar}</span></div>
+      <div><b>${fmt(m.tdee)}</b><span>${s.coach && s.coach.tdee ? 'حرقك الحقيقي (الكوتش)' : 'حرقك اليومي (معادلة)'}</span></div>
+      <div class="hl"><b>${fmt(m.cal)}</b><span>سعرات ${BODY[s.body].ar}${s.body !== 'maintain' ? ` (${r1(m.kgWeek)} كجم/أسبوع)` : ''}</span></div>
       <div class="hl"><b>${m.protein}g</b><span>بروتين</span></div>
       <div><b>${sm.carbs}g · ${sm.fat}g</b><span>كارب · دهون</span></div>
       <div><b>${waterT({ ...s, water: 0 })} L</b><span>ماء يوميًا (35مل لكل كيلو)</span></div>
@@ -1320,6 +1370,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   function fillSettings() {
     const s = S();
+    const pm = macros(s);
+    $('#profileSum').textContent = pm ? `${s.name || 'بدون اسم'} · ${s.age} سنة · ${s.height} سم · ${s.weight} كجم · ${s.body === 'cut' ? `تنشيف ${r1(pm.kgWeek)} كجم/أسبوع` : s.body === 'bulk' ? `تضخيم ${r1(pm.kgWeek)} كجم/أسبوع` : 'ثبات'}${s.goalW ? ` لين ${s.goalW} كجم` : ''} · ${s.muslim === false ? 'غير مسلم' : 'مسلم'}` : 'ما كمّلت ملفك.';
     fillGoals(); fillCalc();
     $('#s-sex').value = s.sex || 'm'; $('#s-act').value = s.act || 'light';
     for (const i of document.querySelectorAll('[data-s]')) {
@@ -1486,7 +1538,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const now = new Date(), t = ds(now);
     if (t !== lastToday) {
       if (viewDate === lastToday) viewDate = t;
-      lastToday = t; buildDaily(); fillMonth(); render(false);
+      lastToday = t; buildDaily(); fillMonth(); render(false); runCheckin();
     }
     $('#gDate').textContent = gFmt.format(now);
     renderNextPrayer();
@@ -1671,6 +1723,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   function renderNextPrayer() {
     const el = $('#nextPrayer'); if (!el) return;
+    el.hidden = S().muslim === false; if (el.hidden) return;
     const np = nextPrayer();
     if (!np) { el.innerHTML = '<button class="link-btn" type="button" data-goto="prayer">حدد مدينتك عشان تطلع لك أوقات الصلاة</button>'; return; }
     const sec = Math.max(0, Math.floor((np.at - Date.now()) / 1000));
@@ -1679,6 +1732,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   let adhanTimer = null;
   function scheduleAdhan() {
     clearTimeout(adhanTimer);
+    if (S().muslim === false) return;
     const np = nextPrayer(); if (!np) return;
     const ms = np.at.getTime() - Date.now();
     if (ms > 2147483000) return;
@@ -1703,8 +1757,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     try {
       if ('Notification' in window && Notification.permission === 'granted') {
         const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration() : null;
-        if (reg) reg.showNotification('نظام الصياد', { body: msg, tag: 'adhan-' + k, icon: 'icons/icon-192.png' });
-        else new Notification('نظام الصياد', { body: msg });
+        if (reg) reg.showNotification('ARISE', { body: msg, tag: 'adhan-' + k, icon: 'icons/icon-192.png' });
+        else new Notification('ARISE', { body: msg });
       }
     } catch {}
   }
@@ -1726,6 +1780,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   function fillPrayerSettings() {
     const s = S(), loc = prayerLoc();
+    $('#prayerSect').hidden = s.muslim === false;
     const opts = ['<option value="">اختر مدينتك</option>'].concat(CITIES.map((c) => `<option value="${c.id}">${esc(c.n)}</option>`));
     if (s.loc) opts.splice(1, 0, '<option value="__geo">موقعي الحالي</option>');
     $('#s-city').innerHTML = opts.join('');
@@ -1812,6 +1867,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     return out;
   }
   function renderFood() {
+    renderCoach();
     const d = getDay(viewDate) || {}, s = S(), list = d.food || [], t = foodTotals(list);
     const mt = macroT(s), wg = waterT(s), wa = d.water || 0;
     $('#foodDay').textContent = dayLabel(viewDate);
@@ -2294,13 +2350,234 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const it = storeItems()[+row.dataset.si]; if (it) { it.fx = ev.target.value; save('settings'); }
   });
 
+  // ---------- adaptive coach: learns the real daily burn from intake and weight trend ----------
+  const daysBetween = (a, b) => Math.round((parseDs(b) - parseDs(a)) / 86400e3);
+  // Weight trend: fill gaps by straight lines between weigh-ins, then smooth (EMA 0.1) so water swings don't move it
+  function weightTrend() {
+    const pts = weightSeries(); if (!pts.length) return null;
+    const out = {}, end = todayStr();
+    let i = 0, t = pts[0][1];
+    for (let d = pts[0][0]; d <= end; d = addDays(d, 1)) {
+      while (i < pts.length - 1 && pts[i + 1][0] <= d) i++;
+      let w = pts[i][1];
+      if (i < pts.length - 1 && pts[i][0] < d) { const a = pts[i], b = pts[i + 1], f = daysBetween(a[0], d) / daysBetween(a[0], b[0]); w = a[1] + (b[1] - a[1]) * f; }
+      t += 0.1 * (w - t); out[d] = t;
+    }
+    return out;
+  }
+  const COACH_DAYS = 14;
+  // Daily weights between weigh-ins, filled by straight lines (no smoothing lag)
+  function dailyWeight(d, pts) {
+    if (!pts.length || d < pts[0][0]) return null;
+    let i = 0; while (i < pts.length - 1 && pts[i + 1][0] <= d) i++;
+    const a = pts[i], b = pts[i + 1];
+    if (!b || a[0] === d) return a[1];
+    return a[1] + (b[1] - a[1]) * daysBetween(a[0], d) / daysBetween(a[0], b[0]);
+  }
+  function coachEstimate() {
+    const end = addDays(todayStr(), -1), start = addDays(end, -20);
+    let logged = 0, sum = 0, weighs = 0, first = null, recent = 0;
+    for (let d = start; d <= end; d = addDays(d, 1)) {
+      const r = getDay(d) || {};
+      if (r.cal > 0) { logged++; sum += r.cal; if (!first) first = d; if (d > addDays(end, -7)) recent++; }
+      if (r.weight > 0) weighs++;
+    }
+    const res = { ok: false, logged, weighs, recent };
+    const tr = weightTrend(), pts = weightSeries();
+    if (!tr || !first) return res;
+    const span = daysBetween(first, end);
+    if (span < COACH_DAYS - 1 || logged < Math.ceil((span + 1) * 0.7) || weighs < 4) return res;
+    // least-squares slope of daily weight over the window: robust to water noise and has no lag
+    const xs = [], ys = [];
+    for (let d = first, i = 0; d <= end; d = addDays(d, 1), i++) { const w = dailyWeight(d, pts); if (w != null) { xs.push(i); ys.push(w); } }
+    if (xs.length < COACH_DAYS) return res;
+    const n = xs.length, mx = xs.reduce((a, v) => a + v, 0) / n, my = ys.reduce((a, v) => a + v, 0) / n;
+    const slope = xs.reduce((a, x, k) => a + (x - mx) * (ys[k] - my), 0) / xs.reduce((a, x) => a + (x - mx) ** 2, 0);
+    const avg = sum / logged;
+    return { ...res, ok: true, tdee: Math.round(avg - slope * 7700), avg: Math.round(avg), perWeek: slope * 7, trendNow: tr[end], span };
+  }
+  // Weekly check-in: blend the new estimate with the last one and move at most 150 kcal per week
+  function coachCheckin() {
+    const s = S(); if (!s.onboarded) return null;
+    const e = coachEstimate(); if (!e.ok) return null;
+    const c = s.coach || (s.coach = { hist: [] });
+    if (c.at && daysBetween(c.at, todayStr()) < 7) return null;
+    const m0 = macros(s); if (!m0) return null;
+    const est = Math.min(m0.bmr * 2.5, Math.max(m0.bmr * 1.1, e.tdee));
+    const prev = c.tdee || m0.formulaTdee;
+    let next = c.tdee ? Math.round(0.5 * c.tdee + 0.5 * est) : Math.round(est);
+    next = Math.max(prev - 150, Math.min(prev + 150, next));
+    const oldCal = s.cal;
+    c.tdee = next; c.at = todayStr();
+    c.hist = (c.hist || []).concat([{ d: c.at, est: Math.round(est), tdee: next, perWeek: Math.round(e.perWeek * 100) / 100, avg: e.avg, logged: e.logged }]).slice(-52);
+    if (s.autoMacros) applyAuto();
+    save('settings');
+    return { oldCal, newCal: s.cal, e, tdee: next };
+  }
+  function runCheckin() {
+    const ci = coachCheckin(); if (!ci) return;
+    const diff = ci.newCal - ci.oldCal;
+    toast('COACH', `المراجعة الأسبوعية: حرقك ${fmt(ci.tdee)} سعرة. ${diff ? `سعراتك صارت ${fmt(ci.newCal)} (${diff > 0 ? '+' : ''}${diff}).` : 'سعراتك زي ما هي.'}`, 'gold');
+    fillSettings(); buildDaily(); render(false);
+  }
+  function etaText(m, s) {
+    if (s.body === 'maintain' || !(s.goalW > 0) || !(m.kgWeek > 0)) return '';
+    const left = s.body === 'cut' ? s.weight - s.goalW : s.goalW - s.weight;
+    if (left <= 0) return 'وصلت وزنك المطلوب 🎉 فكّر تحوّل هدفك لمحافظة.';
+    const weeks = Math.ceil(left / m.kgWeek), dt = new Date(); dt.setDate(dt.getDate() + weeks * 7);
+    return `توصل ${s.goalW} كجم بعد ~${weeks} أسبوع (${mFmt.format(dt)})`;
+  }
+  function renderCoach() {
+    const el = $('#coachCard'); if (!el) return;
+    const s = S(), m = macros(s);
+    if (!m) { el.innerHTML = `<div class="coach"><div class="coach-head"><b>الكوتش</b></div><span class="q-desc">كمّل ملفك عشان يبدأ الكوتش يحسب لك.</span><button class="btn" type="button" data-onboard>إعداد الملف</button></div>`; return; }
+    const e = coachEstimate(), c = s.coach || {}, tw = (getDay(todayStr()) || {}).weight;
+    const trendTxt = e.trendNow ? `${r1(e.trendNow)} كجم (${e.perWeek > 0 ? '+' : ''}${r1(e.perWeek)}/أسبوع)` : (s.weight ? `${s.weight} كجم` : '—');
+    const goalRate = s.body === 'maintain' ? 'ثبات' : `${s.body === 'cut' ? '−' : '+'}${r1(m.kgWeek)}/أسبوع`;
+    const learn = e.ok ? '' : `<div class="hint">يتعلم حرقك الحقيقي: <b>${Math.min(e.logged, COACH_DAYS)}/${COACH_DAYS}</b> يوم أكل مسجل · <b>${Math.min(e.weighs, 4)}/4</b> أوزان. سجّل أكلك كل يوم ووزنك الصبح.</div>
+      <div class="bar"><i style="width:${Math.min(100, (Math.min(e.logged, COACH_DAYS) / COACH_DAYS * 70) + (Math.min(e.weighs, 4) / 4 * 30)).toFixed(0)}%"></i></div>`;
+    const nextIn = c.at ? Math.max(0, 7 - daysBetween(c.at, todayStr())) : null;
+    const last = (c.hist || []).slice(-1)[0];
+    el.innerHTML = `<div class="coach">
+      <div class="coach-head"><b>الكوتش</b><span class="hint">${c.tdee ? (nextIn ? `المراجعة الجاية بعد ${daysAr(nextIn)}` : 'المراجعة جاهزة') : 'يستخدم المعادلة لين يجمع بيانات'}</span></div>
+      <div class="stats2">
+        <div><b>${fmt(m.tdee)}</b>${c.tdee ? 'حرقك الحقيقي' : 'حرقك المبدئي (معادلة)'}</div>
+        <div><b>${fmt(s.cal)}</b>سعراتك اليومية</div>
+        <div><b>${trendTxt}</b>اتجاه وزنك</div>
+        <div><b>${goalRate}</b>هدفك</div>
+      </div>
+      ${learn}
+      ${etaText(m, s) ? `<div class="hint">${etaText(m, s)}</div>` : ''}
+      ${e.recent < 5 && e.logged ? '<div class="hint" style="color:var(--bad)">سجلت أقل من 5 أيام هالأسبوع. الكوتش يحتاج انتظام عشان يكون دقيق.</div>' : ''}
+      ${last ? `<div class="hint">آخر مراجعة ${dayLabel(last.d)}: متوسط أكلك ${fmt(last.avg)} ووزنك ${last.perWeek > 0 ? '+' : ''}${last.perWeek}/أسبوع</div>` : ''}
+      <form class="inc-form" id="coachW"><label class="field"><span>وزن اليوم</span><span class="inwrap"><input id="cw-in" inputmode="decimal" autocomplete="off" placeholder="${s.weight || '0.0'}" value="${tw || ''}"><em>كجم</em></span></label><button class="btn ghost" type="submit">${tw ? 'تحديث' : 'سجّل'}</button></form>
+    </div>`;
+  }
+  document.addEventListener('submit', (ev) => {
+    if (ev.target.id !== 'coachW') return;
+    ev.preventDefault();
+    if (!logWeight(num($('#cw-in').value))) { toast('خطأ', 'اكتب وزن صحيح بالكيلو.', 'bad'); return; }
+    toast('SYSTEM', `سجلت وزنك ${S().weight} كجم.`);
+    fillSettings(); buildDaily(); render(false); renderFood();
+  });
+
+  // ---------- onboarding / profile wizard ----------
+  const OB_STEPS = ['welcome', 'body', 'activity', 'goal', 'nutrition', 'life', 'summary'];
+  const MACRO_MODES = { balanced: ['متوازن', 'دهون 25٪ والباقي كارب'], lowcarb: ['كارب قليل', 'دهون 40٪'], lowfat: ['دهون قليلة', 'دهون 20٪'], keto: ['كيتو', 'كارب 30 جم بس'], custom: ['مخصص', 'تحدد نسبة الدهون بنفسك'] };
+  const RATES = { cut: [[0.25, 'بطيء ومريح'], [0.5, 'معتدل · ننصح فيه'], [0.75, 'سريع'], [1, 'سريع جدًا · صعب']], bulk: [[0.1, 'نظيف وبطيء'], [0.25, 'معتدل · ننصح فيه'], [0.5, 'سريع · دهون أكثر']] };
+  let ob = null, obStep = 0;
+  function openOnboard() {
+    const s = S();
+    ob = { name: s.name || '', sex: s.sex || 'm', age: s.age || '', height: s.height || '', weight: s.weight || '', act: s.act || 'light', body: s.body || 'cut', goalW: s.goalW || '',
+      rateP: s.rateP || (s.body === 'bulk' ? 0.25 : 0.5), macroMode: s.macroMode || 'balanced', proKg: s.proKg || 2, fatPct: s.fatPct || 25, muslim: s.muslim !== false, city: s.city || '',
+      work: !s.mods || s.mods.work !== false, finance: !s.mods || s.mods.finance !== false, workDays: s.workDays.slice(), steps: s.steps || 10000, sleep: s.sleep || 7 };
+    obStep = 0; $('#onboard').hidden = false; document.body.style.overflow = 'hidden'; drawOb();
+  }
+  const obProfile = () => ({ ...S(), sex: ob.sex, age: +ob.age, height: +ob.height, weight: +ob.weight, act: ob.act, body: ob.body, goalW: +ob.goalW || 0, rateP: ob.rateP, macroMode: ob.macroMode, proKg: ob.proKg, fatPct: ob.fatPct, coach: S().coach });
+  const opt = (field, val, title, sub, on) => `<button type="button" class="opt" data-obv="${field}" data-val="${esc(String(val))}" aria-pressed="${on ? 'true' : 'false'}"><span>${title}${sub ? `<small>${sub}</small>` : ''}</span></button>`;
+  const chipO = (field, val, label, on) => `<button type="button" class="chip" data-obv="${field}" data-val="${esc(String(val))}" aria-pressed="${on ? 'true' : 'false'}">${label}</button>`;
+  const obIn = (field, label, unit, mode) => `<label class="field"><span>${label}</span><span class="inwrap"><input data-ob="${field}" inputmode="${mode || 'decimal'}" autocomplete="off" value="${esc(String(ob[field] ?? ''))}" ${field === 'name' ? 'style="direction:rtl" placeholder="اسمك"' : 'placeholder="0"'}>${unit ? `<em>${unit}</em>` : ''}</span></label>`;
+  function drawOb() {
+    const st = OB_STEPS[obStep];
+    $('#obBar').style.width = ((obStep + 1) / OB_STEPS.length * 100) + '%';
+    $('#obBack').hidden = obStep === 0;
+    $('#obNext').textContent = obStep === OB_STEPS.length - 1 ? 'انهض ⚔️' : 'التالي';
+    $('#obErr').textContent = '';
+    let h = '';
+    if (st === 'welcome') h = `<div class="ob-hero"><div class="ob-logo">ARISE</div><div class="ob-sub">انهض</div><p class="q-desc">النظام اختارك. كل يوم مهام: صلاتك وأكلك وتمرينك ونومك وأهدافك. تكسب خبرة ومستويات، وتتعاقب إذا قصّرت. أول شي خلنا نتعرف عليك.</p></div>${obIn('name', 'وش اسمك؟', '', 'text')}`;
+    if (st === 'body') h = `<h2 class="ob-title">بياناتك</h2><p class="q-desc" style="text-align:center">عشان نحسب حرقك وسعراتك بدقة.</p>
+      <div class="chips-row" style="justify-content:center">${chipO('sex', 'm', 'ذكر', ob.sex === 'm')}${chipO('sex', 'f', 'أنثى', ob.sex === 'f')}</div>
+      <div class="set-grid">${obIn('age', 'العمر', 'سنة', 'numeric')}${obIn('height', 'الطول', 'سم', 'numeric')}${obIn('weight', 'الوزن الحالي', 'كجم')}</div>`;
+    if (st === 'activity') h = `<h2 class="ob-title">نشاطك اليومي</h2><p class="q-desc" style="text-align:center">بدون التمرين المقصود. الكوتش بيصحح الرقم بعد أسبوعين من بياناتك.</p><div class="opt-list">${Object.entries(ACT).map(([k, v]) => opt('act', k, v[1], '', ob.act === k)).join('')}</div>`;
+    if (st === 'goal') {
+      const w = +ob.weight || 0, rates = RATES[ob.body] || [];
+      h = `<h2 class="ob-title">وش هدفك؟</h2><div class="opt-list">${opt('body', 'cut', 'إنقاص وزن (تنشيف)', 'تنزل دهون وتحافظ على عضلك', ob.body === 'cut')}${opt('body', 'maintain', 'ثبات الوزن', 'تحسن جسمك وأكلك بدون تغيير الوزن', ob.body === 'maintain')}${opt('body', 'bulk', 'زيادة وزن (تضخيم)', 'تبني عضل بأقل دهون ممكنة', ob.body === 'bulk')}</div>`;
+      if (ob.body !== 'maintain') {
+        h += `<div class="set-grid">${obIn('goalW', 'الوزن المطلوب', 'كجم')}</div><p class="hint">سرعة ${ob.body === 'cut' ? 'النزول' : 'الزيادة'} بالأسبوع:</p><div class="opt-list">${rates.map(([p, lbl]) => {
+          const kg = r1(w * p / 100), left = ob.body === 'cut' ? w - (+ob.goalW || 0) : (+ob.goalW || 0) - w;
+          const weeks = ob.goalW && left > 0 && kg > 0 ? ` · توصل بعد ~${Math.ceil(left / (w * p / 100))} أسبوع` : '';
+          return opt('rateP', p, `${kg || '?'} كجم بالأسبوع`, `${lbl} (${p}٪ من وزنك)${weeks}`, ob.rateP === p);
+        }).join('')}</div>`;
+      }
+    }
+    if (st === 'nutrition') {
+      const m = macros(obProfile());
+      h = `<h2 class="ob-title">طريقة أكلك</h2><div class="chips-row" style="flex-wrap:wrap;justify-content:center">${Object.entries(MACRO_MODES).map(([k, v]) => chipO('macroMode', k, v[0], ob.macroMode === k)).join('')}</div><p class="hint" style="text-align:center">${MACRO_MODES[ob.macroMode][1]}</p>
+        <p class="hint">البروتين (جم لكل كيلو من وزنك):</p><div class="chips-row" style="flex-wrap:wrap">${[1.6, 1.8, 2, 2.2, 2.5].map((v) => chipO('proKg', v, v + ' جم', ob.proKg === v)).join('')}</div>
+        ${ob.macroMode === 'custom' ? `<p class="hint">الدهون (٪ من السعرات):</p><div class="chips-row" style="flex-wrap:wrap">${[20, 25, 30, 35, 40].map((v) => chipO('fatPct', v, v + '٪', ob.fatPct === v)).join('')}</div>` : ''}
+        ${m ? `<div class="calc"><div class="hl"><b>${fmt(m.cal)}</b><span>سعرة باليوم</span></div><div class="hl"><b>${m.protein}g</b><span>بروتين</span></div><div><b>${m.carbs}g</b><span>كارب</span></div><div><b>${m.fat}g</b><span>دهون</span></div></div>` : ''}
+        ${m && m.floored ? '<p class="hint" style="color:var(--gold)">حطينا حد أدنى آمن للسعرات، فالنزول بيكون أبطأ شوي من اللي اخترته.</p>' : ''}`;
+    }
+    if (st === 'life') {
+      h = `<h2 class="ob-title">حياتك اليومية</h2>
+        <p class="hint">الديانة (تحدد المهام الروحية):</p><div class="chips-row">${chipO('muslim', 1, 'مسلم', ob.muslim)}${chipO('muslim', 0, 'غير مسلم', !ob.muslim)}</div>
+        ${ob.muslim ? `<label class="field" style="max-width:none"><span>مدينتك (لأوقات الصلاة والأذان)</span><select data-ob="city"><option value="">اختر مدينتك</option>${CITIES.map((c) => `<option value="${c.id}"${ob.city === c.id ? ' selected' : ''}>${esc(c.n)}</option>`).join('')}</select></label>` : '<p class="hint">بدال الصلاة بتطلع لك مهمة اختيارية: تأمل أو تدوين أو قراءة ١٠ دقايق.</p>'}
+        <p class="hint">هدف الخطوات اليومي:</p><div class="chips-row" style="flex-wrap:wrap">${[6000, 8000, 10000, 12000].map((v) => chipO('steps', v, fmt(v), ob.steps === v)).join('')}</div>
+        <p class="hint">ساعات النوم:</p><div class="chips-row">${[6, 7, 8].map((v) => chipO('sleep', v, v + ' ساعات', ob.sleep === v)).join('')}</div>
+        <p class="hint">مهام اختيارية:</p><div class="opt-list">${opt('work', ob.work ? 0 : 1, 'مهمة الدوام / الدراسة', ob.work ? 'مفعّلة · تختار أيامها تحت' : 'مقفلة', ob.work)}${opt('finance', ob.finance ? 0 : 1, 'الادخار والاستثمار والدخل', ob.finance ? 'مفعّلة' : 'مقفلة', ob.finance)}</div>
+        ${ob.work ? `<div class="chips-row" style="flex-wrap:wrap">${DAY_NAMES.map((n, i) => chipO('workDay', i, n, ob.workDays.includes(i))).join('')}</div>` : ''}`;
+    }
+    if (st === 'summary') {
+      const m = macros(obProfile()), sp = obProfile();
+      h = `<div class="ob-hero"><div class="ob-sub">جاهز يا ${esc(ob.name || 'صياد')}</div><p class="q-desc">هذي خطتك. الكوتش بيراجعها كل أسبوع ويعدلها على حسب نتايجك الحقيقية.</p></div>
+        <div class="calc"><div class="hl"><b>${fmt(m.cal)}</b><span>سعرة باليوم</span></div><div class="hl"><b>${m.protein}g</b><span>بروتين</span></div><div><b>${m.carbs}g</b><span>كارب</span></div><div><b>${m.fat}g</b><span>دهون</span></div><div><b>${fmt(m.tdee)}</b><span>حرقك المبدئي</span></div><div><b>${waterT({ ...sp, water: 0 })} L</b><span>ماء</span></div></div>
+        ${etaText(m, sp) ? `<p class="hint" style="text-align:center">${etaText(m, sp)}</p>` : ''}
+        <p class="hint" style="text-align:center">مهامك اليومية: ${[ob.muslim ? 'الصلوات والقرآن والأذكار' : '', 'الأكل والماء', `${fmt(ob.steps)} خطوة`, `نوم ${ob.sleep} ساعات`, ob.work ? 'الدوام' : ''].filter(Boolean).join('، ')}</p>`;
+    }
+    $('#obBody').innerHTML = h;
+  }
+  function obValid() {
+    const st = OB_STEPS[obStep];
+    if (st === 'body') {
+      if (!(+ob.age >= 13 && +ob.age <= 90)) return 'اكتب عمرك (13 إلى 90).';
+      if (!(+ob.height >= 120 && +ob.height <= 230)) return 'اكتب طولك بالسنتيمتر.';
+      if (!(+ob.weight >= 30 && +ob.weight <= 300)) return 'اكتب وزنك بالكيلو.';
+    }
+    if (st === 'goal' && ob.body !== 'maintain' && ob.goalW !== '' && +ob.goalW) {
+      if (ob.body === 'cut' && +ob.goalW >= +ob.weight) return 'الوزن المطلوب لازم يكون أقل من وزنك الحالي.';
+      if (ob.body === 'bulk' && +ob.goalW <= +ob.weight) return 'الوزن المطلوب لازم يكون أكثر من وزنك الحالي.';
+      if (+ob.goalW < 35 || +ob.goalW > 250) return 'الوزن المطلوب مو منطقي، راجعه.';
+    }
+    return '';
+  }
+  function finishOnboard() {
+    const s = S();
+    Object.assign(s, { name: ob.name.trim().slice(0, 40), sex: ob.sex, age: +ob.age, height: +ob.height, act: ob.act, body: ob.body, goalW: ob.body === 'maintain' ? 0 : (+ob.goalW || 0), rateP: ob.rateP,
+      macroMode: ob.macroMode, proKg: ob.proKg, fatPct: ob.fatPct, muslim: ob.muslim, steps: ob.steps, sleep: ob.sleep, mods: { work: ob.work, finance: ob.finance }, autoMacros: true, onboarded: true });
+    if (ob.work) s.workDays = ob.workDays.slice().sort();
+    if (ob.muslim && ob.city) { s.city = ob.city; s.loc = null; const c = CITIES.find((x) => x.id === ob.city); if (c) s.pMethod = c.m; for (const k in ptCache) delete ptCache[k]; }
+    if (+ob.weight !== +s.weight || !(getDay(todayStr()) || {}).weight) logWeight(+ob.weight); else s.weight = +ob.weight;
+    applyAuto(); touchStart(); save('settings');
+    $('#onboard').hidden = true; document.body.style.overflow = '';
+    fillSettings(); fillMonth(); buildDaily(); render(false); showTab('daily'); scheduleAdhan();
+    toast('ARISE', `أهلًا ${s.name || 'يا صياد'}. خطتك جاهزة: ${fmt(s.cal)} سعرة و${s.protein} جم بروتين.`, 'gold');
+  }
+  $('#obNext').addEventListener('click', () => {
+    const err = obValid(); if (err) { $('#obErr').textContent = err; return; }
+    if (obStep === OB_STEPS.length - 1) { finishOnboard(); return; }
+    obStep++; drawOb(); $('#onboard').scrollTop = 0;
+  });
+  $('#obBack').addEventListener('click', () => { if (obStep > 0) { obStep--; drawOb(); } });
+  $('#obBody').addEventListener('input', (ev) => { const f = ev.target.dataset.ob; if (!f) return; ob[f] = f === 'name' || f === 'city' ? ev.target.value : (ev.target.value.trim() === '' ? '' : num(ev.target.value)); });
+  $('#obBody').addEventListener('change', (ev) => { if (ev.target.dataset.ob === 'city') ob.city = ev.target.value; if (ev.target.dataset.ob === 'goalW' || ev.target.dataset.ob === 'weight') drawOb(); });
+  $('#obBody').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-obv]'); if (!b) return;
+    const f = b.dataset.obv, v = b.dataset.val;
+    if (f === 'workDay') { const i = +v; ob.workDays = ob.workDays.includes(i) ? ob.workDays.filter((x) => x !== i) : ob.workDays.concat([i]); }
+    else if (f === 'muslim' || f === 'work' || f === 'finance') ob[f] = v === '1';
+    else if (['rateP', 'proKg', 'fatPct', 'steps', 'sleep'].includes(f)) ob[f] = +v;
+    else { ob[f] = v; if (f === 'body') { ob.rateP = v === 'bulk' ? 0.25 : 0.5; ob.proKg = v === 'maintain' ? 1.8 : v === 'bulk' ? 2 : 2.2; } }
+    drawOb();
+  });
+  document.addEventListener('click', (ev) => { if (ev.target.closest('[data-onboard]')) openOnboard(); });
+
   // ---------- backup ----------
   $('#exportBtn').addEventListener('click', async () => {
-    const name = `hunter-backup-${todayStr()}.json`;
-    const blob = new Blob([JSON.stringify({ app: 'hunter-system', v: 1, savedAt: new Date().toISOString(), ...state })], { type: 'application/json' });
+    const name = `arise-backup-${todayStr()}.json`;
+    const blob = new Blob([JSON.stringify({ app: 'arise', v: 1, savedAt: new Date().toISOString(), ...state })], { type: 'application/json' });
     try {
       const file = new File([blob], name, { type: 'application/json' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'نسخة نظام الصياد' }); toast('BACKUP', 'تم تجهيز النسخة الاحتياطية.'); return; }
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'نسخة ARISE' }); toast('BACKUP', 'تم تجهيز النسخة الاحتياطية.'); return; }
     } catch (e) { if (e && e.name === 'AbortError') return; }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = name;
@@ -2318,7 +2595,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       cacheLocal(); lastLevel = null; viewDate = todayStr();
       fillSettings(); fillMonth(); buildDaily(); render(false);
       toast('SYSTEM', `تم استرجاع تقدمك. المستوى ${C.lv.L}.`, 'gold');
-    } catch { toast('خطأ', 'الملف هذا مو نسخة احتياطية من نظام الصياد.', 'bad'); }
+    } catch { toast('خطأ', 'الملف هذا مو نسخة احتياطية من ARISE.', 'bad'); }
   });
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
@@ -2332,6 +2609,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   let savedTab = null; try { savedTab = sessionStorage.getItem('hunter-tab'); } catch {}
   showTab(SECTIONS.includes(hashTab) ? hashTab : (savedTab || 'daily'));
   scheduleAdhan();
+  runCheckin();
+  if (!S().onboarded) openOnboard();
   initStore();
 })();
 </script>

@@ -85,7 +85,7 @@ window.HUNTER_TEMPLATES = [
   { id: 'fb', n: 'جسم كامل (3 أيام)', routines: [
     { n: 'جسم كامل', ex: [['squat', 3, '8'], ['bench', 3, '8'], ['bb_row', 3, '8'], ['ohp', 3, '10'], ['rdl', 3, '10'], ['plank', 3, '1']] },
   ], days: [0, 2, 4] },
-  { id: 'cut', n: 'حرق دهون وكارديو', routines: [
-    { n: 'كارديو وبطن', ex: [['incline_walk', 1, '30'], ['bike', 1, '15'], ['plank', 3, '1'], ['crunch', 3, '15-20']] },
-  ], days: [1, 3, 5] },
+  { id: 'beginner', n: 'مبتدئ (أجهزة، 3 أيام)', routines: [
+    { n: 'جسم كامل للمبتدئين', ex: [['leg_press', 3, '10-12'], ['chest_press_m', 3, '10-12'], ['lat_pulldown', 3, '10-12'], ['seated_row', 3, '10-12'], ['db_shoulder', 2, '10-12'], ['plank', 3, '1']] },
+  ], days: [0, 2, 4] },
 ];
