@@ -74,6 +74,17 @@
 	<string>ARISE lets you pick a photo of a nutrition label to read its values.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>ARISE uses your location only to calculate prayer times.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.moslehlab.arise</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>arise</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIStatusBarStyle</key>

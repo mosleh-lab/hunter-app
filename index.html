@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050913">
 <meta name="description" content="ARISE · انهض: حوّل يومك إلى مهام وخبرة ومستويات">
 <meta name="mobile-web-app-capable" content="yes">
@@ -123,6 +123,8 @@ button { cursor: pointer; }
 [dir="rtl"] .bar i { margin-inline-start: 0; }
 [dir="ltr"] .inwrap input { text-align: left; }
 select { max-width: 100%; min-width: 0; }
+/* iPhone zooms into any field with text under 16px and doesn't zoom back */
+@supports (-webkit-touch-callout: none) { input, select, textarea { font-size: 16px !important; } }
 .set-grid > *, .field { min-width: 0; }
 html[lang="en"] { --f-disp: "Chakra Petch", "IBM Plex Sans Arabic", "Segoe UI", sans-serif; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 16px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-soft); }
@@ -625,6 +627,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <div><button class="btn ghost" id="goalAdd" type="button">+ أضف هدف شهري</button></div>
     </div>
     <div class="sect" id="healthSetup">
+      <div id="healthNative" hidden></div>
       <h3>الربط مع Apple Health و Apple Watch</h3>
       <p class="q-desc">الآيفون ما يسمح لتطبيقات الويب تقرأ الصحة مباشرة، فنستخدم تطبيق «الاختصارات» كوسيط: يقرأ أرقام اليوم من الصحة وينسخها، وزر المزامنة يلصقها هنا. أي ساعة تكتب في Apple Health تشتغل (Apple Watch، Fitbit، Garmin، Huawei وغيرها).</p>
       <ol class="steps-list">
@@ -1697,12 +1700,13 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#pasteBox').hidden = true;
     return true;
   }
-  $('#healthBtn').addEventListener('click', async () => {
+  async function healthClipboard() {
     let text = null;
     try { text = await navigator.clipboard.readText(); } catch {}
     if (text && parseHealth(text)) { applyHealth(text); return; }
     $('#pasteBox').hidden = false; $('#pasteTa').value = ''; $('#pasteTa').focus();
-  });
+  }
+  $('#healthBtn').addEventListener('click', healthClipboard);
   $('#pasteApply').addEventListener('click', () => applyHealth($('#pasteTa').value));
   $('#pasteCancel').addEventListener('click', () => { $('#pasteBox').hidden = true; });
   $('#healthHelp').addEventListener('click', () => { showTab('settings'); setTimeout(() => $('#healthSetup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
@@ -1711,7 +1715,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   const CAP = window.Capacitor;
   const NATIVE = !!(CAP && CAP.isNativePlatform && CAP.isNativePlatform());
   const nativeCall = (plugin, method, opts) => CAP.nativePromise(plugin, method, opts || {});
-  let healthBusy = false;
+  let healthBusy = false, healthErr = null, healthOk = false;
+  function renderHealthStatus() {
+    const el = $('#healthNative'); if (!el) return;
+    el.hidden = !NATIVE;
+    if (!NATIVE) return;
+    el.innerHTML = healthOk ? '<p class="q-desc" style="color:var(--ok)">Apple Health متصل. التطبيق يسحب الخطوات والنوم والماء والوزن والأكل تلقائيًا كل ما تفتحه.</p>'
+      : `<p class="q-desc">${healthErr ? 'Apple Health ما اشتغل: <b dir="ltr">' + esc(healthErr) + '</b>. إذا ما ضبط، استخدم طريقة الاختصار تحت.' : 'اضغط الزر عشان تعطي التطبيق صلاحية قراءة Apple Health.'}</p><div class="backup"><button class="btn" type="button" id="healthGrant">ربط Apple Health</button></div>`;
+  }
+  document.addEventListener('click', (ev) => { if (ev.target.closest('#healthGrant')) nativeHealthSync(false); });
   async function nativeHealthSync(quiet) {
     if (!NATIVE || healthBusy) return false;
     healthBusy = true;
@@ -1741,6 +1753,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
           else if (!prev.weight) setDayAt(date, { weight: w });
         }
       }
+      healthOk = true; healthErr = null; renderHealthStatus();
       buildDaily(); render(false);
       const h = changed[0];
       if (h && !quiet) {
@@ -1753,7 +1766,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       } else if (!quiet) toast('SYNC', 'Apple Health: كل شيء محدّث');
       return true;
     } catch (e) {
-      if (!quiet) toast('خطأ', 'ما قدرت أقرأ Apple Health: ' + ((e && e.message) || e) + ' — افتح الإعدادات ← الصحة ← الوصول إلى البيانات ← ARISE وفعّل كل شيء.', 'bad');
+      const m = String((e && e.message) || e || '');
+      healthErr = m;
+      if (!quiet) {
+        if (/entitlement|not authori|authorization|denied|unavailable|not available/i.test(m)) {
+          toast('خطأ', 'Apple Health مقفل على هذي النسخة (' + m + '). استخدم طريقة الاختصار بدالها.', 'bad');
+          healthClipboard();
+        } else toast('خطأ', 'ما قدرت أقرأ Apple Health: ' + m + ' — افتح الإعدادات ← الصحة ← الوصول إلى البيانات ← ARISE وفعّل كل شيء.', 'bad');
+      }
+      renderHealthStatus();
       return false;
     } finally { healthBusy = false; }
   }
@@ -1790,7 +1811,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   if (NATIVE) {
     document.documentElement.classList.add('native');
     $('#healthBtn').textContent = 'مزامنة Apple Health';
-    $('#healthBtn').addEventListener('click', (e) => { e.stopImmediatePropagation(); nativeHealthSync(false); }, true);
+    $('#healthBtn').removeEventListener('click', healthClipboard);
+    $('#healthBtn').addEventListener('click', () => nativeHealthSync(false));
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') { nativeHealthSync(true); scheduleAdhan(); }
     });
@@ -2186,6 +2208,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   const MUSCLES = window.HUNTER_MUSCLES || {};
   const allEx = () => (S().myEx || []).concat(window.HUNTER_EXERCISES || []);
   const exById = (id) => allEx().find((e) => e.id === id) || { id, n: 'تمرين محذوف', m: 'abs', kind: 'w' };
+  const exKnown = (id) => allEx().some((e) => e.id === id);
   const e1rm = (w, r) => w * (1 + r / 30);
   let trainView = 'today', restLeft = 0, restTimer = null, libMuscle = 'all', libOpen = null, routineDelete = null, templatePending = null;
   function sessions(beforeDate) {
@@ -2314,7 +2337,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <button class="link-btn" type="button" data-rx-add="${r.id}">+ أضف تمرين</button>
     </div>`).join('');
     return `<div class="sect"><h3>الجدول الأسبوعي</h3>${rs.length ? sched : '<p class="empty">سوّ برنامج أو اختر برنامج جاهز تحت، وبعدها وزّعه على أيام الأسبوع.</p>'}</div>
-      <div class="sect"><h3>برامجي</h3>${rhtml}<div class="backup"><button class="btn ghost" type="button" id="rt-new">+ برنامج جديد</button></div>
+      <div class="sect"><h3>برامجي</h3>${rhtml}<div class="backup"><button class="btn ghost" type="button" id="rt-new">+ برنامج جديد</button>${rs.length ? '<button class="btn" type="button" id="rt-share">شارك برامجي وجدولي</button>' : ''}<button class="btn ghost" type="button" id="rt-import">استورد برنامج</button></div>
         <label class="field" style="max-width:220px"><span>الراحة بين المجموعات</span><select id="rest-sec">${[45, 60, 90, 120, 180].map((v) => `<option value="${v}"${(s.restSec || 90) === v ? ' selected' : ''}>${v} ثانية</option>`).join('')}</select></label></div>
       <div class="sect"><h3>برامج جاهزة</h3><div class="shop">${tpl}</div></div>`;
   }
@@ -2388,6 +2411,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (tp) { if (!routines().length) applyTemplate(tp.dataset.tpl); else { templatePending = tp.dataset.tpl; renderTrain(); } return; }
     const ty = ev.target.closest('[data-tpl-yes]'); if (ty) { applyTemplate(ty.dataset.tplYes); return; }
     if (ev.target.closest('[data-tpl-no]')) { templatePending = null; renderTrain(); return; }
+    if (ev.target.closest('#rt-share')) { sharePlan(); return; }
+    if (ev.target.closest('#rt-import')) { importPlanSheet(''); return; }
     if (ev.target.closest('#rt-new')) { S().routines = routines().concat([{ id: 'r' + uid(), n: 'برنامج جديد', ex: [] }]); saveRoutines(); renderTrain(); return; }
     const rd = ev.target.closest('[data-rdel]'); if (rd) { routineDelete = rd.dataset.rdel; renderTrain(); return; }
     if (ev.target.closest('[data-rdel-no]')) { routineDelete = null; renderTrain(); return; }
@@ -2421,6 +2446,67 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (i.dataset.sched != null) { S().schedule = { ...(S().schedule || {}), [i.dataset.sched]: i.value || null }; saveRoutines(); return; }
     if (i.id === 'rest-sec') { S().restSec = +i.value; saveRoutines(); }
   });
+  // ---------- share programs + weekly schedule as a link ----------
+  const PLAN_URL = 'https://mosleh-lab.github.io/hunter-app/';
+  const b64u = (str) => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const unb64u = (str) => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0)));
+  function encodePlan() {
+    const rs = routines(), sch = S().schedule || {}, mine = S().myEx || [];
+    const used = new Set(rs.flatMap((r) => r.ex.map((x) => x.id)));
+    const plan = { v: 1, by: S().name || '', r: rs.map((r) => [r.n, r.ex.map((x) => [x.id, x.sets, x.reps])]), s: {}, x: mine.filter((e) => used.has(e.id)).map((e) => ({ id: e.id, n: e.n, m: e.m, kind: e.kind })) };
+    for (const k in sch) { const i = rs.findIndex((r) => r.id === sch[k]); if (i >= 0) plan.s[k] = i; }
+    return b64u(JSON.stringify(plan));
+  }
+  const encodePlanCode = (text) => { const m = String(text || '').match(/plan[=/]([A-Za-z0-9_-]{8,})/) || String(text || '').trim().match(/^([A-Za-z0-9_-]{8,})$/); return m ? m[1] : ''; };
+  function decodePlan(text) {
+    const m = String(text || '').match(/plan[=/]([A-Za-z0-9_-]{8,})/) || String(text || '').trim().match(/^([A-Za-z0-9_-]{8,})$/);
+    if (!m) return null;
+    try { const p = JSON.parse(unb64u(m[1])); return p && p.v === 1 && Array.isArray(p.r) ? p : null; } catch { return null; }
+  }
+  async function sharePlan() {
+    const code = encodePlan(), url = PLAN_URL + '#plan=' + code;
+    const text = tr(`برامج تماريني وجدولي على ARISE${S().name ? ' من ' + S().name : ''}. افتح الرابط واضغط «استورد»:`);
+    try { if (navigator.share) { await navigator.share({ title: 'ARISE', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text + '\n' + url); toast('SYSTEM', 'نسخت الرابط. أرسله لصاحبك.'); }
+    catch { openSheet('شارك برامجك', `<p class="q-desc">انسخ الرابط وأرسله:</p><textarea readonly rows="4" style="width:100%" dir="ltr">${esc(url)}</textarea>`); }
+  }
+  function importPlanSheet(prefill) {
+    openSheet('استورد برنامج', `
+      <p class="q-desc">الصق الرابط اللي وصلك من صاحبك.</p>
+      <textarea id="ip-in" rows="3" dir="ltr" style="width:100%;background:rgba(0,0,0,.25);border:1px solid var(--line-soft);border-radius:var(--r);color:var(--fg);padding:10px">${esc(prefill || '')}</textarea>
+      <div id="ip-out" style="display:grid;gap:10px"></div>`);
+    const show = () => {
+      const p = decodePlan($('#ip-in').value), out = $('#ip-out');
+      if (!p) { out.innerHTML = $('#ip-in').value.trim() ? '<p class="hint" style="color:var(--bad)">الرابط هذا مو برنامج من ARISE.</p>' : ''; return; }
+      const exName = (id) => { const e = allEx().find((x) => x.id === id) || (p.x || []).find((x) => x.id === id); return e ? e.n : id; };
+      out.innerHTML = `${p.by ? `<p class="hint">من: <b>${esc(p.by)}</b></p>` : ''}
+        ${p.r.map(([n, ex], i) => `<div class="item"><h4>${esc(n)}</h4><p>${ex.map(([id, sets, reps]) => `${esc(exName(id))} ${sets}×${esc(reps)}`).join(' · ')}</p><p class="hint">${Object.keys(p.s || {}).filter((d) => p.s[d] === i).map((d) => DAY_NAMES[d]).join('، ') || '—'}</p></div>`).join('')}
+        <div class="backup"><button class="btn" type="button" id="ip-replace">استبدل برامجي وجدولي</button><button class="btn ghost" type="button" id="ip-add">أضف البرامج بس</button></div>
+        ${NATIVE ? '' : `<a class="btn ghost" style="text-align:center;text-decoration:none" href="arise://plan/${encodePlanCode($('#ip-in').value)}">عندك تطبيق ARISE على الآيفون؟ افتحه فيه</a>`}`;
+    };
+    $('#ip-in').addEventListener('input', show);
+    $('#ip-out').addEventListener('click', (ev) => {
+      const replace = ev.target.closest('#ip-replace'), add = ev.target.closest('#ip-add');
+      if (!replace && !add) return;
+      const p = decodePlan($('#ip-in').value); if (!p) return;
+      const mine = S().myEx || [];
+      for (const e of p.x || []) if (!exKnown(e.id) && e.n) mine.push({ id: e.id, n: String(e.n).slice(0, 40), m: e.m || 'chest', kind: ['w', 'bw', 't'].includes(e.kind) ? e.kind : 'w' });
+      S().myEx = mine;
+      const rs = p.r.slice(0, 14).map(([n, ex]) => ({ id: 'r' + uid(), n: String(n || 'برنامج').slice(0, 40), ex: (ex || []).filter(([id]) => exKnown(id)).slice(0, 30).map(([id, sets, reps]) => ({ id, sets: Math.max(1, Math.min(20, +sets || 3)), reps: String(reps || '8-12').slice(0, 10) })) }));
+      if (replace) {
+        const sch = {}; for (const d in p.s || {}) if (rs[p.s[d]] && +d >= 0 && +d <= 6) sch[d] = rs[p.s[d]].id;
+        S().routines = rs; S().schedule = sch;
+      } else S().routines = routines().concat(rs);
+      saveRoutines(); closeSheet(); trainView = 'plans'; showTab('train'); renderTrain();
+      toast('SYSTEM', replace ? 'تم استيراد البرامج والجدول.' : `أضفت ${rs.length} برامج. وزّعها على أيامك من الجدول.`, 'gold');
+    });
+    show();
+  }
+  function planFromUrl(url) {
+    if (!url || !/plan[=/]/.test(url)) return;
+    importPlanSheet(url);
+    if (!NATIVE && location.hash) history.replaceState(null, '', location.pathname + location.search);
+  }
   function applyTemplate(id) {
     const t = (window.HUNTER_TEMPLATES || []).find((x) => x.id === id); if (!t) return;
     const rs = t.routines.map((r) => ({ id: 'r' + uid(), n: r.n, ex: r.ex.map(([eid, sets, reps]) => ({ id: eid, sets, reps: String(reps) })) }));
@@ -3362,7 +3448,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   if (!S().onboarded) openOnboard();
   initStore();
   setTimeout(arenaBoot, 1500);
-  if (NATIVE) { setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
+  if (/plan=/.test(location.hash)) setTimeout(() => planFromUrl(location.hash), 600);
+  if (NATIVE) {
+    try { CAP.nativeCallback('App', 'addListener', { eventName: 'appUrlOpen' }, (d) => planFromUrl(d && d.url)); } catch {}
+    nativeCall('App', 'getLaunchUrl').then((r) => r && r.url && setTimeout(() => planFromUrl(r.url), 600)).catch(() => {});
+  }
+  if (NATIVE) { renderHealthStatus(); setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
 })();
 </script>
 </body>

@@ -29,6 +29,13 @@ class AriseBridgeViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(AriseHealthPlugin())
     }
+
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        // The app is dark, so the default (dark) scroll indicator is invisible.
+        webView?.scrollView.indicatorStyle = .white
+        webView?.scrollView.showsVerticalScrollIndicator = true
+    }
 }
 
 // Reads one day of Apple Health data (steps, nutrition, water, sleep, weight).
@@ -73,11 +80,12 @@ public class AriseHealthPlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("Health data is not available on this device")
             return
         }
+        let entitled = Bundle.main.object(forInfoDictionaryKey: "NSHealthShareUsageDescription") != nil
         store.requestAuthorization(toShare: nil, read: readTypes) { ok, error in
             if let error = error {
-                call.reject(error.localizedDescription)
+                call.reject(error.localizedDescription, "\((error as NSError).code)")
             } else {
-                call.resolve(["granted": ok])
+                call.resolve(["granted": ok, "entitled": entitled])
             }
         }
     }
