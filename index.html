@@ -272,7 +272,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 .levelup p b { color: var(--gold); font-family: var(--f-num); font-size: 20px; }
 @keyframes pulse { 50% { text-shadow: 0 0 10px var(--glow); } }
 /* App shell: bottom navigation, compact status, sheets */
-.app { padding-block: 18px calc(110px + env(safe-area-inset-bottom, 0px)); }
+.app { padding-block: calc(18px + env(safe-area-inset-top, 0px)) calc(110px + env(safe-area-inset-bottom, 0px)); }
+/* solid strip behind the phone's status bar so scrolled content doesn't run under the clock */
+body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: env(safe-area-inset-top, 0px); background: rgba(5, 10, 22, 0.97); z-index: 40; pointer-events: none; }
+.native-only { display: none; }
+html.native .native-only { display: list-item; }
+html.native .web-only { display: none; }
 .bottom-nav { position: fixed; inset-inline: 0; bottom: 0; z-index: 15; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(5, 10, 22, 0.95); border-top: 1px solid var(--line); backdrop-filter: blur(10px); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); }
 .bottom-nav button { background: none; border: 0; color: var(--muted); display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: var(--r); }
 .bottom-nav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -641,8 +646,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
           <b>الماء</b> (Water) باسم <code>water</code>.</li>
         <li>للنوم: <b>البحث عن عينات الصحة</b> بنوع <b>تحليل النوم</b>، تاريخ البدء <b>آخر يوم واحد</b>، والقيمة <b>ليست «في السرير»</b> و<b>ليست «مستيقظ»</b>. بعده <b>الحصول على تفاصيل عينات الصحة</b> = <b>المدة</b>، بعده <b>حساب الإحصائيات</b> = <b>المجموع</b>، بعده <b>تعيين متغير</b> باسم <code>sleep</code>.</li>
         <li>أضف إجراء <b>نص</b> واكتب فيه (وحط المتغيرات مكان الأسماء): <code>HUNTER;steps=steps;cal=cal;protein=protein;carbs=carbs;fat=fat;water=water;sleep=sleep</code>. وتقدر تضيف الوزن (Body Mass) بنفس الطريقة باسم <code>weight</code> لكن بدل «المجموع» استخدم <b>آخر عينة</b>.</li>
-        <li>أضف <b>نسخ إلى الحافظة</b>. احفظ الاختصار.</li>
-        <li>كل يوم: شغّل الاختصار (أو من ودجت الشاشة الرئيسية)، افتح التطبيق، اضغط <b>مزامنة من الصحة / الساعة</b>.</li>
+        <li class="web-only">أضف <b>نسخ إلى الحافظة</b>. احفظ الاختصار.</li>
+        <li class="web-only">كل يوم: شغّل الاختصار (أو من ودجت الشاشة الرئيسية)، افتح التطبيق، اضغط <b>مزامنة من الصحة / الساعة</b>.</li>
+        <li class="native-only">بدال «نسخ إلى الحافظة» أضف <b>ترميز URL</b> (URL Encode) على النص، بعده <b>فتح عناوين URL</b> (Open URLs) واكتب فيه <code>arise://health?d=</code> وبعده مباشرة متغير <b>النص المرمّز</b>. احفظ الاختصار.</li>
+        <li class="native-only">شغّل الاختصار: يفتح ARISE ويحدّث مهامك لحاله بدون نسخ ولصق. وتقدر تخليه يشتغل كل يوم لحاله من <b>الأتمتة</b> ← <b>أتمتة شخصية</b> ← <b>وقت اليوم</b> (مثلًا 11 مساءً) ← <b>تشغيل فوري</b>.</li>
       </ol>
       <p class="q-desc">الأكل والماء يوصلون للصحة إذا كنت تسجلهم في تطبيق مربوط فيها (مثل MyFitnessPal أو Lifesum أو تطبيقات الماء). أي رقم ما تبيه احذفه من النص، والتطبيق يحدّث الموجود بس. أول مرة يطلب منك الآيفون السماح بالوصول للصحة، اضغط سماح.</p>
     </div>
@@ -1720,12 +1727,19 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const el = $('#healthNative'); if (!el) return;
     el.hidden = !NATIVE;
     if (!NATIVE) return;
+    if (hkBlocked()) $('#healthBtn').textContent = 'مزامنة من الصحة / الساعة';
     el.innerHTML = healthOk ? '<p class="q-desc" style="color:var(--ok)">Apple Health متصل. التطبيق يسحب الخطوات والنوم والماء والوزن والأكل تلقائيًا كل ما تفتحه.</p>'
+      : hkBlocked() ? '<p class="q-desc">النسخة المثبتة على جوالك ما فيها صلاحية Apple Health (أداة التثبيت ما تدعمها). استخدم الاختصار تحت: يفتح التطبيق ويرسل له أرقامك تلقائيًا.</p><div class="backup"><button class="btn ghost" type="button" id="healthRetry">جرّب Apple Health مرة ثانية</button></div>'
       : `<p class="q-desc">${healthErr ? 'Apple Health ما اشتغل: <b dir="ltr">' + esc(healthErr) + '</b>. إذا ما ضبط، استخدم طريقة الاختصار تحت.' : 'اضغط الزر عشان تعطي التطبيق صلاحية قراءة Apple Health.'}</p><div class="backup"><button class="btn" type="button" id="healthGrant">ربط Apple Health</button></div>`;
   }
-  document.addEventListener('click', (ev) => { if (ev.target.closest('#healthGrant')) nativeHealthSync(false); });
+  document.addEventListener('click', (ev) => {
+    if (ev.target.closest('#healthGrant')) nativeHealthSync(false);
+    if (ev.target.closest('#healthRetry')) { try { localStorage.removeItem('arise-hk-blocked'); } catch {} nativeHealthSync(false); }
+  });
+  const hkBlocked = () => { try { return localStorage.getItem('arise-hk-blocked') === '1'; } catch { return false; } };
   async function nativeHealthSync(quiet) {
     if (!NATIVE || healthBusy) return false;
+    if (hkBlocked()) { if (!quiet) healthClipboard(); return false; }
     healthBusy = true;
     try {
       await nativeCall('AriseHealth', 'requestAuthorization');
@@ -1768,6 +1782,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     } catch (e) {
       const m = String((e && e.message) || e || '');
       healthErr = m;
+      if (/entitlement/i.test(m)) { try { localStorage.setItem('arise-hk-blocked', '1'); } catch {} }
       if (!quiet) {
         if (/entitlement|not authori|authorization|denied|unavailable|not available/i.test(m)) {
           toast('خطأ', 'Apple Health مقفل على هذي النسخة (' + m + '). استخدم طريقة الاختصار بدالها.', 'bad');
@@ -1810,7 +1825,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
   if (NATIVE) {
     document.documentElement.classList.add('native');
-    $('#healthBtn').textContent = 'مزامنة Apple Health';
+    $('#healthBtn').textContent = hkBlocked() ? 'مزامنة من الصحة / الساعة' : 'مزامنة Apple Health';
     $('#healthBtn').removeEventListener('click', healthClipboard);
     $('#healthBtn').addEventListener('click', () => nativeHealthSync(false));
     document.addEventListener('visibilitychange', () => {
@@ -2506,6 +2521,13 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (!url || !/plan[=/]/.test(url)) return;
     importPlanSheet(url);
     if (!NATIVE && location.hash) history.replaceState(null, '', location.pathname + location.search);
+  }
+  // arise://plan/<code> from a shared link, arise://health?d=<HUNTER;...> from the Health shortcut
+  function handleAppUrl(url) {
+    if (!url) return;
+    if (/plan[=/]/.test(url)) { planFromUrl(url); return; }
+    const m = String(url).match(/^arise:\/\/health\/?\?(?:.*&)?d=([^&#]*)/i);
+    if (m) { let t = m[1]; try { t = decodeURIComponent(t.replace(/\+/g, ' ')); } catch {} showTab('daily'); applyHealth(t); }
   }
   function applyTemplate(id) {
     const t = (window.HUNTER_TEMPLATES || []).find((x) => x.id === id); if (!t) return;
@@ -3450,8 +3472,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   setTimeout(arenaBoot, 1500);
   if (/plan=/.test(location.hash)) setTimeout(() => planFromUrl(location.hash), 600);
   if (NATIVE) {
-    try { CAP.nativeCallback('App', 'addListener', { eventName: 'appUrlOpen' }, (d) => planFromUrl(d && d.url)); } catch {}
-    nativeCall('App', 'getLaunchUrl').then((r) => r && r.url && setTimeout(() => planFromUrl(r.url), 600)).catch(() => {});
+    try { CAP.nativeCallback('App', 'addListener', { eventName: 'appUrlOpen' }, (d) => handleAppUrl(d && d.url)); } catch {}
+    nativeCall('App', 'getLaunchUrl').then((r) => r && r.url && setTimeout(() => handleAppUrl(r.url), 600)).catch(() => {});
   }
   if (NATIVE) { renderHealthStatus(); setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
 })();
