@@ -138,7 +138,7 @@ button { cursor: pointer; }
 .penalty .pq { font-family: var(--f-disp); font-size: 17px; color: #ffd0d8; }
 
 /* Tabs */
-.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
 .tabs button { background: transparent; border: 1px solid var(--line-soft); color: var(--muted); padding: 9px 4px; font-size: 13px; font-weight: 600; border-radius: var(--r); }
 .tabs button[aria-selected="true"] { color: #fff; border-color: var(--line); background: rgba(87,184,255,0.12); box-shadow: 0 0 14px rgba(87,184,255,0.2); }
 
@@ -265,6 +265,96 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 .levelup p { margin: 6px 0 0; color: var(--muted); }
 .levelup p b { color: var(--gold); font-family: var(--f-num); font-size: 20px; }
 @keyframes pulse { 50% { text-shadow: 0 0 10px var(--glow); } }
+/* App shell: bottom navigation, compact status, sheets */
+.app { padding-block: 18px calc(110px + env(safe-area-inset-bottom, 0px)); }
+.bottom-nav { position: fixed; inset-inline: 0; bottom: 0; z-index: 15; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(5, 10, 22, 0.95); border-top: 1px solid var(--line); backdrop-filter: blur(10px); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); }
+.bottom-nav button { background: none; border: 0; color: var(--muted); display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: var(--r); }
+.bottom-nav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bottom-nav button[aria-selected="true"] { color: #fff; }
+.bottom-nav button[aria-selected="true"] svg { stroke: var(--glow-2); filter: drop-shadow(0 0 6px var(--glow)); }
+.toasts { bottom: calc(64px + env(safe-area-inset-bottom, 0px)); padding-bottom: 8px; }
+.mini { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--panel); font-family: var(--f-num); font-size: 13px; color: var(--muted); }
+.mini b { color: #fff; } .mini .bar { flex: 1; margin: 0; }
+.coin b { color: var(--gold); }
+.link-btn[data-goto-tab] { padding: 0; }
+.sheet-back { position: fixed; inset: 0; z-index: 40; background: rgba(2, 6, 16, 0.72); display: flex; align-items: flex-end; justify-content: center; }
+.sheet { width: 100%; max-width: 760px; max-height: 88vh; max-height: 88dvh; overflow: auto; border-radius: 14px 14px 0 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 12px; align-content: start; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sheet-head b { font-family: var(--f-disp); font-size: 18px; font-weight: 600; }
+.pick-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pick-list button { width: 100%; text-align: start; background: rgba(0,0,0,0.2); border: 1px solid var(--line-soft); border-radius: var(--r); padding: 9px 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--fg); }
+.pick-list small { color: var(--muted); font-family: var(--f-num); font-size: 12px; white-space: nowrap; }
+.pick-list span small { font-family: var(--f-body); white-space: normal; }
+.chips-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.chips-row .chip { white-space: nowrap; min-height: 32px; padding: 4px 12px; font-size: 13px; flex: none; }
+/* Food */
+.food-summary { display: grid; gap: 14px; margin-block: 12px; }
+.kcal-big { text-align: center; display: grid; gap: 2px; }
+.kcal-big b { font-family: var(--f-num); font-size: 44px; line-height: 1.1; color: #fff; text-shadow: 0 0 16px rgba(87,184,255,0.6); }
+.kcal-big span { color: var(--glow-2); font-weight: 600; } .kcal-big small { color: var(--muted); }
+.macro-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.macro-grid > div { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.macro-grid b { font-family: var(--f-num); font-size: 18px; color: var(--fg); } .macro-grid b small { font-size: 12px; color: var(--muted); }
+.water-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+.water-row span { flex: 1 1 100%; } .water-row b { color: var(--fg); font-family: var(--f-num); }
+.meal { display: grid; gap: 6px; padding-block: 12px; border-top: 1px dashed var(--line-soft); }
+.meal-head { display: flex; justify-content: space-between; align-items: baseline; }
+.meal-head h3 { margin: 0; font-size: 16px; }
+.kc { font-family: var(--f-num); color: var(--glow-2); white-space: nowrap; font-size: 13px; }
+.entry { display: flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.2); border-radius: var(--r); padding: 4px 4px 4px 10px; }
+.entry .nm { flex: 1; min-width: 0; background: none; border: 0; text-align: start; padding: 4px 0; color: var(--fg); overflow-wrap: anywhere; }
+.entry .nm small { display: block; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.meal-actions { display: flex; }
+.meal-actions .btn { min-height: 34px; padding: 4px 12px; font-size: 13px; }
+/* Workouts */
+.train-body { display: grid; gap: 10px; margin-top: 12px; }
+.today-card { border: 1px solid var(--line); border-radius: var(--r); background: rgba(87,184,255,0.06); padding: 14px; display: grid; gap: 6px; justify-items: start; }
+.today-card h3 { margin: 0; font-family: var(--f-disp); font-size: 20px; font-weight: 600; }
+.session-head { display: flex; justify-content: space-between; align-items: center; }
+.session-head h3 { margin: 0; font-family: var(--f-disp); font-size: 20px; font-weight: 600; }
+.timer-sm { font-family: var(--f-num); font-size: 20px; color: var(--glow-2); }
+.ex-card { border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--panel-2); padding: 10px 12px; display: grid; gap: 6px; }
+.ex-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.ex-head h4 { margin: 0; font-size: 15px; } .ex-head small { color: var(--muted); font-size: 12px; }
+.set-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) 40px 30px; gap: 6px; align-items: center; }
+.set-row.head { font-size: 11px; color: var(--dim); }
+.set-row .no { font-family: var(--f-num); color: var(--muted); text-align: center; }
+.set-row .inwrap input { padding: 7px 8px; text-align: center; }
+.set-ok { width: 40px; height: 36px; border-radius: var(--r); border: 1px solid var(--line-soft); background: transparent; color: var(--muted); font-size: 16px; }
+.set-ok[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #062016; font-weight: 700; }
+.rt-row { display: grid; grid-template-columns: minmax(0, 1fr) 70px 90px 30px; gap: 6px; align-items: center; font-size: 13px; }
+.rt-row .nm { overflow-wrap: anywhere; } .rt-row .inwrap input { padding: 5px 6px; text-align: center; }
+.sched-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 14px; }
+.lib-detail { display: grid; gap: 4px; padding: 6px 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.lib-detail b { color: var(--fg); font-weight: 600; margin-inline-end: 6px; }
+.rest-bar { position: fixed; inset-inline: 0; bottom: calc(70px + env(safe-area-inset-bottom, 0px)); z-index: 16; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+.rest-bar > div { pointer-events: auto; display: flex; align-items: center; gap: 10px; background: rgba(6,14,32,0.96); border: 1px solid var(--gold); border-radius: 999px; padding: 6px 8px 6px 16px; box-shadow: 0 0 18px rgba(255,210,122,0.25); }
+.rest-bar b { font-family: var(--f-num); font-size: 22px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.rest-bar .btn { min-height: 32px; padding: 2px 12px; }
+/* Store */
+.coin-card { text-align: center; display: grid; gap: 2px; margin-block: 6px 12px; }
+.coin-card b { font-family: var(--f-num); font-size: 44px; color: var(--gold); text-shadow: 0 0 18px rgba(255,210,122,0.5); }
+.coin-card span { font-weight: 600; } .coin-card small { color: var(--muted); font-size: 12px; }
+.store-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.store-bar .hint { flex: 1 1 220px; }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+.item { border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--panel-2); padding: 12px; display: grid; gap: 6px; align-content: start; justify-items: start; }
+.item .em { font-size: 30px; line-height: 1; } .item h4 { margin: 0; font-size: 15px; } .item p { margin: 0; font-size: 12px; color: var(--muted); }
+.item .price { font-family: var(--f-num); color: var(--gold); font-weight: 600; }
+.item.locked .em, .item.locked h4 { opacity: 0.6; }
+.item .set-grid { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.lock { font-size: 12px; color: var(--bad); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+/* Prayer */
+.next-prayer { font-size: 13px; color: var(--muted); } .next-prayer b { color: var(--fg); }
+.next-prayer .cd { font-family: var(--f-num); color: var(--glow-2); }
+.chip small { display: block; font-family: var(--f-num); font-size: 11px; font-weight: 500; opacity: 0.85; }
+.chip:disabled { opacity: 0.4; cursor: default; }
+.pt-table { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.pt-table div { border: 1px solid var(--line-soft); border-radius: var(--r); padding: 6px 8px; text-align: center; font-size: 12px; color: var(--muted); }
+.pt-table b { display: block; font-family: var(--f-num); font-size: 15px; color: var(--fg); font-weight: 600; }
+.pt-table .now { border-color: var(--line); background: rgba(87,184,255,0.1); }
+@media (max-width: 520px) { .item .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rt-row { grid-template-columns: minmax(0, 1fr) 60px 80px 28px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 @media (max-width: 520px) {
@@ -287,7 +377,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     <span class="sync" id="sync">جارٍ الاتصال…</span>
   </header>
 
-  <section class="win" aria-label="نافذة الحالة">
+  <div class="mini" id="miniStatus" hidden><span>LV <b id="miniLv">1</b></span><div class="bar"><i id="miniXp"></i></div><span class="coin">🪙 <b id="miniCoins">0</b></span></div>
+
+  <section class="win" id="statusWin" aria-label="نافذة الحالة">
     <div class="win-title"><span>الحالة</span></div>
     <div class="st-top">
       <div class="lv"><span class="lv-label">LEVEL</span><span class="lv-num" id="lvNum">1</span></div>
@@ -310,6 +402,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <span>أيام مكتملة <b id="mDays">0</b></span>
       <span>عقوبات <b id="mPen">0</b></span>
       <span>أيام تعافي <b id="mRest">0</b></span>
+      <span class="coin">العملات <b id="mCoins">0</b></span>
     </div>
     <div class="setup" id="setupCard" hidden>
       <span>سجّل عمرك وطولك ووزنك وهدفك، والنظام يحسب سعراتك وبروتينك.</span>
@@ -324,17 +417,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     <p><button class="btn danger" id="clearPenalty">أكملت مهمة العقاب (استرجاع 50 XP)</button></p>
   </section>
 
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="daily" aria-selected="true">المهام اليومية</button>
-    <button role="tab" data-tab="goals" aria-selected="false">الأسبوع والشهر</button>
-    <button role="tab" data-tab="log" aria-selected="false">السجل</button>
-    <button role="tab" data-tab="settings" aria-selected="false">الإعدادات</button>
-  </nav>
-
   <section class="win" id="tab-daily" role="tabpanel">
     <div class="win-title"><span>مهمة يومية</span></div>
     <div class="dq-head">
       <h2 class="dq-name">الاستعداد لتصبح أقوى</h2>
+      <div class="next-prayer" id="nextPrayer"></div>
       <div class="daynav">
         <button id="prevDay" aria-label="اليوم السابق">›</button>
         <span class="lbl" id="dayLbl">اليوم</span>
@@ -356,6 +443,31 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     </div>
     <div class="quests" id="quests"></div>
   </section>
+
+  <section class="win" id="tab-food" role="tabpanel" hidden>
+    <div class="win-title"><span>سجل الأكل</span></div>
+    <div class="daynav"><button id="foodPrev" aria-label="اليوم السابق">›</button><span class="lbl" id="foodDay">اليوم</span><button id="foodNext" aria-label="اليوم التالي">‹</button></div>
+    <div class="food-summary" id="foodSummary"></div>
+    <div class="backup" style="justify-content:center"><button class="btn" type="button" id="quickFood">+ سجّل أكل</button><button class="btn ghost" type="button" id="copyYesterday">انسخ أكل اليوم اللي قبله</button></div>
+    <div id="meals"></div>
+    <p class="hint">القيم تقديرية لكل 100 جم من مصادر غذائية معروفة. للأدق وزّن أكلك أو استخدم ملصق المنتج.</p>
+  </section>
+
+  <section class="win" id="tab-train" role="tabpanel" hidden>
+    <div class="win-title"><span>التمارين</span></div>
+    <nav class="tabs" id="trainSeg"><button type="button" data-tv="today" aria-selected="true">اليوم</button><button type="button" data-tv="plans" aria-selected="false">البرامج والجدول</button><button type="button" data-tv="lib" aria-selected="false">التمارين والتقدم</button></nav>
+    <div class="train-body" id="trainBody"></div>
+  </section>
+
+  <section class="win" id="tab-store" role="tabpanel" hidden>
+    <div class="win-title"><span>المتجر</span></div>
+    <div class="coin-card" id="coinCard"></div>
+    <div class="store-bar"><span class="hint">كل مكافأة لها وقت انتظار، حتى لو عندك عملات كثير. الصبر جزء من اللعبة.</span><button class="btn ghost" type="button" id="storeEditBtn">تعديل المتجر</button></div>
+    <div class="shop" id="shop"></div>
+    <div class="sect"><h3>مشترياتك</h3><ul class="inc-list" id="buyHistory"></ul></div>
+  </section>
+
+  <nav class="tabs" id="moreSeg" hidden><button type="button" data-tab="goals" aria-selected="true">الأسبوع والشهر</button><button type="button" data-tab="log" aria-selected="false">السجل</button><button type="button" data-tab="settings" aria-selected="false">الإعدادات</button></nav>
 
   <section class="win" id="tab-goals" role="tabpanel" hidden>
     <div class="win-title"><span>مهام الأسبوع والشهر</span></div>
@@ -415,6 +527,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         <li>إكمال كل المهام الإجبارية في يوم = <b>+50 XP</b> مكافأة وسلسلة +1.</li>
         <li>يوم ناقص = <b>-50 XP</b> ومنطقة العقاب. مهمة العقاب في اليوم التالي تسترجعها.</li>
         <li>يوم تعافي (مريض، مرهق، مسافر): المطلوب الصلاة بس، بدون عقوبة والسلسلة ما تنكسر ولا تزيد. لك <b id="ruleRest">4</b> أيام بالشهر.</li>
+        <li>كل <b>20 XP</b> = عملة 🪙 تصرفها في المتجر. كل رقم قياسي في التمرين = <b>+15 XP</b> قوة.</li>
         <li>النادي <b id="ruleGym">4</b> مرات في الأسبوع (الأحد إلى السبت) = <b>+100 XP</b> قوة.</li>
         <li>الادخار والاستثمار الشهري = حتى <b>300 XP</b> ثروة لكل واحد.</li>
         <li>المستوى التالي يحتاج <b>100 + 50 × (المستوى − 1)</b> XP. كل 100 XP في صفة = نقطة.</li>
@@ -437,6 +550,17 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       <div class="days-pick" id="bodyGoal"></div>
       <div class="calc" id="calcBox"></div>
       <div class="auto-row" id="autoRow"></div>
+    </div>
+    <div class="sect" id="prayerSect">
+      <h3>المدينة ومواقيت الصلاة</h3>
+      <div class="set-grid">
+        <label class="field"><span>المدينة</span><select id="s-city"></select></label>
+        <label class="field"><span>طريقة الحساب</span><select id="s-pmethod"></select></label>
+        <label class="field"><span>صلاة العصر</span><select id="s-asr"><option value="shafi">الجمهور</option><option value="hanafi">الحنفي</option></select></label>
+      </div>
+      <div class="backup"><button class="btn ghost" type="button" id="geoBtn">استخدم موقعي الحالي</button><button class="btn" type="button" id="adhanBtn">تفعيل تنبيه الأذان</button><button class="btn ghost" type="button" id="icsBtn">أضف الأوقات لتقويم الجوال</button></div>
+      <div class="pt-table" id="ptToday"></div>
+      <p class="q-desc">تنبيه الأذان يشتغل والتطبيق مفتوح. عشان يوصلك التنبيه والتطبيق مقفل، اضغط «أضف الأوقات لتقويم الجوال»: ينزل ملف فيه أوقات الصلاة لـ30 يوم مع تنبيه وقت كل أذان، افتحه واختر «إضافة الكل». كرره كل شهر.</p>
     </div>
     <div class="sect">
       <h3>الأهداف اليومية</h3>
@@ -508,6 +632,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     </div>
   </section>
 
+  <nav class="bottom-nav" role="tablist" aria-label="الأقسام">
+    <button type="button" role="tab" data-tab="daily" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/></svg>اليوم</button>
+    <button type="button" role="tab" data-tab="food" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v8a2 2 0 0 0 2 2v8M4 3v5M8 3v5M17 3c-2.5 2-2.5 7 0 9v9"/></svg>الأكل</button>
+    <button type="button" role="tab" data-tab="train" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M6.5 6.5v11M17.5 6.5v11M21 10v4M6.5 12h11"/></svg>التمارين</button>
+    <button type="button" role="tab" data-tab="store" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>المتجر</button>
+    <button type="button" role="tab" data-tab="more" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>المزيد</button>
+  </nav>
+  <div class="rest-bar" id="restBar" hidden><div><span>راحة</span><b id="restTime">1:30</b><button class="btn ghost" type="button" id="restPlus">+15</button><button class="btn" type="button" id="restSkip">تخطي</button></div></div>
+  <div class="sheet-back" id="sheet" hidden><div class="win sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sheet-head"><b id="sheetTitle"></b><button class="x" type="button" id="sheetClose" aria-label="إغلاق">×</button></div><div id="sheetBody" style="display:grid;gap:12px"></div></div></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
   <div class="levelup" id="levelup" hidden>
     <div class="win box">
@@ -518,6 +651,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   </div>
 </div>
 
+<script src="js/prayer.js"></script>
+<script src="data/foods.js"></script>
+<script src="data/exercises.js"></script>
+<script src="data/cities.js"></script>
 <script>
 (() => {
   document.documentElement.lang = 'ar';
@@ -551,7 +688,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, city: null, loc: null, pMethod: 'uq', asr: 'shafi', adhan: false, myFoods: [], myEx: [], routines: [], schedule: {}, restSec: 90, storeItems: null, purchases: [], steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
@@ -559,7 +696,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   const LKEY = 'hunter-system-v1';
   const ACT = { sed: [1.2, 'قليل الحركة (دوام مكتبي)'], light: [1.375, 'خفيف (1-3 تمارين بالأسبوع)'], mod: [1.55, 'متوسط (3-5 تمارين)'], high: [1.725, 'عالي (6-7 تمارين)'], athlete: [1.9, 'رياضي جدًا أو شغل بدني'] };
   const BODY = { cut: { ar: 'تنشيف', long: 'تنشيف (إنقاص دهون)', calF: 0.8, pro: 2.2 }, maintain: { ar: 'محافظة', long: 'محافظة على الوزن', calF: 1, pro: 1.8 }, bulk: { ar: 'تضخيم', long: 'تضخيم (زيادة عضل)', calF: 1.1, pro: 2.0 } };
-  const REST = { sick: 'مريض', tired: 'مرهق', travel: 'مسافر', excuse: 'عذر شرعي' };
+  const REST = { sick: 'مريض', tired: 'مرهق', travel: 'مسافر', excuse: 'عذر شرعي', reward: 'إجازة من المتجر' };
+  function cardioMinutes(w) {
+    if (!w || !w.ex) return 0;
+    const lib = (window.HUNTER_EXERCISES || []).concat(state.settings.myEx || []);
+    return w.ex.reduce((a, x) => { const e = lib.find((y) => y.id === x.id); return a + (e && e.m === 'cardio' ? x.sets.reduce((b, st) => b + (st.ok ? +st.r || 0 : 0), 0) : 0); }, 0);
+  }
   function macros(s) {
     if (!(s.age > 0 && s.height > 0 && s.weight > 0)) return null;
     const bmr = 10 * s.weight + 6.25 * s.height - 5 * s.age + (s.sex === 'f' ? -161 : 5);
@@ -592,6 +734,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       ];
     } else s.goals = o.goals.map((g) => ({ ...g }));
     delete s.save; delete s.invest;
+    for (const k of ['myFoods', 'myEx', 'routines', 'schedule', 'purchases', 'storeItems', 'loc']) s[k] = o[k] != null ? JSON.parse(JSON.stringify(o[k])) : JSON.parse(JSON.stringify(DEFAULTS[k]));
     if (!s.waterSince) s.waterSince = todayStr();
     return s;
   }
@@ -629,13 +772,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const calOk = cv > 0 && (bg === 'cut' ? cv <= s.cal : bg === 'bulk' ? cv >= s.cal * 0.95 && cv <= s.cal * 1.15 : Math.abs(cv - s.cal) <= s.cal * 0.1);
     const proOk = (d.protein || 0) >= s.protein;
     const mt = macroT(s), macOk = macroIn(d.carbs || 0, mt.carbs, bg) && macroIn(d.fat || 0, mt.fat, bg);
-    q.push({ id: 'diet', req: true, done: !!d.clean && calOk && proOk, xp: { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0) + (macOk ? 15 : 0), STR: proOk ? 15 : 0 }, prog: ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk, macOk });
+    const cheat = !!d.cheat;
+    q.push({ id: 'diet', req: true, done: cheat || (!!d.clean && calOk && proOk), xp: cheat ? { VIT: 35, STR: proOk ? 15 : 0 } : { VIT: (d.clean ? 15 : 0) + (calOk ? 20 : 0) + (macOk ? 15 : 0), STR: proOk ? 15 : 0 }, prog: cheat ? 1 : ((d.clean ? 1 : 0) + (calOk ? 1 : 0) + (proOk ? 1 : 0)) / 3, calOk, proOk, macOk, cheat });
     const wa = d.water || 0, wg = waterT(s);
     q.push({ id: 'water', req: date >= (s.waterSince || ''), done: wa >= wg, xp: { VIT: wa >= wg ? 20 : 0 }, prog: Math.min(1, wa / wg) });
     const sl = d.sleep || 0, slg = Math.max(1, s.sleep);
     q.push({ id: 'sleep', req: true, done: sl >= slg, xp: { VIT: sl >= slg ? 25 : 0 }, prog: Math.min(1, sl / slg) });
     if (isWorkday(date)) q.push({ id: 'work', req: true, done: !!d.work, xp: { WLT: d.work ? 30 : 0 }, prog: d.work ? 1 : 0 });
-    q.push({ id: 'gym', req: false, done: !!d.gym, xp: { STR: d.gym ? 50 : 0 }, prog: d.gym ? 1 : 0 });
+    const prs = Math.min(3, d.prs || 0), cm = cardioMinutes(d.workout);
+    q.push({ id: 'gym', req: false, done: !!d.gym, xp: { STR: d.gym ? 50 + prs * 15 : 0, AGI: d.gym && cm >= 20 ? 20 : 0 }, prog: d.gym ? 1 : 0 });
     const dv = d.dev || 0, dg = Math.max(1, s.dev);
     q.push({ id: 'dev', req: false, done: dv >= dg, xp: { INT: Math.round(40 * Math.min(1, dv / dg)) + (dv >= dg * 2 ? 10 : 0) }, prog: Math.min(1, dv / dg) });
     for (const c of s.custom) {
@@ -793,7 +938,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const s = S(), prof = macros(s);
     $('#pBody').textContent = s.weight > 0 ? `${(BODY[s.body] || BODY.cut).ar} · ${s.weight} كجم` : (BODY[s.body] || BODY.cut).ar;
     $('#setupCard').hidden = !!prof;
-    $('#penalty').hidden = !C.penaltyActive;
+    $('#penalty').hidden = !C.penaltyActive || curTab !== 'daily';
+    const cn = coins();
+    $('#mCoins').textContent = fmt(cn.bal); $('#miniCoins').textContent = fmt(cn.bal);
+    $('#miniLv').textContent = lv.L; $('#miniXp').style.width = (100 * lv.into / lv.need).toFixed(1) + '%';
   }
 
   // ---------- UI: daily ----------
@@ -809,7 +957,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       case 'diet': {
         const bg = s.body || 'cut', sm = macroT(s);
         const rule = bg === 'cut' ? `سعرات ≤ ${fmt(s.cal)}` : bg === 'bulk' ? `سعرات ${fmt(s.cal * 0.95)}–${fmt(s.cal * 1.15)}` : `سعرات ${fmt(s.cal * 0.9)}–${fmt(s.cal * 1.1)}`;
-        return [`أكل نظيف + ${(BODY[bg] || BODY.cut).ar}`, `${rule} · بروتين ≥ ${fmt(s.protein)}g · كارب ~${fmt(sm.carbs)}g · دهون ~${fmt(sm.fat)}g`];
+        return [`أكل نظيف + ${(BODY[bg] || BODY.cut).ar}`, `${q.cheat ? '🍔 وجبة حرة مفعّلة من المتجر · ' : ''}${rule} · بروتين ≥ ${fmt(s.protein)}g · كارب ~${fmt(sm.carbs)}g · دهون ~${fmt(sm.fat)}g`];
       }
       case 'water': { const wg = waterT(s); return ['شرب الماء', `${wg} لتر على الأقل · ${Math.round(wg / 0.25)} كوب`]; }
       case 'sleep': return ['النوم', `${s.sleep} ساعات على الأقل`];
@@ -825,15 +973,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 
   function controls(q, d) {
     switch (q.id) {
-      case 'prayer': return PRAYERS.map(([k, n]) => `<button type="button" class="chip" data-act="prayer" data-k="${k}" aria-pressed="${d.p && d.p[k] ? 'true' : 'false'}">${n}</button>`).join('');
+      case 'prayer': { const tt = prayerTimes(viewDate); return PRAYERS.map(([k, n]) => `<button type="button" class="chip" data-act="prayer" data-k="${k}" aria-pressed="${d.p && d.p[k] ? 'true' : 'false'}">${n}${tt ? `<small>${fmtPT(tt[k])}</small>` : ''}</button>`).join(''); }
       case 'quran': return `<div class="stepper"><button type="button" data-act="quran" data-d="1" aria-label="زيادة">+</button><output id="quranOut">${d.quran || 0} صفحة</output><button type="button" data-act="quran" data-d="-1" aria-label="إنقاص">−</button></div>`;
       case 'tasbeeh': return tog('tasbeeh', 'تم', d.tasbeeh);
       case 'steps': return numIn('steps', 'خطوات اليوم', 'خطوة', d.steps) + `<span class="hint" data-hint></span>`;
-      case 'diet': return tog('clean', 'أكلي نظيف اليوم', d.clean) + numIn('cal', 'السعرات', 'kcal', d.cal) + numIn('protein', 'البروتين', 'g', d.protein) + numIn('carbs', 'كارب', 'g', d.carbs) + numIn('fat', 'دهون', 'g', d.fat) + `<span class="hint" data-hint></span>`;
+      case 'diet': return tog('clean', 'أكلي نظيف اليوم', d.clean) + numIn('cal', 'السعرات', 'kcal', d.cal) + numIn('protein', 'البروتين', 'g', d.protein) + numIn('carbs', 'كارب', 'g', d.carbs) + numIn('fat', 'دهون', 'g', d.fat) + `<span class="hint" data-hint></span><button class="link-btn" type="button" data-goto-tab="food">سجّل أكلك بالتفصيل من صفحة الأكل ←</button>`;
       case 'water': return `<button type="button" class="chip" data-act="water" data-d="0.25">+ كوب ٢٥٠مل</button><button type="button" class="chip" data-act="water" data-d="0.5">+ قارورة ٥٠٠مل</button><div class="stepper"><button type="button" data-act="water" data-d="-0.25" aria-label="إنقاص كوب">−</button><output id="waterOut">0 لتر</output></div>`;
       case 'sleep': return numIn('sleep', 'ساعات النوم', 'ساعة', d.sleep);
       case 'work': return tog('work', 'داومت', d.work);
-      case 'gym': return tog('gym', 'تمرنت', d.gym) + `<span class="hint" data-hint></span>`;
+      case 'gym': return tog('gym', 'تمرنت', d.gym) + `<span class="hint" data-hint></span><button class="link-btn" type="button" data-goto-tab="train">سجّل تمرينك من صفحة التمارين ←</button>`;
       case 'dev': return numIn('dev', 'المدة', 'دقيقة', d.dev);
       default: return `<button type="button" class="tog" data-act="custom" data-id="${esc(q.custom.id)}" aria-pressed="${q.done ? 'true' : 'false'}">تم</button>`;
     }
@@ -892,7 +1040,9 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     }
     const qo = $('#quranOut'); if (qo) qo.textContent = `${d.quran || 0} صفحة`;
     const wo = $('#waterOut'); if (wo) wo.textContent = `${d.water || 0} / ${waterT(s)} لتر`;
-    for (const b of document.querySelectorAll('#quests [data-act="prayer"]')) b.setAttribute('aria-pressed', d.p && d.p[b.dataset.k] ? 'true' : 'false');
+    for (const b of document.querySelectorAll('#quests [data-act="prayer"]')) { const on = !!(d.p && d.p[b.dataset.k]); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.disabled = !on && !prayerOpen(viewDate, b.dataset.k); b.title = b.disabled ? 'لسا ما دخل وقتها' : ''; }
+    const hasFood = (d.food || []).length > 0;
+    for (const f of ['cal', 'protein', 'carbs', 'fat']) { const el = $('#in-' + f); if (el) { el.readOnly = hasFood; el.title = hasFood ? 'تتحدث من سجل الأكل' : ''; if (hasFood && document.activeElement !== el) el.value = d[f] || ''; } }
     for (const b of document.querySelectorAll('#quests [data-act="toggle"]')) b.setAttribute('aria-pressed', d[b.dataset.f] ? 'true' : 'false');
     for (const b of document.querySelectorAll('#quests [data-act="custom"]')) b.setAttribute('aria-pressed', d.c && d.c[b.dataset.id] ? 'true' : 'false');
     $('#reqCount').textContent = `${e.reqDone}/${e.reqTotal}`;
@@ -908,13 +1058,13 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   }
 
   let restOpen = false;
-  const restUsed = (mk, except) => Object.entries(getMonth(mk)?.days || {}).filter(([d, r]) => d !== except && r.rest && r.rest !== 'excuse' && REST[r.rest]).length;
+  const restUsed = (mk, except) => Object.entries(getMonth(mk)?.days || {}).filter(([d, r]) => d !== except && r.rest && r.rest !== 'excuse' && r.rest !== 'reward' && REST[r.rest]).length;
   function renderRest() {
     const box = $('#restBox'); if (!box) return;
     const d = getDay(viewDate) || {}, s = S(), mk = monthOf(viewDate);
     const used = restUsed(mk, viewDate), left = Math.max(0, s.restMax - used);
     if (REST[d.rest]) {
-      box.innerHTML = `<div class="recovery"><b>حالة: تعافي · ${REST[d.rest]}</b><span>${d.rest === 'excuse' ? 'الصلاة غير مطلوبة اليوم.' : 'المطلوب الصلوات الخمس بس.'} ما فيه عقوبة والسلسلة محفوظة. ارتاح وارجع أقوى.</span><button class="link-btn" type="button" data-rest="">إلغاء وضع التعافي</button></div>`;
+      box.innerHTML = `<div class="recovery"><b>حالة: تعافي · ${REST[d.rest]}</b><span>${d.rest === 'excuse' ? 'الصلاة غير مطلوبة اليوم.' : d.rest === 'reward' ? 'اشتريتها من المتجر وما تنحسب من رصيدك الشهري. المطلوب الصلوات الخمس بس.' : 'المطلوب الصلوات الخمس بس.'} ما فيه عقوبة والسلسلة محفوظة. ارتاح وارجع أقوى.</span><button class="link-btn" type="button" data-rest="">إلغاء وضع التعافي</button></div>`;
       return;
     }
     if (!restOpen) { box.innerHTML = `<button class="link-btn" type="button" data-rest-open>تعبان اليوم؟</button>`; return; }
@@ -1300,19 +1450,35 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (fromUser && lastLevel != null && C.lv.L > lastLevel) levelUp(C.lv.L);
     lastLevel = C.lv.L;
     renderStatus(); renderGoals(); renderLog(); refreshDaily();
+    if (curTab === 'food') renderFood();
+    if (curTab === 'store') renderStore();
   }
 
   // ---------- tabs ----------
-  const tabs = document.querySelectorAll('[data-tab]');
+  const SECTIONS = ['daily', 'food', 'train', 'store', 'goals', 'log', 'settings'], MORE = ['goals', 'log', 'settings'];
+  let curTab = 'daily', moreSub = 'goals';
   function showTab(name) {
-    tabs.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
-    for (const n of ['daily', 'goals', 'log', 'settings']) $('#tab-' + n).hidden = n !== name;
+    if (name === 'more') name = moreSub;
+    if (!SECTIONS.includes(name)) name = 'daily';
+    if (MORE.includes(name)) moreSub = name;
+    const changed = name !== curTab, navKey = MORE.includes(name) ? 'more' : name;
+    curTab = name;
+    document.querySelectorAll('.bottom-nav [data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === navKey)));
+    document.querySelectorAll('#moreSeg [data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+    for (const n of SECTIONS) $('#tab-' + n).hidden = n !== name;
+    $('#moreSeg').hidden = navKey !== 'more';
+    $('#statusWin').hidden = name !== 'daily';
+    $('#miniStatus').hidden = name === 'daily';
+    $('#penalty').hidden = name !== 'daily' || !C.penaltyActive;
+    if (name === 'food') renderFood();
+    if (name === 'train') renderTrain();
+    if (name === 'store') renderStore();
+    if (name === 'settings') fillPrayerSettings();
+    if (changed) window.scrollTo(0, 0);
     try { sessionStorage.setItem('hunter-tab', name); } catch {}
   }
-  tabs.forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
-  const hashTab = (location.hash || '').slice(1);
-  let saved = null; try { saved = sessionStorage.getItem('hunter-tab'); } catch {}
-  showTab(['daily', 'goals', 'log', 'settings'].includes(hashTab) ? hashTab : (saved || 'daily'));
+  document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  document.addEventListener('click', (ev) => { const g = ev.target.closest('[data-goto-tab]'); if (g) showTab(g.dataset.gotoTab); });
 
   // ---------- clock ----------
   let lastToday = todayStr();
@@ -1323,6 +1489,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       lastToday = t; buildDaily(); fillMonth(); render(false);
     }
     $('#gDate').textContent = gFmt.format(now);
+    renderNextPrayer();
+    if (now.getSeconds() === 0 && curTab === 'daily') refreshDaily();
     $('#hDate').textContent = hFmt ? hFmt.format(now) : '';
     const tm = $('#timer');
     if (viewDate !== t) { tm.textContent = 'انتهى'; return; }
@@ -1392,6 +1560,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const h = parseHealth(text);
     if (!h) { toast('خطأ', 'ما لقيت بيانات «الصياد». شغّل الاختصار أول وبعدها اضغط مزامنة.', 'bad'); return false; }
     viewDate = todayStr(); buildDaily();
+    if (((getDay(viewDate) || {}).food || []).length) { delete h.cal; delete h.protein; delete h.carbs; delete h.fat; }
     act(() => setDay(h));
     if (h.weight) { logWeight(h.weight); fillSettings(); render(false); }
     buildDaily();
@@ -1417,6 +1586,713 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   $('#pasteApply').addEventListener('click', () => applyHealth($('#pasteTa').value));
   $('#pasteCancel').addEventListener('click', () => { $('#pasteBox').hidden = true; });
   $('#healthHelp').addEventListener('click', () => { showTab('settings'); setTimeout(() => $('#healthSetup').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); });
+
+  // ---------- shared bits for the new sections ----------
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const normAr = (s) => String(s || '').toLowerCase().replace(/[ًٌٍَُِّْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim();
+  function dayLabel(date) {
+    const t = todayStr();
+    return date === t ? 'اليوم' : date === addDays(t, -1) ? 'أمس' : gFmt.format(parseDs(date));
+  }
+  function allDays() {
+    const out = [];
+    for (const mk in state.months) for (const [d, r] of Object.entries(state.months[mk].days || {})) out.push([d, r]);
+    return out.sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  }
+  function download(name, text, type) {
+    const blob = new Blob([text], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+  }
+
+  // bottom sheet used by the food and exercise pickers
+  let sheetClose = null;
+  function openSheet(title, html, onClose) {
+    $('#sheetTitle').textContent = title;
+    $('#sheetBody').innerHTML = html;
+    $('#sheet').hidden = false;
+    document.body.style.overflow = 'hidden';
+    sheetClose = onClose || null;
+  }
+  function closeSheet() {
+    $('#sheet').hidden = true; $('#sheetBody').innerHTML = '';
+    document.body.style.overflow = '';
+    const f = sheetClose; sheetClose = null; if (f) f();
+  }
+  $('#sheetClose').addEventListener('click', closeSheet);
+  $('#sheet').addEventListener('click', (ev) => { if (ev.target.id === 'sheet') closeSheet(); });
+
+  // ---------- prayer times ----------
+  const PRAYER_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  const PRAYER_AR = { fajr: 'الفجر', sunrise: 'الشروق', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+  const CITIES = window.HUNTER_CITIES || [];
+  function prayerLoc() {
+    const s = S();
+    if (s.loc && isFinite(s.loc.lat) && isFinite(s.loc.lng)) return s.loc;
+    const c = CITIES.find((x) => x.id === s.city);
+    return c ? { name: c.n, lat: c.lat, lng: c.lng, tz: c.tz } : null;
+  }
+  const hijriMonth = (date) => { try { return +new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { month: 'numeric' }).format(date); } catch { return 0; } };
+  const ptCache = {};
+  function prayerTimes(date) {
+    const loc = prayerLoc(); if (!loc || !window.PrayerTimes) return null;
+    const s = S(), key = [date, loc.lat, loc.lng, s.pMethod, s.asr].join('|');
+    if (ptCache[key]) return ptCache[key];
+    const [y, m, d] = date.split('-').map(Number);
+    const t = window.PrayerTimes.compute(y, m, d, loc.lat, loc.lng, { method: s.pMethod || 'uq', asr: s.asr, ramadan: hijriMonth(new Date(y, m - 1, d, 12)) === 9 });
+    return (ptCache[key] = t);
+  }
+  const ptFmts = {};
+  function fmtPT(dt) {
+    if (!dt) return '—';
+    const tz = prayerLoc()?.tz || '';
+    if (!ptFmts[tz]) {
+      try { ptFmts[tz] = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit', timeZone: tz || undefined }); }
+      catch { ptFmts[tz] = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit' }); }
+    }
+    return ptFmts[tz].format(dt);
+  }
+  function nextPrayer(now) {
+    now = now || new Date();
+    const t = todayStr(), tt = prayerTimes(t); if (!tt) return null;
+    for (const k of PRAYER_KEYS) if (tt[k] && tt[k] > now) return { k, at: tt[k] };
+    const tm = prayerTimes(addDays(t, 1)); return tm ? { k: 'fajr', at: tm.fajr } : null;
+  }
+  // A prayer can be ticked once its time has come (or any time when no city is set)
+  function prayerOpen(date, k) {
+    const t = todayStr();
+    if (date < t) return true;
+    if (date > t) return false;
+    const tt = prayerTimes(date);
+    return !tt || !tt[k] || Date.now() >= tt[k].getTime();
+  }
+  function renderNextPrayer() {
+    const el = $('#nextPrayer'); if (!el) return;
+    const np = nextPrayer();
+    if (!np) { el.innerHTML = '<button class="link-btn" type="button" data-goto="prayer">حدد مدينتك عشان تطلع لك أوقات الصلاة</button>'; return; }
+    const sec = Math.max(0, Math.floor((np.at - Date.now()) / 1000));
+    el.innerHTML = `الصلاة القادمة: <b>${PRAYER_AR[np.k]}</b> ${fmtPT(np.at)} · <span class="cd">بعد ${pad(Math.floor(sec / 3600))}:${pad(Math.floor(sec / 60) % 60)}:${pad(sec % 60)}</span>`;
+  }
+  let adhanTimer = null;
+  function scheduleAdhan() {
+    clearTimeout(adhanTimer);
+    const np = nextPrayer(); if (!np) return;
+    const ms = np.at.getTime() - Date.now();
+    if (ms > 2147483000) return;
+    adhanTimer = setTimeout(() => { fireAdhan(np.k); refreshDaily(); setTimeout(scheduleAdhan, 60000); }, Math.max(0, ms));
+  }
+  function chime() {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      [659, 784, 988].forEach((f, i) => {
+        const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime + i * 0.35;
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9);
+        o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + 1);
+      });
+    } catch {}
+  }
+  async function fireAdhan(k) {
+    const msg = `حان الآن وقت صلاة ${PRAYER_AR[k]}`;
+    toast('ADHAN', msg, 'gold');
+    if (!S().adhan) return;
+    chime();
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration() : null;
+        if (reg) reg.showNotification('نظام الصياد', { body: msg, tag: 'adhan-' + k, icon: 'icons/icon-192.png' });
+        else new Notification('نظام الصياد', { body: msg });
+      }
+    } catch {}
+  }
+  function buildICS() {
+    const loc = prayerLoc(); if (!loc) return null;
+    const stamp = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const now = new Date(), t0 = todayStr();
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hunter System//Prayer Times//AR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:مواقيت الصلاة'];
+    for (let i = 0; i < 30; i++) {
+      const day = addDays(t0, i), tt = prayerTimes(day);
+      for (const k of PRAYER_KEYS) {
+        const at = tt && tt[k]; if (!at || at < now) continue;
+        L.push('BEGIN:VEVENT', `UID:${day}-${k}@hunter-system`, 'DTSTAMP:' + stamp(now), 'DTSTART:' + stamp(at), 'DTEND:' + stamp(new Date(at.getTime() + 10 * 60e3)),
+          'SUMMARY:صلاة ' + PRAYER_AR[k], 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:حان وقت صلاة ' + PRAYER_AR[k], 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+      }
+    }
+    L.push('END:VCALENDAR');
+    return L.join('\r\n') + '\r\n';
+  }
+  function fillPrayerSettings() {
+    const s = S(), loc = prayerLoc();
+    const opts = ['<option value="">اختر مدينتك</option>'].concat(CITIES.map((c) => `<option value="${c.id}">${esc(c.n)}</option>`));
+    if (s.loc) opts.splice(1, 0, '<option value="__geo">موقعي الحالي</option>');
+    $('#s-city').innerHTML = opts.join('');
+    $('#s-city').value = s.loc ? '__geo' : (s.city || '');
+    $('#s-pmethod').innerHTML = Object.entries(window.PrayerTimes ? window.PrayerTimes.METHODS : {}).map(([k, m]) => `<option value="${k}">${esc(m.name)}</option>`).join('');
+    $('#s-pmethod').value = s.pMethod || 'uq';
+    $('#s-asr').value = s.asr || 'shafi';
+    $('#adhanBtn').textContent = s.adhan ? 'تنبيه الأذان مفعّل ✓' : 'تفعيل تنبيه الأذان';
+    const tt = prayerTimes(todayStr());
+    if (!tt) { $('#ptToday').innerHTML = '<p class="empty">اختر مدينتك أو استخدم موقعك، وتطلع لك الأوقات هنا.</p>'; return; }
+    const np = nextPrayer();
+    $('#ptToday').innerHTML = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'].map((k) =>
+      `<div class="${np && np.k === k && np.at === tt[k] ? 'now' : ''}"><b>${fmtPT(tt[k])}</b>${PRAYER_AR[k]}</div>`).join('') +
+      `<p class="hint" style="grid-column:1/-1">${esc(loc.name)} · ${esc(loc.tz || '')}</p>`;
+  }
+  function prayerChanged() {
+    for (const k in ptCache) delete ptCache[k];
+    touchStart(); save('settings'); fillPrayerSettings(); buildDaily(); renderNextPrayer(); scheduleAdhan();
+  }
+  $('#s-city').addEventListener('change', (ev) => {
+    const v = ev.target.value, s = S();
+    if (v === '__geo') return;
+    s.loc = null; s.city = v || null;
+    const c = CITIES.find((x) => x.id === v); if (c) s.pMethod = c.m;
+    prayerChanged();
+  });
+  $('#s-pmethod').addEventListener('change', (ev) => { S().pMethod = ev.target.value; prayerChanged(); });
+  $('#s-asr').addEventListener('change', (ev) => { S().asr = ev.target.value; prayerChanged(); });
+  $('#geoBtn').addEventListener('click', () => {
+    if (!navigator.geolocation) { toast('خطأ', 'جهازك ما يدعم تحديد الموقع. اختر مدينتك من القائمة.', 'bad'); return; }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch {}
+      S().loc = { name: 'موقعي الحالي', lat: r1(pos.coords.latitude * 100) / 100, lng: r1(pos.coords.longitude * 100) / 100, tz };
+      S().city = null; prayerChanged(); toast('SYSTEM', 'تم تحديد موقعك وحساب أوقات الصلاة.');
+    }, () => toast('خطأ', 'ما قدرت أحدد موقعك. اسمح للتطبيق بالموقع أو اختر مدينتك من القائمة.', 'bad'), { timeout: 15000, maximumAge: 3600e3 });
+  });
+  $('#adhanBtn').addEventListener('click', async () => {
+    const s = S();
+    if (s.adhan) { s.adhan = false; save('settings'); fillPrayerSettings(); toast('SYSTEM', 'تم إيقاف تنبيه الأذان.'); return; }
+    if (!prayerLoc()) { toast('خطأ', 'حدد مدينتك أول.', 'bad'); return; }
+    let perm = 'denied';
+    try { perm = 'Notification' in window ? await Notification.requestPermission() : 'unsupported'; } catch {}
+    s.adhan = true; save('settings'); fillPrayerSettings(); scheduleAdhan(); chime();
+    toast('SYSTEM', perm === 'granted' ? 'تم تفعيل تنبيه الأذان والإشعارات.' : 'تم تفعيل صوت الأذان داخل التطبيق. الإشعارات ما انسمح لها، فعّلها من إعدادات الجوال.');
+  });
+  $('#icsBtn').addEventListener('click', async () => {
+    const ics = buildICS(); if (!ics) { toast('خطأ', 'حدد مدينتك أول.', 'bad'); return; }
+    const name = 'prayer-times.ics';
+    try {
+      const file = new File([ics], name, { type: 'text/calendar' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'مواقيت الصلاة' }); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    download(name, ics, 'text/calendar');
+    toast('SYSTEM', 'نزل ملف التقويم. افتحه واختر «إضافة الكل».');
+  });
+  document.addEventListener('click', (ev) => {
+    const g = ev.target.closest('[data-goto="prayer"]'); if (!g) return;
+    showTab('settings'); setTimeout(() => $('#prayerSect').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  });
+
+  // ---------- food log ----------
+  const MEALS = { b: 'الفطور', l: 'الغداء', d: 'العشاء', s: 'سناك' };
+  const MEALS_TO = { b: 'للفطور', l: 'للغداء', d: 'للعشاء', s: 'للسناك' };
+  const FOOD_CATS = window.HUNTER_FOOD_CATS || {};
+  const allFoods = () => (S().myFoods || []).concat(window.HUNTER_FOODS || []);
+  const foodById = (id) => allFoods().find((f) => f.id === id);
+  const foodTotals = (list) => (list || []).reduce((a, e) => ({ k: a.k + (e.k || 0), p: a.p + (e.p || 0), c: a.c + (e.c || 0), f: a.f + (e.f || 0) }), { k: 0, p: 0, c: 0, f: 0 });
+  function makeEntry(food, grams, label, meal) {
+    const x = grams / 100;
+    return { id: uid(), fid: food.id, n: food.n, meal, g: r1(grams), label, k: r1(food.k * x), p: r1(food.p * x), c: r1(food.c * x), f: r1(food.f * x) };
+  }
+  function setFood(list) {
+    const t = foodTotals(list);
+    act(() => setDay({ food: list, cal: Math.round(t.k), protein: Math.round(t.p), carbs: Math.round(t.c), fat: Math.round(t.f) }));
+    buildDaily(); renderFood();
+  }
+  function recentFoods() {
+    const seen = new Set(), out = [];
+    for (const [, r] of allDays()) for (const e of (r.food || []).slice().reverse()) {
+      if (!e.fid || seen.has(e.fid)) continue;
+      const f = foodById(e.fid); if (!f) continue;
+      seen.add(e.fid); out.push(f); if (out.length >= 15) return out;
+    }
+    return out;
+  }
+  function renderFood() {
+    const d = getDay(viewDate) || {}, s = S(), list = d.food || [], t = foodTotals(list);
+    const mt = macroT(s), wg = waterT(s), wa = d.water || 0;
+    $('#foodDay').textContent = dayLabel(viewDate);
+    $('#foodPrev').disabled = viewDate <= addDays(todayStr(), -30);
+    $('#foodNext').disabled = viewDate >= todayStr();
+    const left = s.cal - t.k;
+    const bar = (v, tg) => `<div class="bar"><i style="width:${Math.min(100, tg ? (v / tg) * 100 : 0).toFixed(0)}%"></i></div>`;
+    $('#foodSummary').innerHTML = `
+      <div class="kcal-big"><b>${fmt(Math.abs(left))}</b><span>${left >= 0 ? 'سعرة باقية' : 'سعرة زيادة'}</span><small>أكلت ${fmt(t.k)} من ${fmt(s.cal)}${d.cheat ? ' · 🍔 وجبة حرة مفعّلة' : ''}</small></div>
+      <div class="macro-grid">
+        <div><span>بروتين</span><b>${fmt(t.p)}<small>/${fmt(s.protein)}g</small></b>${bar(t.p, s.protein)}</div>
+        <div><span>كارب</span><b>${fmt(t.c)}<small>/${fmt(mt.carbs)}g</small></b>${bar(t.c, mt.carbs)}</div>
+        <div><span>دهون</span><b>${fmt(t.f)}<small>/${fmt(mt.fat)}g</small></b>${bar(t.f, mt.fat)}</div>
+      </div>
+      <div class="water-row"><span>الماء <b>${wa}</b> / ${wg} لتر</span><button class="chip" type="button" data-water="0.25">+ كوب</button><button class="chip" type="button" data-water="0.5">+ قارورة</button><button class="chip" type="button" data-water="-0.25" aria-label="إنقاص كوب">−</button></div>`;
+    $('#meals').innerHTML = Object.entries(MEALS).map(([mk, mn]) => {
+      const items = list.filter((e) => (e.meal || 's') === mk), mtot = foodTotals(items);
+      return `<div class="meal">
+        <div class="meal-head"><h3>${mn}</h3><span class="kc">${fmt(mtot.k)} سعرة</span></div>
+        ${items.map((e) => `<div class="entry"><button type="button" class="nm" data-edit="${e.id}">${esc(e.n)}<small>${esc(e.label || '')} · ب ${fmt(e.p)} · ك ${fmt(e.c)} · د ${fmt(e.f)}</small></button><span class="kc">${fmt(e.k)}</span><button class="x" type="button" data-del-food="${e.id}" aria-label="حذف">×</button></div>`).join('')}
+        <div class="meal-actions"><button class="btn ghost" type="button" data-add-meal="${mk}">+ أضف ${MEALS_TO[mk]}</button></div>
+      </div>`;
+    }).join('');
+  }
+  $('#foodPrev').addEventListener('click', () => { viewDate = addDays(viewDate, -1); buildDaily(); renderFood(); });
+  $('#foodNext').addEventListener('click', () => { if (viewDate < todayStr()) { viewDate = addDays(viewDate, 1); buildDaily(); renderFood(); } });
+  $('#tab-food').addEventListener('click', (ev) => {
+    const w = ev.target.closest('[data-water]');
+    if (w) { const d = getDay(viewDate) || {}; act(() => setDay({ water: Math.max(0, Math.round(((d.water || 0) + Number(w.dataset.water)) * 100) / 100) })); renderFood(); return; }
+    const add = ev.target.closest('[data-add-meal]'); if (add) { foodSearch(add.dataset.addMeal); return; }
+    const del = ev.target.closest('[data-del-food]');
+    if (del) { setFood(((getDay(viewDate) || {}).food || []).filter((e) => e.id !== del.dataset.delFood)); return; }
+    const ed = ev.target.closest('[data-edit]');
+    if (ed) { const e = ((getDay(viewDate) || {}).food || []).find((x) => x.id === ed.dataset.edit); const f = e && foodById(e.fid); if (f) foodQty(f, e.meal, e); return; }
+  });
+  $('#copyYesterday').addEventListener('click', () => {
+    const y = (getDay(addDays(viewDate, -1)) || {}).food || [];
+    if (!y.length) { toast('SYSTEM', 'ما فيه أكل مسجل في اليوم اللي قبله.'); return; }
+    setFood(((getDay(viewDate) || {}).food || []).concat(y.map((e) => ({ ...e, id: uid() }))));
+    toast('SYSTEM', `نسخت ${y.length} أكلة من اليوم اللي قبله.`);
+  });
+  const defaultMeal = () => { const h = new Date().getHours(); return h < 11 ? 'b' : h < 16 ? 'l' : h < 21 ? 'd' : 's'; };
+  $('#quickFood').addEventListener('click', () => foodSearch(defaultMeal()));
+
+  function foodSearch(meal, cat) {
+    cat = cat || 'recent';
+    const cats = [['recent', 'الأخيرة'], ['all', 'الكل'], ['mine', 'أكلاتي']].concat(Object.entries(FOOD_CATS));
+    openSheet(`أضف ${MEALS_TO[meal]}`, `
+      <div class="inwrap"><input id="fs-q" type="search" placeholder="ابحث: دجاج، رز، لبن…" autocomplete="off" style="direction:rtl"></div>
+      <div class="chips-row" id="fs-cats">${cats.map(([k, n]) => `<button type="button" class="chip" data-cat="${k}" aria-pressed="${k === cat}">${n}</button>`).join('')}</div>
+      <ul class="pick-list" id="fs-list"></ul>
+      <div class="backup"><button class="btn ghost" type="button" id="fs-custom">+ أكلة مو موجودة</button><button class="btn ghost" type="button" id="fs-quick">سعرات سريعة</button></div>`);
+    let cur = cat;
+    const draw = () => {
+      const q = normAr($('#fs-q').value);
+      let list = cur === 'recent' && !q ? recentFoods() : cur === 'mine' ? (S().myFoods || []) : cur === 'all' || cur === 'recent' ? allFoods() : allFoods().filter((f) => f.cat === cur);
+      if (q) list = list.filter((f) => normAr(f.n).includes(q));
+      $('#fs-list').innerHTML = list.slice(0, 80).map((f) => `<li><button type="button" data-pick="${esc(f.id)}"><span>${esc(f.n)}</span><small>${fmt(f.k)} سعرة · ب ${r1(f.p)} / 100جم</small></button></li>`).join('')
+        || `<li class="empty">${cur === 'recent' && !q ? 'لسا ما سجلت أكل. ابحث أو اختر «الكل».' : 'ما لقيت شي. جرب كلمة ثانية أو أضفها من «أكلة مو موجودة».'}</li>`;
+    };
+    draw();
+    $('#fs-q').addEventListener('input', draw);
+    $('#fs-cats').addEventListener('click', (ev) => { const b = ev.target.closest('[data-cat]'); if (!b) return; cur = b.dataset.cat; document.querySelectorAll('#fs-cats .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b))); draw(); });
+    $('#fs-list').addEventListener('click', (ev) => { const b = ev.target.closest('[data-pick]'); if (!b) return; const f = foodById(b.dataset.pick); if (f) foodQty(f, meal); });
+    $('#fs-custom').addEventListener('click', () => foodCustom(meal));
+    $('#fs-quick').addEventListener('click', () => foodQuick(meal));
+  }
+  function foodQty(food, meal, entry) {
+    const units = (food.u || []).map(([n, g], i) => `<option value="${i}">${esc(n)} (${r1(g)} جم)</option>`).join('') + '<option value="g">جرام</option>';
+    openSheet(entry ? 'تعديل الكمية' : food.n, `
+      <p class="q-desc">${esc(food.n)} · لكل 100 جم: ${fmt(food.k)} سعرة · بروتين ${r1(food.p)} · كارب ${r1(food.c)} · دهون ${r1(food.f)}</p>
+      <div class="set-grid">
+        <label class="field"><span>الكمية</span><span class="inwrap"><input id="fq-n" inputmode="decimal" autocomplete="off" value="1"></span></label>
+        <label class="field"><span>الوحدة</span><select id="fq-u">${units}</select></label>
+        <label class="field"><span>الوجبة</span><select id="fq-m">${Object.entries(MEALS).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>
+      </div>
+      <div class="calc" id="fq-prev"></div>
+      <button class="btn" type="button" id="fq-add">${entry ? 'حفظ' : 'أضف'}</button>`);
+    $('#fq-m').value = meal || 's';
+    if (entry) { $('#fq-u').value = 'g'; $('#fq-n').value = entry.g; }
+    else if (!(food.u || []).length) { $('#fq-u').value = 'g'; $('#fq-n').value = 100; }
+    const grams = () => { const n = num($('#fq-n').value), u = $('#fq-u').value; return u === 'g' ? n : n * food.u[+u][1]; };
+    const label = () => { const n = num($('#fq-n').value), u = $('#fq-u').value; return u === 'g' ? `${r1(n)} جم` : `${r1(n)} × ${food.u[+u][0]}`; };
+    const prev = () => {
+      const g = grams(), x = g / 100;
+      $('#fq-prev').innerHTML = `<div class="hl"><b>${fmt(food.k * x)}</b><span>سعرة</span></div><div><b>${r1(food.p * x)}g</b><span>بروتين</span></div><div><b>${r1(food.c * x)}g</b><span>كارب</span></div><div><b>${r1(food.f * x)}g</b><span>دهون</span></div>`;
+    };
+    prev();
+    $('#fq-n').addEventListener('input', prev);
+    $('#fq-u').addEventListener('change', () => { if ($('#fq-u').value === 'g' && num($('#fq-n').value) < 10) $('#fq-n').value = 100; else if ($('#fq-u').value !== 'g' && num($('#fq-n').value) >= 10) $('#fq-n').value = 1; prev(); });
+    $('#fq-add').addEventListener('click', () => {
+      const g = grams(); if (!(g > 0)) { $('#fq-n').focus(); return; }
+      const list = ((getDay(viewDate) || {}).food || []).slice();
+      const e = makeEntry(food, g, label(), $('#fq-m').value);
+      if (entry) { const i = list.findIndex((x) => x.id === entry.id); if (i >= 0) list[i] = { ...e, id: entry.id }; }
+      else list.push(e);
+      closeSheet(); setFood(list);
+      if (!entry) toast('FOOD', `${food.n} · ${fmt(e.k)} سعرة`);
+    });
+  }
+  function foodCustom(meal) {
+    openSheet('أكلة جديدة', `
+      <p class="q-desc">اكتب القيم من ملصق المنتج أو من تطبيق ثاني. تنحفظ في «أكلاتي» وتقدر تستخدمها كل مرة.</p>
+      <div class="set-grid">
+        <label class="field" style="grid-column:1/-1"><span>الاسم</span><span class="inwrap"><input id="fc-n" autocomplete="off" style="direction:rtl" placeholder="مثال: بروتين بار"></span></label>
+        <label class="field"><span>اسم الحصة</span><span class="inwrap"><input id="fc-un" autocomplete="off" style="direction:rtl" value="حصة"></span></label>
+        <label class="field"><span>وزن الحصة</span><span class="inwrap"><input id="fc-ug" inputmode="decimal" value="100"><em>جم</em></span></label>
+        <label class="field"><span>سعرات الحصة</span><span class="inwrap"><input id="fc-k" inputmode="decimal"><em>kcal</em></span></label>
+        <label class="field"><span>بروتين</span><span class="inwrap"><input id="fc-p" inputmode="decimal"><em>g</em></span></label>
+        <label class="field"><span>كارب</span><span class="inwrap"><input id="fc-c" inputmode="decimal"><em>g</em></span></label>
+        <label class="field"><span>دهون</span><span class="inwrap"><input id="fc-f" inputmode="decimal"><em>g</em></span></label>
+      </div>
+      <button class="btn" type="button" id="fc-save">حفظ واختيار الكمية</button>`);
+    $('#fc-save').addEventListener('click', () => {
+      const n = $('#fc-n').value.trim(), ug = num($('#fc-ug').value), k = num($('#fc-k').value);
+      if (!n) { $('#fc-n').focus(); return; }
+      if (!(ug > 0)) { $('#fc-ug').focus(); return; }
+      if (!(k > 0)) { $('#fc-k').focus(); return; }
+      const x = 100 / ug;
+      const food = { id: 'my_' + uid(), cat: 'mine', n: n.slice(0, 60), k: r1(k * x), p: r1(num($('#fc-p').value) * x), c: r1(num($('#fc-c').value) * x), f: r1(num($('#fc-f').value) * x), u: [[($('#fc-un').value.trim() || 'حصة').slice(0, 30), ug]] };
+      S().myFoods = [food].concat(S().myFoods || []);
+      touchStart(); save('settings');
+      foodQty(food, meal);
+    });
+  }
+  function foodQuick(meal) {
+    openSheet('سعرات سريعة', `
+      <p class="q-desc">لما تعرف السعرات بس، مثل وجبة مطعم مكتوب عليها السعرات.</p>
+      <div class="set-grid">
+        <label class="field" style="grid-column:1/-1"><span>الوصف</span><span class="inwrap"><input id="fk-n" autocomplete="off" style="direction:rtl" placeholder="مثال: وجبة مطعم"></span></label>
+        <label class="field"><span>السعرات</span><span class="inwrap"><input id="fk-k" inputmode="decimal"><em>kcal</em></span></label>
+        <label class="field"><span>بروتين</span><span class="inwrap"><input id="fk-p" inputmode="decimal"><em>g</em></span></label>
+        <label class="field"><span>كارب</span><span class="inwrap"><input id="fk-c" inputmode="decimal"><em>g</em></span></label>
+        <label class="field"><span>دهون</span><span class="inwrap"><input id="fk-f" inputmode="decimal"><em>g</em></span></label>
+      </div>
+      <button class="btn" type="button" id="fk-add">أضف</button>`);
+    $('#fk-add').addEventListener('click', () => {
+      const k = num($('#fk-k').value); if (!(k > 0)) { $('#fk-k').focus(); return; }
+      const e = { id: uid(), fid: null, n: ($('#fk-n').value.trim() || 'سعرات سريعة').slice(0, 60), meal, g: 0, label: 'إدخال سريع', k: r1(k), p: r1(num($('#fk-p').value)), c: r1(num($('#fk-c').value)), f: r1(num($('#fk-f').value)) };
+      closeSheet(); setFood(((getDay(viewDate) || {}).food || []).concat([e]));
+    });
+  }
+
+  // ---------- workouts ----------
+  const MUSCLES = window.HUNTER_MUSCLES || {};
+  const allEx = () => (S().myEx || []).concat(window.HUNTER_EXERCISES || []);
+  const exById = (id) => allEx().find((e) => e.id === id) || { id, n: 'تمرين محذوف', m: 'abs', kind: 'w' };
+  const e1rm = (w, r) => w * (1 + r / 30);
+  let trainView = 'today', restLeft = 0, restTimer = null, libMuscle = 'all', libOpen = null, routineDelete = null, templatePending = null;
+  function sessions(beforeDate) {
+    return allDays().filter(([d, r]) => r.workout && r.workout.done && (!beforeDate || d < beforeDate));
+  }
+  function lastSets(exId, beforeDate) {
+    for (const [, r] of sessions(beforeDate)) { const x = r.workout.ex.find((e) => e.id === exId); if (x && x.sets.some((s) => s.ok)) return x.sets.filter((s) => s.ok); }
+    return null;
+  }
+  function bestE1(exId, beforeDate) {
+    let best = 0;
+    for (const [, r] of sessions(beforeDate)) for (const x of r.workout.ex) if (x.id === exId) for (const s of x.sets) if (s.ok && s.w > 0 && s.r > 0) best = Math.max(best, e1rm(s.w, s.r));
+    return best;
+  }
+  const volume = (w) => w.ex.reduce((a, x) => a + (exById(x.id).kind === 't' ? 0 : x.sets.reduce((b, s) => b + (s.ok ? (s.w || 0) * (s.r || 0) : 0), 0)), 0);
+  const cardioMin = (w) => w ? w.ex.reduce((a, x) => a + (exById(x.id).m === 'cardio' ? x.sets.reduce((b, s) => b + (s.ok ? s.r || 0 : 0), 0) : 0), 0) : 0;
+  const routines = () => S().routines || [];
+  function setWorkout(w) { setDayAt(todayStr(), { workout: w }); }
+  function startWorkout(rid) {
+    const r = routines().find((x) => x.id === rid), t = todayStr();
+    const ex = (r ? r.ex : []).map((x) => {
+      const prev = lastSets(x.id, t) || [];
+      return { id: x.id, target: x.reps, sets: Array.from({ length: Math.max(1, x.sets || 3) }, (_, i) => { const p = prev[i] || prev[prev.length - 1]; return { w: p ? p.w : '', r: p ? p.r : '', ok: false }; }) };
+    });
+    setWorkout({ rid: r ? r.id : null, n: r ? r.n : 'تمرين حر', t0: Date.now(), done: false, ex });
+    renderTrain();
+    if (!r) exPicker((id) => { const w = (getDay(todayStr()) || {}).workout; w.ex.push({ id, target: '', sets: [{ w: '', r: '', ok: false }] }); setWorkout(w); renderTrain(); });
+  }
+  function finishWorkout() {
+    const t = todayStr(), w = JSON.parse(JSON.stringify((getDay(t) || {}).workout || null));
+    if (!w) return;
+    if (!w.ex.some((x) => x.sets.some((s) => s.ok))) { toast('خطأ', 'علّم على مجموعة وحدة على الأقل بـ ✓ قبل ما تنهي.', 'bad'); return; }
+    let prs = 0;
+    for (const x of w.ex) {
+      const ex = exById(x.id); if (ex.kind === 't') continue;
+      const before = bestE1(x.id, t);
+      const top = x.sets.filter((s) => s.ok && s.w > 0 && s.r > 0).sort((a, b) => e1rm(b.w, b.r) - e1rm(a.w, a.r))[0];
+      if (top && before > 0 && e1rm(top.w, top.r) > before + 0.01) { prs++; toast('NEW RECORD', `رقم قياسي في ${ex.n}: ${top.w} كجم × ${top.r}`, 'gold'); }
+    }
+    w.done = true; w.t1 = Date.now();
+    viewDate = t;
+    act(() => setDay({ workout: w, gym: true, prs }));
+    stopRest(); renderTrain(); buildDaily();
+    toast('WORKOUT', `خلص التمرين · ${Math.round((w.t1 - w.t0) / 60000)} دقيقة · حجم ${fmt(volume(w))} كجم`, 'gold');
+  }
+  function startRest() {
+    restLeft = S().restSec || 90; $('#restBar').hidden = false; drawRest();
+    clearInterval(restTimer);
+    restTimer = setInterval(() => {
+      restLeft--; drawRest();
+      if (restLeft <= 0) { stopRest(); chime(); try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {} toast('REST', 'خلصت الراحة، المجموعة الجاية!'); }
+    }, 1000);
+  }
+  function stopRest() { clearInterval(restTimer); restTimer = null; $('#restBar').hidden = true; }
+  function drawRest() { $('#restTime').textContent = `${Math.floor(Math.max(0, restLeft) / 60)}:${pad(Math.max(0, restLeft) % 60)}`; }
+  $('#restBar').addEventListener('click', (ev) => {
+    if (ev.target.closest('#restSkip')) stopRest();
+    else if (ev.target.closest('#restPlus')) { restLeft += 15; drawRest(); }
+  });
+
+  function renderTrain() {
+    document.querySelectorAll('#trainSeg [data-tv]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tv === trainView)));
+    const box = $('#trainBody'), t = todayStr(), d = getDay(t) || {}, w = d.workout;
+    if (trainView === 'today') {
+      if (w && !w.done) { box.innerHTML = sessionHTML(w); return; }
+      const sched = routines().find((r) => r.id === (S().schedule || {})[parseDs(t).getDay()]);
+      let html = '';
+      if (w && w.done) {
+        html += `<div class="recovery" style="border-color:rgba(95,227,173,.5);background:rgba(95,227,173,.06)"><b style="color:var(--ok)">تمرين اليوم مكتمل ✓</b><span>${esc(w.n)} · ${Math.round(((w.t1 || w.t0) - w.t0) / 60000)} دقيقة · حجم ${fmt(volume(w))} كجم${d.prs ? ` · ${d.prs} رقم قياسي` : ''}${cardioMin(w) ? ` · كارديو ${cardioMin(w)} دقيقة` : ''}</span></div>`;
+      } else if (!routines().length) {
+        html += `<div class="recovery"><b>ابدأ ببرنامج جاهز</b><span>اختر برنامج من «البرامج والجدول» أو سوّ برنامجك، أو ابدأ تمرين حر الحين.</span><button class="btn" type="button" data-tv-go="plans">اختر برنامج</button></div>`;
+      } else {
+        html += sched
+          ? `<div class="today-card"><span class="hint">تمرين اليوم حسب جدولك</span><h3>${esc(sched.n)}</h3><p class="q-desc">${sched.ex.map((x) => esc(exById(x.id).n)).join('، ')}</p><button class="btn" type="button" data-start="${sched.id}">ابدأ التمرين</button></div>`
+          : `<div class="today-card"><span class="hint">اليوم راحة حسب جدولك</span><h3>يوم راحة 💤</h3><p class="q-desc">الراحة جزء من التمرين. وإذا تبي تتمرن، اختر برنامج تحت.</p></div>`;
+      }
+      if (!w || !w.done) {
+        html += `<div class="inc-form" style="margin-top:12px">
+          <label class="field" style="flex:2 1 180px"><span>أو اختر برنامج ثاني</span><select id="tr-pick">${routines().map((r) => `<option value="${r.id}">${esc(r.n)}</option>`).join('')}<option value="">تمرين حر (بدون برنامج)</option></select></label>
+          <button class="btn ghost" type="button" id="tr-start-pick">ابدأ</button></div>`;
+      }
+      html += historyHTML();
+      box.innerHTML = html;
+      return;
+    }
+    if (trainView === 'plans') { box.innerHTML = plansHTML(); return; }
+    box.innerHTML = libraryHTML();
+  }
+  function sessionHTML(w) {
+    const t = todayStr();
+    return `<div class="session-head"><div><span class="hint">جاري التمرين</span><h3>${esc(w.n)}</h3></div><span class="timer-sm" id="sessClock"></span></div>
+      ${w.ex.map((x, xi) => {
+        const ex = exById(x.id), last = lastSets(x.id, t), kind = ex.kind;
+        const lastTxt = last ? 'آخر مرة: ' + last.map((s) => kind === 't' ? `${s.r} د` : kind === 'bw' && !s.w ? `${s.r}` : `${s.w}×${s.r}`).join('، ') : 'أول مرة';
+        return `<div class="ex-card">
+          <div class="ex-head"><div><h4>${esc(ex.n)}</h4><small>${MUSCLES[ex.m] || ''}${x.target ? ` · الهدف ${x.sets.length} × ${esc(x.target)}${kind === 't' ? ' د' : ''}` : ''}</small></div><button class="x" type="button" data-rm-ex="${xi}" aria-label="حذف التمرين">×</button></div>
+          <small class="hint">${lastTxt}</small>
+          <div class="set-row head"><span>#</span><span>${kind === 't' ? '' : kind === 'bw' ? 'وزن إضافي' : 'الوزن (كجم)'}</span><span>${kind === 't' ? 'الدقائق' : 'العدات'}</span><span></span><span></span></div>
+          ${x.sets.map((s, si) => `<div class="set-row">
+            <span class="no">${si + 1}</span>
+            ${kind === 't' ? '<span></span>' : `<span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="w" value="${s.w === '' || s.w == null ? '' : s.w}" placeholder="${kind === 'bw' ? '0' : '—'}" aria-label="الوزن"></span>`}
+            <span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="r" value="${s.r === '' || s.r == null ? '' : s.r}" placeholder="—" aria-label="${kind === 't' ? 'الدقائق' : 'العدات'}"></span>
+            <button type="button" class="set-ok" data-ok="${xi}:${si}" aria-pressed="${s.ok ? 'true' : 'false'}" aria-label="تم">✓</button>
+            <button type="button" class="x" data-rm-set="${xi}:${si}" aria-label="حذف المجموعة">×</button>
+          </div>`).join('')}
+          <button class="link-btn" type="button" data-add-set="${xi}">+ مجموعة</button>
+        </div>`;
+      }).join('')}
+      <div class="backup"><button class="btn ghost" type="button" id="sess-add-ex">+ أضف تمرين</button></div>
+      <div class="backup" style="margin-top:6px"><button class="btn" type="button" id="sess-finish">إنهاء التمرين ✓</button><button class="btn danger" type="button" id="sess-cancel">إلغاء</button></div>`;
+  }
+  function historyHTML() {
+    const list = sessions().slice(0, 12);
+    if (!list.length) return '';
+    return `<div class="sect"><h3>آخر التمارين</h3><ul class="inc-list">${list.map(([d, r]) => `<li><span class="amt">${esc(r.workout.n)}</span><span class="note">${dayLabel(d)} · ${fmt(volume(r.workout))} كجم${r.prs ? ` · ${r.prs} رقم قياسي` : ''}</span></li>`).join('')}</ul></div>`;
+  }
+  function plansHTML() {
+    const s = S(), rs = routines(), sch = s.schedule || {};
+    const tpl = (window.HUNTER_TEMPLATES || []).map((t) => `<div class="item"><h4>${esc(t.n)}</h4><p>${t.routines.map((r) => esc(r.n)).join(' · ')}</p><p>${t.days.map((i) => DAY_NAMES[i]).join('، ')}</p>
+      ${templatePending === t.id ? `<div class="confirm"><span class="lock">بيستبدل برامجك وجدولك الحاليين</span><button class="btn danger" type="button" data-tpl-yes="${t.id}">استبدل</button><button class="btn ghost" type="button" data-tpl-no>إلغاء</button></div>` : `<button class="btn ghost" type="button" data-tpl="${t.id}">استخدم هذا البرنامج</button>`}</div>`).join('');
+    const sched = DAY_NAMES.map((n, i) => `<div class="sched-row"><span>${n}</span><select data-sched="${i}"><option value="">راحة</option>${rs.map((r) => `<option value="${r.id}"${sch[i] === r.id ? ' selected' : ''}>${esc(r.n)}</option>`).join('')}</select></div>`).join('');
+    const rhtml = rs.map((r) => `<div class="ex-card" data-rid="${r.id}">
+      <div class="ex-head"><span class="inwrap" style="flex:1"><input data-rname="${r.id}" value="${esc(r.n)}" aria-label="اسم البرنامج" style="direction:rtl"></span>
+        ${routineDelete === r.id ? `<button class="btn danger" type="button" data-rdel-yes="${r.id}">احذف</button><button class="btn ghost" type="button" data-rdel-no>لا</button>` : `<button class="x" type="button" data-rdel="${r.id}" aria-label="حذف البرنامج">×</button>`}</div>
+      ${r.ex.map((x, i) => { const ex = exById(x.id); return `<div class="rt-row"><span class="nm">${esc(ex.n)}</span><span class="inwrap"><input inputmode="numeric" data-rx="${r.id}:${i}" data-rf="sets" value="${x.sets}" aria-label="المجموعات"><em>×</em></span><span class="inwrap"><input data-rx="${r.id}:${i}" data-rf="reps" value="${esc(x.reps)}" aria-label="العدات" style="direction:ltr"><em>${ex.kind === 't' ? 'د' : 'عدة'}</em></span><button class="x" type="button" data-rx-del="${r.id}:${i}" aria-label="حذف">×</button></div>`; }).join('')}
+      <button class="link-btn" type="button" data-rx-add="${r.id}">+ أضف تمرين</button>
+    </div>`).join('');
+    return `<div class="sect"><h3>الجدول الأسبوعي</h3>${rs.length ? sched : '<p class="empty">سوّ برنامج أو اختر برنامج جاهز تحت، وبعدها وزّعه على أيام الأسبوع.</p>'}</div>
+      <div class="sect"><h3>برامجي</h3>${rhtml}<div class="backup"><button class="btn ghost" type="button" id="rt-new">+ برنامج جديد</button></div>
+        <label class="field" style="max-width:220px"><span>الراحة بين المجموعات</span><select id="rest-sec">${[45, 60, 90, 120, 180].map((v) => `<option value="${v}"${(s.restSec || 90) === v ? ' selected' : ''}>${v} ثانية</option>`).join('')}</select></label></div>
+      <div class="sect"><h3>برامج جاهزة</h3><div class="shop">${tpl}</div></div>`;
+  }
+  function libraryHTML() {
+    const t = todayStr();
+    const chips = [['all', 'الكل']].concat(Object.entries(MUSCLES)).map(([k, n]) => `<button type="button" class="chip" data-lm="${k}" aria-pressed="${libMuscle === k}">${n}</button>`).join('');
+    const list = allEx().filter((e) => libMuscle === 'all' || e.m === libMuscle);
+    return `<div class="chips-row">${chips}</div><ul class="pick-list">${list.map((e) => {
+      const best = bestE1(e.id), open = libOpen === e.id;
+      let detail = '';
+      if (open) {
+        const hist = sessions().filter(([, r]) => r.workout.ex.some((x) => x.id === e.id)).slice(0, 6);
+        detail = `<div class="lib-detail">${hist.length ? hist.map(([d, r]) => { const x = r.workout.ex.find((y) => y.id === e.id); return `<div><b>${dayLabel(d)}</b> ${x.sets.filter((s) => s.ok).map((s) => e.kind === 't' ? `${s.r} د` : `${s.w || 0}×${s.r}`).join('، ')}</div>`; }).join('') : '<div class="empty">ما سجلت هذا التمرين للحين.</div>'}</div>`;
+      }
+      return `<li><button type="button" data-lib="${e.id}"><span>${esc(e.n)}<small style="display:block">${esc(e.en || '')} · ${MUSCLES[e.m] || ''}</small></span><small>${best ? `أفضل 1RM ~${Math.round(best)} كجم` : ''}</small></button>${detail}</li>`;
+    }).join('')}</ul>`;
+  }
+  function exPicker(onPick) {
+    let m = 'all';
+    openSheet('اختر تمرين', `
+      <div class="inwrap"><input id="xp-q" type="search" placeholder="ابحث: بنش، سكوات، Squat…" autocomplete="off" style="direction:rtl"></div>
+      <div class="chips-row" id="xp-m">${[['all', 'الكل']].concat(Object.entries(MUSCLES)).map(([k, n]) => `<button type="button" class="chip" data-m="${k}" aria-pressed="${k === 'all'}">${n}</button>`).join('')}</div>
+      <ul class="pick-list" id="xp-list"></ul>
+      <details><summary class="link-btn">تمرينك مو موجود؟ أضفه</summary>
+        <div class="set-grid" style="margin-top:8px">
+          <label class="field"><span>الاسم</span><span class="inwrap"><input id="xn-n" autocomplete="off" style="direction:rtl"></span></label>
+          <label class="field"><span>العضلة</span><select id="xn-m">${Object.entries(MUSCLES).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select></label>
+          <label class="field"><span>النوع</span><select id="xn-k"><option value="w">وزن × عدات</option><option value="bw">وزن الجسم</option><option value="t">بالدقائق</option></select></label>
+        </div><button class="btn ghost" type="button" id="xn-save" style="margin-top:8px">أضف واختر</button></details>`);
+    const draw = () => {
+      const q = normAr($('#xp-q').value);
+      const list = allEx().filter((e) => (m === 'all' || e.m === m) && (!q || normAr(e.n).includes(q) || String(e.en || '').toLowerCase().includes(q)));
+      $('#xp-list').innerHTML = list.map((e) => `<li><button type="button" data-xp="${e.id}"><span>${esc(e.n)}</span><small>${MUSCLES[e.m] || ''}</small></button></li>`).join('') || '<li class="empty">ما لقيت شي.</li>';
+    };
+    draw();
+    $('#xp-q').addEventListener('input', draw);
+    $('#xp-m').addEventListener('click', (ev) => { const b = ev.target.closest('[data-m]'); if (!b) return; m = b.dataset.m; document.querySelectorAll('#xp-m .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b))); draw(); });
+    $('#xp-list').addEventListener('click', (ev) => { const b = ev.target.closest('[data-xp]'); if (!b) return; closeSheet(); onPick(b.dataset.xp); });
+    $('#xn-save').addEventListener('click', () => {
+      const n = $('#xn-n').value.trim(); if (!n) { $('#xn-n').focus(); return; }
+      const e = { id: 'myx_' + uid(), n: n.slice(0, 50), m: $('#xn-m').value, kind: $('#xn-k').value };
+      S().myEx = [e].concat(S().myEx || []); touchStart(); save('settings');
+      closeSheet(); onPick(e.id);
+    });
+  }
+  function saveRoutines() { touchStart(); save('settings'); }
+  $('#trainSeg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-tv]'); if (!b) return; trainView = b.dataset.tv; renderTrain(); });
+  $('#trainBody').addEventListener('click', (ev) => {
+    const tgo = ev.target.closest('[data-tv-go]'); if (tgo) { trainView = tgo.dataset.tvGo; renderTrain(); return; }
+    const st = ev.target.closest('[data-start]'); if (st) { startWorkout(st.dataset.start); return; }
+    if (ev.target.closest('#tr-start-pick')) { startWorkout($('#tr-pick').value || null); return; }
+    const t = todayStr(), w = JSON.parse(JSON.stringify((getDay(t) || {}).workout || null));
+    const ok = ev.target.closest('[data-ok]');
+    if (ok && w) { const [xi, si] = ok.dataset.ok.split(':').map(Number); const s = w.ex[xi].sets[si]; s.ok = !s.ok; setWorkout(w); renderTrain(); if (s.ok) startRest(); return; }
+    const as = ev.target.closest('[data-add-set]');
+    if (as && w) { const x = w.ex[+as.dataset.addSet], l = x.sets[x.sets.length - 1] || {}; x.sets.push({ w: l.w ?? '', r: l.r ?? '', ok: false }); setWorkout(w); renderTrain(); return; }
+    const rs = ev.target.closest('[data-rm-set]');
+    if (rs && w) { const [xi, si] = rs.dataset.rmSet.split(':').map(Number); w.ex[xi].sets.splice(si, 1); if (!w.ex[xi].sets.length) w.ex.splice(xi, 1); setWorkout(w); renderTrain(); return; }
+    const re = ev.target.closest('[data-rm-ex]');
+    if (re && w) { w.ex.splice(+re.dataset.rmEx, 1); setWorkout(w); renderTrain(); return; }
+    if (ev.target.closest('#sess-add-ex') && w) { exPicker((id) => { const w2 = (getDay(t) || {}).workout; w2.ex.push({ id, target: '', sets: [{ w: '', r: '', ok: false }] }); setWorkout(w2); renderTrain(); }); return; }
+    if (ev.target.closest('#sess-finish')) { finishWorkout(); return; }
+    const cancel = ev.target.closest('#sess-cancel');
+    if (cancel) {
+      if (cancel.dataset.sure) { setDayAt(t, { workout: null }); stopRest(); renderTrain(); toast('SYSTEM', 'تم إلغاء التمرين.'); }
+      else { cancel.dataset.sure = '1'; cancel.textContent = 'متأكد؟ يحذف التمرين'; }
+      return;
+    }
+    // plans
+    const tp = ev.target.closest('[data-tpl]');
+    if (tp) { if (!routines().length) applyTemplate(tp.dataset.tpl); else { templatePending = tp.dataset.tpl; renderTrain(); } return; }
+    const ty = ev.target.closest('[data-tpl-yes]'); if (ty) { applyTemplate(ty.dataset.tplYes); return; }
+    if (ev.target.closest('[data-tpl-no]')) { templatePending = null; renderTrain(); return; }
+    if (ev.target.closest('#rt-new')) { S().routines = routines().concat([{ id: 'r' + uid(), n: 'برنامج جديد', ex: [] }]); saveRoutines(); renderTrain(); return; }
+    const rd = ev.target.closest('[data-rdel]'); if (rd) { routineDelete = rd.dataset.rdel; renderTrain(); return; }
+    if (ev.target.closest('[data-rdel-no]')) { routineDelete = null; renderTrain(); return; }
+    const ry = ev.target.closest('[data-rdel-yes]');
+    if (ry) { const id = ry.dataset.rdelYes; S().routines = routines().filter((r) => r.id !== id); const sch = { ...(S().schedule || {}) }; for (const k in sch) if (sch[k] === id) delete sch[k]; S().schedule = sch; routineDelete = null; saveRoutines(); renderTrain(); return; }
+    const xa = ev.target.closest('[data-rx-add]');
+    if (xa) { const rid = xa.dataset.rxAdd; exPicker((id) => { const r = routines().find((x) => x.id === rid); if (!r) return; r.ex.push({ id, sets: exById(id).kind === 't' ? 1 : 3, reps: exById(id).kind === 't' ? '20' : '8-12' }); saveRoutines(); renderTrain(); }); return; }
+    const xd = ev.target.closest('[data-rx-del]');
+    if (xd) { const [rid, i] = xd.dataset.rxDel.split(':'); const r = routines().find((x) => x.id === rid); if (r) { r.ex.splice(+i, 1); saveRoutines(); renderTrain(); } return; }
+    // library
+    const lm = ev.target.closest('[data-lm]'); if (lm) { libMuscle = lm.dataset.lm; libOpen = null; renderTrain(); return; }
+    const lb = ev.target.closest('[data-lib]'); if (lb) { libOpen = libOpen === lb.dataset.lib ? null : lb.dataset.lib; renderTrain(); return; }
+  });
+  $('#trainBody').addEventListener('input', (ev) => {
+    const i = ev.target;
+    if (i.dataset.sx != null) {
+      const t = todayStr(), w = JSON.parse(JSON.stringify((getDay(t) || {}).workout || null)); if (!w) return;
+      const v = i.value.trim() === '' ? '' : num(i.value);
+      w.ex[+i.dataset.sx].sets[+i.dataset.ss][i.dataset.sf] = v; setWorkout(w); return;
+    }
+    if (i.dataset.rname) { const r = routines().find((x) => x.id === i.dataset.rname); if (r) { r.n = i.value.slice(0, 40) || 'برنامج'; saveRoutines(); } return; }
+    if (i.dataset.rx) {
+      const [rid, idx] = i.dataset.rx.split(':'), r = routines().find((x) => x.id === rid); if (!r) return;
+      const x = r.ex[+idx]; if (!x) return;
+      if (i.dataset.rf === 'sets') { const v = Math.round(num(i.value)); if (v > 0) x.sets = Math.min(10, v); } else x.reps = i.value.slice(0, 10);
+      saveRoutines();
+    }
+  });
+  $('#trainBody').addEventListener('change', (ev) => {
+    const i = ev.target;
+    if (i.dataset.sched != null) { S().schedule = { ...(S().schedule || {}), [i.dataset.sched]: i.value || null }; saveRoutines(); return; }
+    if (i.id === 'rest-sec') { S().restSec = +i.value; saveRoutines(); }
+  });
+  function applyTemplate(id) {
+    const t = (window.HUNTER_TEMPLATES || []).find((x) => x.id === id); if (!t) return;
+    const rs = t.routines.map((r) => ({ id: 'r' + uid(), n: r.n, ex: r.ex.map(([eid, sets, reps]) => ({ id: eid, sets, reps: String(reps) })) }));
+    const sch = {}; t.days.forEach((dIdx, i) => { sch[dIdx] = rs[i % rs.length].id; });
+    S().routines = rs; S().schedule = sch; templatePending = null; saveRoutines();
+    trainView = 'today'; renderTrain();
+    toast('SYSTEM', `تم اختيار برنامج «${t.n}». تقدر تعدّله من «البرامج والجدول».`, 'gold');
+  }
+  setInterval(() => { const c = $('#sessClock'); const w = (getDay(todayStr()) || {}).workout; if (c && w && !w.done) { const m = Math.floor((Date.now() - w.t0) / 1000); c.textContent = `${pad(Math.floor(m / 3600))}:${pad(Math.floor(m / 60) % 60)}:${pad(m % 60)}`; } }, 1000);
+
+  // ---------- store ----------
+  const COIN_RATE = 20;
+  const DEFAULT_ITEMS = [
+    { id: 'cheat', e: '🍔', n: 'وجبة حرة', d: 'مهمة الأكل تنحسب لك مكتملة اليوم', cost: 150, cd: 14, lvl: 1, fx: 'cheat' },
+    { id: 'dessert', e: '🍰', n: 'حلى أو قطعة كيك', d: '', cost: 80, cd: 7, lvl: 1, fx: '' },
+    { id: 'soda', e: '🥤', n: 'مشروب غازي', d: '', cost: 40, cd: 7, lvl: 1, fx: '' },
+    { id: 'games', e: '🎮', n: 'ساعتين ألعاب', d: '', cost: 60, cd: 3, lvl: 1, fx: '' },
+    { id: 'restday', e: '🛌', n: 'إجازة من المهام', d: 'وضع تعافي اليوم بدون ما ينحسب من رصيدك الشهري', cost: 200, cd: 30, lvl: 5, fx: 'rest' },
+    { id: 'gift', e: '🎁', n: 'هدية لنفسك', d: 'اشتري شي كنت تبيه', cost: 500, cd: 30, lvl: 10, fx: '' },
+  ];
+  const FX = { '': 'بدون تأثير', cheat: 'وجبة حرة (مهمة الأكل تكتمل)', rest: 'يوم تعافي' };
+  let storeEdit = false, buyPending = null;
+  const storeItems = () => S().storeItems || DEFAULT_ITEMS;
+  function coins() {
+    const earned = Math.floor(Math.max(0, C.total) / COIN_RATE);
+    const spent = (S().purchases || []).reduce((a, p) => a + (p.cost || 0), 0);
+    return { earned, spent, bal: Math.max(0, earned - spent) };
+  }
+  function itemState(it) {
+    const last = (S().purchases || []).filter((p) => p.item === it.id).sort((a, b) => b.t - a.t)[0];
+    const until = last ? last.t + it.cd * 86400e3 : 0;
+    if (until > Date.now()) return { ok: false, why: 'cooldown', until };
+    if (C.lv.L < (it.lvl || 1)) return { ok: false, why: 'level' };
+    if (coins().bal < it.cost) return { ok: false, why: 'coins' };
+    return { ok: true };
+  }
+  const daysAr = (n) => n === 1 ? 'يوم' : n === 2 ? 'يومين' : n <= 10 ? `${n} أيام` : `${n} يوم`;
+  const hoursAr = (n) => n === 1 ? 'ساعة' : n === 2 ? 'ساعتين' : n <= 10 ? `${n} ساعات` : `${n} ساعة`;
+  function waitText(ms) { const h = Math.max(1, Math.ceil(ms / 3600e3)), dd = Math.floor(h / 24), hh = h % 24; return dd ? `${daysAr(dd)}${hh ? ` و${hoursAr(hh)}` : ''}` : hoursAr(hh); }
+  function renderStore() {
+    const c = coins();
+    $('#coinCard').innerHTML = `<b>🪙 ${fmt(c.bal)}</b><span>عملاتك</span><small>تكسب عملة لكل ${COIN_RATE} XP · كسبت ${fmt(c.earned)} وصرفت ${fmt(c.spent)}</small>`;
+    $('#storeEditBtn').textContent = storeEdit ? 'تم' : 'تعديل المتجر';
+    if (storeEdit) {
+      $('#shop').innerHTML = storeItems().map((it, i) => `<div class="item" data-si="${i}">
+        <div class="set-grid">
+          <label class="field"><span>رمز</span><span class="inwrap"><input data-sf="e" value="${esc(it.e || '')}" maxlength="4"></span></label>
+          <label class="field" style="grid-column:span 2"><span>الاسم</span><span class="inwrap"><input data-sf="n" value="${esc(it.n)}" style="direction:rtl"></span></label>
+          <label class="field"><span>السعر</span><span class="inwrap"><input data-sf="cost" inputmode="numeric" value="${it.cost}"><em>🪙</em></span></label>
+          <label class="field"><span>مرة كل</span><span class="inwrap"><input data-sf="cd" inputmode="numeric" value="${it.cd}"><em>يوم</em></span></label>
+          <label class="field"><span>يفتح من مستوى</span><span class="inwrap"><input data-sf="lvl" inputmode="numeric" value="${it.lvl || 1}"></span></label>
+          <label class="field"><span>التأثير</span><select data-sf="fx">${Object.entries(FX).map(([k, n]) => `<option value="${k}"${(it.fx || '') === k ? ' selected' : ''}>${n}</option>`).join('')}</select></label>
+        </div>
+        <button class="btn danger" type="button" data-sdel="${i}">حذف</button></div>`).join('') + `<div class="item"><button class="btn ghost" type="button" id="sadd">+ أضف مكافأة</button></div>`;
+    } else {
+      $('#shop').innerHTML = storeItems().map((it) => {
+        const st = itemState(it);
+        const lock = st.why === 'cooldown' ? `متاح بعد ${waitText(st.until - Date.now())}` : st.why === 'level' ? `يفتح في المستوى ${it.lvl}` : st.why === 'coins' ? `تحتاج ${fmt(it.cost - coins().bal)} عملة زيادة` : '';
+        const btn = buyPending === it.id
+          ? `<div class="confirm"><button class="btn" type="button" data-buy-yes="${it.id}">تأكيد الشراء</button><button class="btn ghost" type="button" data-buy-no>إلغاء</button></div>`
+          : `<button class="btn${st.ok ? '' : ' ghost'}" type="button" data-buy="${it.id}" ${st.ok ? '' : 'disabled'}>${st.ok ? 'اشترِ' : st.why === 'cooldown' ? 'مقفل' : 'ما يمديك'}</button>`;
+        return `<div class="item${st.ok ? '' : ' locked'}"><span class="em">${esc(it.e || '🎁')}</span><h4>${esc(it.n)}</h4>${it.d ? `<p>${esc(it.d)}</p>` : ''}<p><span class="price">🪙 ${fmt(it.cost)}</span> · مرة كل ${daysAr(it.cd)}${(it.lvl || 1) > 1 ? ` · من المستوى ${it.lvl}` : ''}</p>${lock ? `<span class="lock">${lock}</span>` : ''}${btn}</div>`;
+      }).join('');
+    }
+    const ps = (S().purchases || []).slice().sort((a, b) => b.t - a.t).slice(0, 20);
+    $('#buyHistory').innerHTML = ps.length ? ps.map((p) => `<li><span class="amt" style="color:var(--gold)">−${fmt(p.cost)}</span><span class="note">${esc(p.n)} · ${dayLabel(p.date)}</span></li>`).join('') : '<li class="empty">ما اشتريت شي للحين. كمّل مهامك واجمع عملات.</li>';
+  }
+  $('#tab-store').addEventListener('click', (ev) => {
+    if (ev.target.closest('#storeEditBtn')) { if (!S().storeItems) S().storeItems = DEFAULT_ITEMS.map((x) => ({ ...x })); storeEdit = !storeEdit; save('settings'); renderStore(); return; }
+    const b = ev.target.closest('[data-buy]'); if (b && !b.disabled) { buyPending = b.dataset.buy; renderStore(); return; }
+    if (ev.target.closest('[data-buy-no]')) { buyPending = null; renderStore(); return; }
+    const y = ev.target.closest('[data-buy-yes]');
+    if (y) {
+      const it = storeItems().find((x) => x.id === y.dataset.buyYes); buyPending = null;
+      if (!it || !itemState(it).ok) { renderStore(); return; }
+      const t = todayStr();
+      S().purchases = (S().purchases || []).concat([{ id: uid(), item: it.id, n: it.n, cost: it.cost, date: t, t: Date.now() }]);
+      touchStart(); save('settings');
+      if (it.fx === 'cheat') setDayAt(t, { cheat: true });
+      if (it.fx === 'rest') setDayAt(t, { rest: 'reward' });
+      viewDate = t; buildDaily(); render(true);
+      toast('PURCHASE', `اشتريت «${it.n}» ${it.e || ''}. استمتع، تستاهل!`, 'gold');
+      return;
+    }
+    if (ev.target.closest('#sadd')) { S().storeItems = storeItems().concat([{ id: 'i' + uid(), e: '⭐', n: 'مكافأة جديدة', d: '', cost: 100, cd: 7, lvl: 1, fx: '' }]); save('settings'); renderStore(); return; }
+    const del = ev.target.closest('[data-sdel]');
+    if (del) { const arr = storeItems().slice(); arr.splice(+del.dataset.sdel, 1); S().storeItems = arr; save('settings'); renderStore(); }
+  });
+  $('#tab-store').addEventListener('input', (ev) => {
+    const row = ev.target.closest('[data-si]'), f = ev.target.dataset.sf; if (!row || !f) return;
+    const it = storeItems()[+row.dataset.si]; if (!it) return;
+    if (f === 'cost' || f === 'cd' || f === 'lvl') { const v = Math.round(num(ev.target.value)); if (v >= (f === 'cd' ? 0 : 1)) it[f] = v; }
+    else it[f] = ev.target.value.slice(0, f === 'e' ? 4 : 50);
+    save('settings');
+  });
+  $('#tab-store').addEventListener('change', (ev) => {
+    const row = ev.target.closest('[data-si]'); if (!row || ev.target.dataset.sf !== 'fx') return;
+    const it = storeItems()[+row.dataset.si]; if (it) { it.fx = ev.target.value; save('settings'); }
+  });
 
   // ---------- backup ----------
   $('#exportBtn').addEventListener('click', async () => {
@@ -1452,6 +2328,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   // ---------- boot ----------
   applyAuto(); cacheLocal();
   fillSettings(); fillMonth(); buildDaily(); render(false);
+  const hashTab = (location.hash || '').slice(1);
+  let savedTab = null; try { savedTab = sessionStorage.getItem('hunter-tab'); } catch {}
+  showTab(SECTIONS.includes(hashTab) ? hashTab : (savedTab || 'daily'));
+  scheduleAdhan();
   initStore();
 })();
 </script>
