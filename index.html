@@ -121,6 +121,10 @@ button { cursor: pointer; }
 .bar { height: 8px; background: rgba(87,184,255,0.1); border: 1px solid var(--line-soft); overflow: hidden; margin-top: 4px; }
 .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--glow), var(--glow-2)); box-shadow: 0 0 12px var(--glow); transition: width .4s ease; margin-inline-start: auto; }
 [dir="rtl"] .bar i { margin-inline-start: 0; }
+[dir="ltr"] .inwrap input { text-align: left; }
+select { max-width: 100%; min-width: 0; }
+.set-grid > *, .field { min-width: 0; }
+html[lang="en"] { --f-disp: "Chakra Petch", "IBM Plex Sans Arabic", "Segoe UI", sans-serif; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 16px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line-soft); }
 .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-width: 0; }
 .stat .n { color: var(--muted); font-size: 13px; }
@@ -565,6 +569,10 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   <section class="win" id="tab-settings" role="tabpanel" hidden>
     <div class="win-title"><span>الإعدادات</span></div>
     <div class="sect">
+      <h3 data-no-tr>اللغة · Language</h3>
+      <div class="chips-row" data-no-tr><button type="button" class="chip" data-lang="ar">العربية</button><button type="button" class="chip" data-lang="en">English</button></div>
+    </div>
+    <div class="sect">
       <h3>ملفك وهدفك</h3>
       <p class="q-desc" id="profileSum"></p>
       <div class="backup"><button class="btn" type="button" data-onboard>عدّل ملفك وهدفك وخطتك</button></div>
@@ -693,10 +701,62 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
 <script src="data/foods.js"></script>
 <script src="data/exercises.js"></script>
 <script src="data/cities.js"></script>
+<script src="data/i18n-en.js"></script>
 <script>
 (() => {
-  document.documentElement.lang = 'ar';
-  document.documentElement.dir = 'rtl';
+  // ---------- language: Arabic (source) or English (translated on screen) ----------
+  const LANG = (() => { try { return (JSON.parse(localStorage.getItem('hunter-system-v1')) || {}).settings.lang === 'en' ? 'en' : 'ar'; } catch { return 'ar'; } })();
+  const EN_MODE = LANG === 'en';
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = EN_MODE ? 'ltr' : 'rtl';
+  { const app = document.querySelector('.app'); if (app) { app.dir = document.documentElement.dir; app.lang = LANG; } }
+  const EN = Object.assign({}, window.ARISE_EN || {});
+  for (const x of window.HUNTER_EXERCISES || []) if (x.en) EN[x.n] = x.en;
+  const AR_CH = /[\u0600-\u06FF]/;
+  const AR_RUN = /[\u0600-\u06FF][\u0600-\u06FF\u064B-\u0652 \u060C\u061F\u00AB\u00BB\-\u0640/()\u066A.,:!\u061B]*[\u0600-\u06FF\u00BB)\u061F.!]|[\u0600-\u06FF]/g;
+  // one Arabic phrase -> English: whole phrase if known, else the longest known word groups
+  function trRun(m) {
+    const k = m.trim();
+    if (EN[k] != null) return m.replace(k, EN[k]);
+    const w = k.split(/\s+/), out = [];
+    for (let i = 0; i < w.length;) {
+      let j = w.length;
+      for (; j > i; j--) { const ph = w.slice(i, j).join(' '); if (EN[ph] != null) { out.push(EN[ph]); break; } }
+      if (j === i) { const bare = w[i].replace(/[\u060C.,:!()\u061F\u00AB\u00BB]/g, ''); const wa = bare.length > 2 && bare[0] === '\u0648' && EN[bare.slice(1)] != null; out.push(EN[bare] != null ? w[i].replace(bare, EN[bare]) : wa ? w[i].replace(bare, 'and ' + EN[bare.slice(1)]) : w[i]); i++; } else i = j;
+    }
+    return m.replace(k, out.join(' '));
+  }
+  const trText = (str) => {
+    if (str == null) return str;
+    str = String(str);
+    if (!AR_CH.test(str)) return str;
+    const k = str.trim();
+    const t = EN[k] != null ? str.replace(k, EN[k]) : str.replace(AR_RUN, trRun);
+    return t.replace(/\u060C/g, ',').replace(/\u061B/g, ';').replace(/\u061F/g, '?').replace(/[\u00AB\u00BB]/g, '"').replace(/\u066A/g, '%').replace(/\u2190/g, '\u2192');
+  };
+  const tr = (str) => (EN_MODE ? trText(str) : str);
+  const TR_ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
+  function trNode(n) {
+    if (n.nodeType === 3) { const v = n.nodeValue; if (AR_CH.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } return; }
+    if (n.nodeType !== 1 || n.tagName === 'SCRIPT' || n.tagName === 'STYLE' || n.hasAttribute('data-no-tr')) return;
+    for (const a of TR_ATTRS) { const v = n.getAttribute(a); if (v && AR_CH.test(v)) n.setAttribute(a, tr(v)); }
+    if (n.tagName === 'TEXTAREA') return;
+    for (const c of n.childNodes) trNode(c);
+  }
+  function startTranslation() {
+    if (!EN_MODE) return;
+    document.title = tr(document.title);
+    trNode(document.body);
+    new MutationObserver((ms) => {
+      for (const m of ms) {
+        if (m.type === 'characterData') trNode(m.target);
+        else if (m.type === 'attributes') { const v = m.target.getAttribute(m.attributeName); if (v && AR_CH.test(v)) m.target.setAttribute(m.attributeName, tr(v)); }
+        else m.addedNodes.forEach(trNode);
+      }
+    }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: TR_ATTRS });
+  }
+  // curated foods get English names too, so English search finds them in either language
+  for (const f of window.HUNTER_FOODS || []) if (!f.en) { const t = trText(f.n); f.en = AR_CH.test(t) ? '' : t; }
 
   // ---------- helpers ----------
   const $ = (s) => document.querySelector(s);
@@ -716,17 +776,18 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const n = parseFloat(t);
     return isFinite(n) ? n : 0;
   };
-  const gFmt = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
-  const mFmt = new Intl.DateTimeFormat('ar-SA-u-ca-gregory-nu-latn', { month: 'long', year: 'numeric' });
+  const LOC = EN_MODE ? 'en-GB' : 'ar-SA';
+  const gFmt = new Intl.DateTimeFormat(LOC + '-u-ca-gregory-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
+  const mFmt = new Intl.DateTimeFormat(LOC + '-u-ca-gregory-nu-latn', { month: 'long', year: 'numeric' });
   let hFmt;
-  try { hFmt = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { hFmt = null; }
+  try { hFmt = new Intl.DateTimeFormat(LOC + '-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { hFmt = null; }
   const DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
   const DAY_SHORT = ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
 
   // ---------- model ----------
   const STATS = { FTH: 'الإيمان', STR: 'القوة', AGI: 'الرشاقة', VIT: 'الحيوية', INT: 'الذكاء', WLT: 'الثروة' };
   const PRAYERS = [['fajr', 'الفجر'], ['dhuhr', 'الظهر'], ['asr', 'العصر'], ['maghrib', 'المغرب'], ['isha', 'العشاء']];
-  const DEFAULTS = { name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, onboarded: false, muslim: true, goalW: 0, rateP: 0.5, macroMode: 'balanced', proKg: 2, fatPct: 25, mods: { work: true, finance: true }, coach: null, city: null, loc: null, pMethod: 'uq', asr: 'shafi', adhan: false, myFoods: [], myEx: [], routines: [], schedule: {}, restSec: 90, storeItems: null, purchases: [], steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
+  const DEFAULTS = { lang: 'ar', name: '', carbs: 0, fat: 0, water: 0, waterSince: null, sex: 'm', age: 0, height: 0, weight: 0, act: 'light', body: 'cut', autoMacros: true, restMax: 4, onboarded: false, muslim: true, goalW: 0, rateP: 0.5, macroMode: 'balanced', proKg: 2, fatPct: 25, mods: { work: true, finance: true }, coach: null, city: null, loc: null, pMethod: 'uq', asr: 'shafi', adhan: false, myFoods: [], myEx: [], routines: [], schedule: {}, restSec: 90, storeItems: null, purchases: [], steps: 10000, cal: 2000, protein: 150, sleep: 7, quran: 1, dev: 30, gym: 4, incomeCur: 'SAR', workDays: [0, 1, 2, 3, 4], custom: [], start: null };
   const RANKS = [
     [1, 'E', 'المستيقظ'], [10, 'D', 'المثابر'], [20, 'C', 'صياد الانضباط'],
     [35, 'B', 'سيد العادات'], [50, 'A', 'النخبة'], [70, 'S', 'ملك الظلال'], [100, 'N', 'صياد بمستوى وطني'],
@@ -1710,7 +1771,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         for (const k of PRAYER_KEYS) {
           const at = tt[k];
           if (!at || at <= now || list.length >= 60) continue;
-          list.push({ id: 1000 + list.length, title: 'ARISE', body: `حان الآن وقت صلاة ${PRAYER_AR[k]}`, schedule: { at: at.toISOString(), allowWhileIdle: true } });
+          list.push({ id: 1000 + list.length, title: 'ARISE', body: tr(`حان الآن وقت صلاة ${PRAYER_AR[k]}`), schedule: { at: at.toISOString(), allowWhileIdle: true } });
         }
       }
       if (list.length) await nativeCall('LocalNotifications', 'schedule', { notifications: list });
@@ -1798,8 +1859,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (!dt) return '—';
     const tz = prayerLoc()?.tz || '';
     if (!ptFmts[tz]) {
-      try { ptFmts[tz] = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit', timeZone: tz || undefined }); }
-      catch { ptFmts[tz] = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { hour: 'numeric', minute: '2-digit' }); }
+      try { ptFmts[tz] = new Intl.DateTimeFormat(LOC + '-u-nu-latn', { hour: 'numeric', minute: '2-digit', timeZone: tz || undefined }); }
+      catch { ptFmts[tz] = new Intl.DateTimeFormat(LOC + '-u-nu-latn', { hour: 'numeric', minute: '2-digit' }); }
     }
     return ptFmts[tz].format(dt);
   }
@@ -1854,8 +1915,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     try {
       if ('Notification' in window && Notification.permission === 'granted') {
         const reg = navigator.serviceWorker ? await navigator.serviceWorker.getRegistration() : null;
-        if (reg) reg.showNotification('ARISE', { body: msg, tag: 'adhan-' + k, icon: 'icons/icon-192.png' });
-        else new Notification('ARISE', { body: msg });
+        if (reg) reg.showNotification('ARISE', { body: tr(msg), tag: 'adhan-' + k, icon: 'icons/icon-192.png' });
+        else new Notification('ARISE', { body: tr(msg) });
       }
     } catch {}
   }
@@ -1939,7 +2000,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   });
 
   // ---------- food log ----------
-  const MEALS = { b: 'الفطور', l: 'الغداء', d: 'العشاء', s: 'سناك' };
+  const MEALS = EN_MODE ? { b: 'Breakfast', l: 'Lunch', d: 'Dinner', s: 'Snack' } : { b: 'الفطور', l: 'الغداء', d: 'العشاء', s: 'سناك' };
   const MEALS_TO = { b: 'للفطور', l: 'للغداء', d: 'للعشاء', s: 'للسناك' };
   const FOOD_CATS = Object.assign({}, window.HUNTER_FOOD_CATS || {}, { other: 'أخرى' });
   const allFoods = () => (S().myFoods || []).concat(window.HUNTER_FOODS || [], usda || []);
@@ -2594,7 +2655,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     $('#obNext').textContent = obStep === OB_STEPS.length - 1 ? 'انهض ⚔️' : 'التالي';
     $('#obErr').textContent = '';
     let h = '';
-    if (st === 'welcome') h = `<div class="ob-hero"><div class="ob-logo">ARISE</div><div class="ob-sub">انهض</div><p class="q-desc">النظام اختارك. كل يوم مهام: صلاتك وأكلك وتمرينك ونومك وأهدافك. تكسب خبرة ومستويات، وتتعاقب إذا قصّرت. أول شي خلنا نتعرف عليك.</p></div>${obIn('name', 'وش اسمك؟', '', 'text')}`;
+    if (st === 'welcome') h = `<div class="chips-row" data-no-tr style="justify-content:center"><button type="button" class="chip" data-lang="ar">العربية</button><button type="button" class="chip" data-lang="en">English</button></div><div class="ob-hero"><div class="ob-logo">ARISE</div><div class="ob-sub">انهض</div><p class="q-desc">النظام اختارك. كل يوم مهام: صلاتك وأكلك وتمرينك ونومك وأهدافك. تكسب خبرة ومستويات، وتتعاقب إذا قصّرت. أول شي خلنا نتعرف عليك.</p></div>${obIn('name', 'وش اسمك؟', '', 'text')}`;
     if (st === 'body') h = `<h2 class="ob-title">بياناتك</h2><p class="q-desc" style="text-align:center">عشان نحسب حرقك وسعراتك بدقة.</p>
       <div class="chips-row" style="justify-content:center">${chipO('sex', 'm', 'ذكر', ob.sex === 'm')}${chipO('sex', 'f', 'أنثى', ob.sex === 'f')}</div>
       <div class="set-grid">${obIn('age', 'العمر', 'سنة', 'numeric')}${obIn('height', 'الطول', 'سم', 'numeric')}${obIn('weight', 'الوزن الحالي', 'كجم')}</div>`;
@@ -2686,13 +2747,14 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   function loadUSDA() {
     if (usda) return Promise.resolve(usda);
     if (!usdaLoading) usdaLoading = fetch('data/usda.json').then((r) => { if (!r.ok) throw new Error('http'); return r.json(); })
-      .then((arr) => (usda = arr.map(([id, n, en, cat, k, p, c, f, u]) => ({ id, n, en, cat, k, p, c, f, u: u || [], src: 'usda' }))))
+      .then((arr) => (usda = arr.map(([id, n, en, cat, k, p, c, f, u]) => { if (EN_MODE) EN[n] = en; return { id, n, en, cat, k, p, c, f, u: u || [], src: 'usda' }; })))
       .catch(() => { usdaLoading = null; return []; });
     return usdaLoading;
   }
   const searchKey = (f) => f._s || (f._s = (' ' + normAr(f.n) + ' ' + String(f.en || '').toLowerCase() + ' ' + normAr(f.brand || '') + ' ' + normAr(f.a || '')).replace(/[()،,/]+/g, ' ').replace(/\s+/g, ' ') + ' ');
   // a query word matches the start of a word in the name (also after the Arabic prefixes و/ب/ال)
   const wordHit = (key, t) => key.includes(' ' + t) || key.includes(' ال' + t) || key.includes(' بال' + t) || key.includes(' و' + t);
+  const stemEn = (w) => (/^[a-z]{4,}$/.test(w) ? w.replace(/(ies)$/, 'y').replace(/(oes|ches|shes)$/, (m) => m.slice(0, -2)).replace(/s$/, '') : w);
   const stemAr = (w) => w.length > 4 && /تين$/.test(w) ? w.slice(0, -3) : w.length > 4 && /ات$/.test(w) ? w.slice(0, -2) : w.length > 3 && /ين$/.test(w) ? w.slice(0, -2) : w.length > 3 && /ه$/.test(w) ? w.slice(0, -1) : w;
   // common spoken spellings -> the spelling used in the library
   const SPELL = { 'مويه': 'ماء', 'موية': 'ماء', 'مويا': 'ماء', 'مياه': 'ماء', 'شوكلاته': 'شوكولاته', 'شكولاته': 'شوكولاته', 'شوكلت': 'شوكولاته', 'شوكليت': 'شوكولاته', 'شوكولا': 'شوكولاته', 'بيضه': 'بيض', 'بيضات': 'بيض', 'طماطه': 'طماطم', 'بندوره': 'طماطم', 'بطاطا': 'بطاطس', 'ارز': 'رز', 'دجاجه': 'دجاج', 'جاج': 'دجاج' };
@@ -2705,19 +2767,19 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       if (cat && cat !== 'all' && f.cat !== cat && !(cat === 'mine' && tier === 0)) continue;
       if (cat === 'mine' && tier !== 0) continue;
       const key = searchKey(f);
-      if (toks.length && !toks.every((t) => wordHit(key, t) || wordHit(key, stemAr(t)))) continue;
-      const nameHit = toks.length && normAr(f.n).startsWith(toks[0]) ? 0 : 1;
+      if (toks.length && !toks.every((t) => wordHit(key, t) || wordHit(key, stemAr(t)) || wordHit(key, stemEn(t)))) continue;
+      const nameHit = toks.length && (normAr(f.n).startsWith(toks[0]) || (f.en || '').toLowerCase().startsWith(toks[0]) || (f.en || '').toLowerCase().startsWith(stemEn(toks[0]))) ? 0 : 1;
       out.push([f, tier * 1000 + nameHit * 500 + (tier === 2 ? f.n.length : (f._i ??= (window.HUNTER_FOODS || []).indexOf(f)))]);
     }
     return out.sort((a, b) => a[1] - b[1]).map((x) => x[0]);
   }
 
   // ---------- "write what you ate" parser (free, on-device) ----------
-  const AR_NUM = { 'واحد': 1, 'وحده': 1, 'اثنين': 2, 'اثنتين': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'نص': 0.5, 'نصف': 0.5, 'ربع': 0.25, 'ثلث': 1 / 3, '½': 0.5, '¼': 0.25, '¾': 0.75 };
-  const UNIT_KEYS = { 'كوب': 'cup', 'كاس': 'cup', 'فنجان': 'cup', 'صحن': 'plate', 'زبديه': 'bowl', 'ملعقه': 'tbsp', 'ملاعق': 'tbsp', 'حبه': 'piece', 'حبات': 'piece', 'شريحه': 'slice', 'شرايح': 'slice', 'شرائح': 'slice', 'رغيف': 'loaf', 'قطعه': 'piece', 'قطع': 'piece', 'علبه': 'can', 'سكوب': 'scoop', 'حفنه': 'handful', 'جرام': 'g', 'غرام': 'g', 'جم': 'g', 'g': 'g', 'gm': 'g', 'كيلو': 'kg', 'مل': 'ml', 'ملي': 'ml', 'مللي': 'ml', 'ملل': 'ml', 'ml': 'ml', 'لتر': 'l', 'لترات': 'l', 'جرامات': 'g', 'غرامات': 'g', 'كجم': 'kg', 'كغ': 'kg', 'kg': 'kg', 'قاروره': 'bottle', 'قوارير': 'bottle', 'رشه': 'pinch', 'رشات': 'pinch', 'بياله': 'cup', 'كاسه': 'cup', 'ساندويتش': 'sandwich', 'باكت': 'can', 'كيس': 'can' };
+  const AR_NUM = { 'واحد': 1, 'وحده': 1, 'اثنين': 2, 'اثنتين': 2, 'ثنتين': 2, 'ثلاث': 3, 'ثلاثه': 3, 'اربع': 4, 'اربعه': 4, 'خمس': 5, 'خمسه': 5, 'ست': 6, 'سته': 6, 'سبع': 7, 'سبعه': 7, 'ثمان': 8, 'ثمانيه': 8, 'تسع': 9, 'تسعه': 9, 'عشر': 10, 'عشره': 10, 'نص': 0.5, 'نصف': 0.5, 'ربع': 0.25, 'ثلث': 1 / 3, '½': 0.5, '¼': 0.25, '¾': 0.75, a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, half: 0.5, quarter: 0.25, couple: 2 };
+  const UNIT_KEYS = { 'كوب': 'cup', 'كاس': 'cup', 'فنجان': 'cup', 'صحن': 'plate', 'زبديه': 'bowl', 'ملعقه': 'tbsp', 'ملاعق': 'tbsp', 'حبه': 'piece', 'حبات': 'piece', 'شريحه': 'slice', 'شرايح': 'slice', 'شرائح': 'slice', 'رغيف': 'loaf', 'قطعه': 'piece', 'قطع': 'piece', 'علبه': 'can', 'سكوب': 'scoop', 'حفنه': 'handful', 'جرام': 'g', 'غرام': 'g', 'جم': 'g', 'g': 'g', 'gm': 'g', 'كيلو': 'kg', 'مل': 'ml', 'ملي': 'ml', 'مللي': 'ml', 'ملل': 'ml', 'ml': 'ml', 'لتر': 'l', 'لترات': 'l', 'جرامات': 'g', 'غرامات': 'g', 'كجم': 'kg', 'كغ': 'kg', 'kg': 'kg', 'قاروره': 'bottle', 'قوارير': 'bottle', 'رشه': 'pinch', 'رشات': 'pinch', 'بياله': 'cup', 'كاسه': 'cup', 'ساندويتش': 'sandwich', 'باكت': 'can', 'كيس': 'can', cup: 'cup', cups: 'cup', glass: 'cup', glasses: 'cup', mug: 'cup', plate: 'plate', plates: 'plate', bowl: 'bowl', bowls: 'bowl', tbsp: 'tbsp', tablespoon: 'tbsp', tablespoons: 'tbsp', spoon: 'tbsp', spoons: 'tbsp', tsp: 'tsp', teaspoon: 'tsp', teaspoons: 'tsp', piece: 'piece', pieces: 'piece', pcs: 'piece', slice: 'slice', slices: 'slice', loaf: 'loaf', can: 'can', cans: 'can', pack: 'can', bag: 'can', scoop: 'scoop', scoops: 'scoop', handful: 'handful', grams: 'g', gram: 'g', gr: 'g', kilo: 'kg', kilos: 'kg', ml: 'ml', liter: 'l', liters: 'l', litre: 'l', l: 'l', bottle: 'bottle', bottles: 'bottle', pinch: 'pinch', sandwich: 'sandwich', sandwiches: 'sandwich' };
   const UNIT_MATCH = { cup: ['كوب', 'كأس'], plate: ['صحن'], bowl: ['زبدية', 'صحن'], tbsp: ['ملعقة أكل', 'ملعقتين'], tsp: ['ملعقة شاي'], piece: ['حبة', 'حبات', 'قطعة'], slice: ['شريحة'], loaf: ['رغيف'], can: ['علبة', 'باكت', 'كيس'], scoop: ['سكوب'], handful: ['حفنة'], bottle: ['قارورة'], pinch: ['رشة'], sandwich: ['ساندويتش'], breast: ['صدر'], thigh: ['فخذ'] };
   const UNIT_GUESS = { cup: 200, plate: 300, bowl: 250, tbsp: 15, tsp: 5, piece: 50, slice: 30, loaf: 60, can: 150, scoop: 30, handful: 28, sandwich: 200, bottle: 500, pinch: 0.4 };
-  const STOPW = new Set(['من', 'مع', 'و', 'فيه', 'في', 'على', 'اكلت', 'كلت', 'شربت', 'تناولت', 'فطرت', 'تغديت', 'تعشيت', 'تسحرت', 'اخذت', 'حطيت', 'سويت', 'تقريبا', 'حوالي', 'نوع', 'شوي', 'شويه', 'تقريبًا']);
+  const STOPW = new Set(['من', 'مع', 'و', 'فيه', 'في', 'على', 'اكلت', 'كلت', 'شربت', 'تناولت', 'فطرت', 'تغديت', 'تعشيت', 'تسحرت', 'اخذت', 'حطيت', 'سويت', 'تقريبا', 'حوالي', 'نوع', 'شوي', 'شويه', 'تقريبًا', 'of', 'i', 'ate', 'had', 'drank', 'some', 'about', 'the', 'for', 'my', 'approx']);
   function unitOf(word) {
     const w = normAr(word);
     if (UNIT_KEYS[w]) return { u: UNIT_KEYS[w], n: 1 };
@@ -2735,7 +2797,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const chunks = [];
     let partNo = 0;
     text = String(text).replace(/([\d٠-٩]+(?:[.٫][\d٠-٩]+)?)(?=[^\d٠-٩\s.,٫،])/g, '$1 '); // «330مل» -> «330 مل»
-    for (const part of String(text).split(/[\n،,+;]|\s+و\s+|\s+مع\s+/)) {
+    for (const part of String(text).split(/[\n،,+;]|\s+و\s+|\s+مع\s+|\s+and\s+|\s+with\s+|\s*&\s*/i)) {
       let cur = [];
       for (let tok of part.trim().split(/\s+/).filter(Boolean)) {
         const rest = tok.slice(1);
@@ -3276,7 +3338,20 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     try { await sbInit(); if (sbUser) { await loadProfile(); queuePush(); } } catch {}
   }
 
+  // language switch: saved with the settings, then the app reloads in the new language
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-lang]'); if (!b) return;
+    if (b.dataset.lang === LANG) return;
+    S().lang = b.dataset.lang === 'en' ? 'en' : 'ar'; save('settings'); cacheLocal();
+    location.reload();
+  });
+  const markLang = () => document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === LANG)));
+  new MutationObserver(markLang).observe(document.body, { childList: true, subtree: true });
+
   // ---------- boot ----------
+  markLang();
+  startTranslation();
+  if (EN_MODE) { [['#prevDay', '‹'], ['#nextDay', '›'], ['#foodPrev', '‹'], ['#foodNext', '›']].forEach(([q, c]) => { const b = $(q); if (b) b.textContent = c; }); loadUSDA().then(() => trNode(document.body)); }
   applyAuto(); cacheLocal();
   fillSettings(); fillMonth(); buildDaily(); render(false);
   const hashTab = (location.hash || '').slice(1);
