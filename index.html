@@ -489,7 +489,12 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     <div class="sect"><h3>مشترياتك</h3><ul class="inc-list" id="buyHistory"></ul></div>
   </section>
 
-  <nav class="tabs" id="moreSeg" hidden><button type="button" data-tab="goals" aria-selected="true">الأسبوع والشهر</button><button type="button" data-tab="log" aria-selected="false">السجل</button><button type="button" data-tab="settings" aria-selected="false">الإعدادات</button></nav>
+  <nav class="tabs" id="moreSeg" hidden><button type="button" data-tab="arena" aria-selected="false">المنافسة</button><button type="button" data-tab="goals" aria-selected="true">الأسبوع والشهر</button><button type="button" data-tab="log" aria-selected="false">السجل</button><button type="button" data-tab="settings" aria-selected="false">الإعدادات</button></nav>
+
+  <section class="win" id="tab-arena" role="tabpanel" hidden>
+    <div class="win-title"><span>المنافسة</span></div>
+    <div id="arena"></div>
+  </section>
 
   <section class="win" id="tab-goals" role="tabpanel" hidden>
     <div class="win-title"><span>مهام الأسبوع والشهر</span></div>
@@ -1504,10 +1509,11 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     renderStatus(); renderGoals(); renderLog(); refreshDaily();
     if (curTab === 'food') renderFood();
     if (curTab === 'store') renderStore();
+    if (typeof queuePush === 'function') queuePush();
   }
 
   // ---------- tabs ----------
-  const SECTIONS = ['daily', 'food', 'train', 'store', 'goals', 'log', 'settings'], MORE = ['goals', 'log', 'settings'];
+  const SECTIONS = ['daily', 'food', 'train', 'store', 'arena', 'goals', 'log', 'settings'], MORE = ['arena', 'goals', 'log', 'settings'];
   let curTab = 'daily', moreSub = 'goals';
   function showTab(name) {
     if (name === 'more') name = moreSub;
@@ -1526,6 +1532,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     if (name === 'train') renderTrain();
     if (name === 'store') renderStore();
     if (name === 'settings') fillPrayerSettings();
+    if (name === 'arena') renderArena();
     if (changed) window.scrollTo(0, 0);
     try { sessionStorage.setItem('hunter-tab', name); } catch {}
   }
@@ -3017,6 +3024,258 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
   }
 
+  // ---------- online: accounts, friends, leaderboards (Supabase) ----------
+  const SB_URL = 'https://yccikiqzkvooruhgelxt.supabase.co', SB_KEY = 'sb_publishable_aeITpjLLjIel-SPc6zf7zw_GHjoR6ZC', SB_STORE = 'arise-auth';
+  const COUNTRIES = [['SA', 'السعودية'], ['AE', 'الإمارات'], ['KW', 'الكويت'], ['QA', 'قطر'], ['BH', 'البحرين'], ['OM', 'عُمان'], ['YE', 'اليمن'], ['IQ', 'العراق'], ['JO', 'الأردن'], ['SY', 'سوريا'], ['LB', 'لبنان'], ['PS', 'فلسطين'], ['EG', 'مصر'], ['SD', 'السودان'], ['LY', 'ليبيا'], ['TN', 'تونس'], ['DZ', 'الجزائر'], ['MA', 'المغرب'], ['MR', 'موريتانيا'], ['SO', 'الصومال'], ['TR', 'تركيا'], ['PK', 'باكستان'], ['IN', 'الهند'], ['BD', 'بنغلاديش'], ['ID', 'إندونيسيا'], ['MY', 'ماليزيا'], ['NG', 'نيجيريا'], ['GB', 'بريطانيا'], ['US', 'أمريكا'], ['CA', 'كندا'], ['DE', 'ألمانيا'], ['FR', 'فرنسا'], ['AU', 'أستراليا']];
+  const flag = (cc) => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map((c) => 127397 + c.charCodeAt(0))) : '🏳️';
+  const countryName = (cc) => (COUNTRIES.find((c) => c[0] === cc) || [cc, cc || '—'])[1];
+  let sb = null, sbUser = null, sbProfile = null, arenaView = 'week', arenaAuth = 'up', arenaBusy = false, lastPush = '', pushTimer = null;
+  const hasSession = () => { try { return !!localStorage.getItem(SB_STORE); } catch { return false; } };
+  async function sbInit() {
+    if (sb) return sb;
+    await loadScript('vendor/supabase.js');
+    sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: SB_STORE } });
+    const { data } = await sb.auth.getSession();
+    sbUser = (data.session && data.session.user) || null;
+    sb.auth.onAuthStateChange((_e, s) => { sbUser = (s && s.user) || null; if (!sbUser) sbProfile = null; });
+    return sb;
+  }
+  async function loadProfile() {
+    if (!sbUser) { sbProfile = null; return null; }
+    const { data, error } = await sb.from('profiles').select('*').eq('id', sbUser.id).maybeSingle();
+    if (error) throw error;
+    sbProfile = data || null;
+    return sbProfile;
+  }
+  // this week's XP (Sunday to today): quest XP plus the full-day bonus
+  function weekXp() {
+    const t = todayStr(); let xp = 0;
+    for (let d = weekStart(t); d <= t; d = addDays(d, 1)) { const e = C.evals[d]; if (e) xp += e.xp + (e.complete ? 50 : 0); }
+    return Math.min(20000, xp);
+  }
+  function myStats() {
+    return { level: Math.min(2000, C.lv.L), rank: rankOf(C.lv.L)[1], total_xp: Math.min(10000000, C.total), week_xp: weekXp(), week_start: weekStart(todayStr()), streak: C.streak };
+  }
+  function queuePush() {
+    if (!sbProfile) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushStats, 3000);
+  }
+  async function pushStats() {
+    if (!sb || !sbProfile) return;
+    const st = myStats(), key = JSON.stringify(st);
+    if (key === lastPush) return;
+    const { error } = await sb.from('profiles').update(st).eq('id', sbProfile.id);
+    if (!error) { lastPush = key; Object.assign(sbProfile, st); }
+  }
+  const authErr = (e) => {
+    const m = String((e && e.message) || e || '');
+    if (/invalid login/i.test(m)) return 'الإيميل أو كلمة المرور غلط.';
+    if (/already registered|already exists/i.test(m)) return 'هذا الإيميل مسجّل من قبل. سجّل دخول.';
+    if (/password/i.test(m) && /6|short|least/i.test(m)) return 'كلمة المرور لازم تكون 6 أحرف أو أكثر.';
+    if (/not confirmed/i.test(m)) return 'لازم تأكد إيميلك أول (شيّك على بريدك).';
+    if (/rate limit|too many/i.test(m)) return 'محاولات كثيرة. انتظر شوي وجرب مرة ثانية.';
+    if (/duplicate|unique|23505/i.test(m)) return 'اسم المستخدم مأخوذ، اختر اسم ثاني.';
+    if (/fetch|network/i.test(m)) return 'ما فيه اتصال بالإنترنت.';
+    return m || 'صار خطأ، جرب مرة ثانية.';
+  };
+  const countrySelect = (id, val) => `<select id="${id}"><option value="">اختر دولتك</option>${COUNTRIES.map(([c, n]) => `<option value="${c}"${c === val ? ' selected' : ''}>${flag(c)} ${n}</option>`).join('')}</select>`;
+  const USER_RE = /^[A-Za-z0-9_.]{3,20}$/;
+  function arenaShell(inner, msg) {
+    $('#arena').innerHTML = (msg ? `<p class="hint" style="color:var(--bad)">${esc(msg)}</p>` : '') + inner;
+  }
+  async function renderArena(msg) {
+    if (!$('#arena')) return;
+    if (!navigator.onLine) { arenaShell('<p class="hint">المنافسة تحتاج إنترنت. تقدمك محفوظ، وبيتحدث أول ما ترجع أونلاين.</p>'); return; }
+    if (!sb) { arenaShell('<p class="hint">جاري الاتصال…</p>'); try { await sbInit(); } catch { arenaShell('<p class="hint">ما قدرت أتصل بالسيرفر. جرب بعدين.</p>'); return; } }
+    if (!sbUser) return drawAuth(msg);
+    if (!sbProfile) { try { await loadProfile(); } catch (e) { arenaShell('<p class="hint">' + esc(authErr(e)) + '</p>'); return; } }
+    if (!sbProfile) return drawProfileForm(msg);
+    queuePush();
+    return drawBoard(msg);
+  }
+  function drawAuth(msg) {
+    const up = arenaAuth === 'up';
+    arenaShell(`
+      <div class="sect"><p class="q-desc">سوّ حساب عشان تنافس أصحابك وتدخل الترتيب العالمي وترتيب دولتك ودوري رتبتك الأسبوعي. تقدمك يبقى محفوظ على جوالك، والسيرفر يشوف بس مستواك وخبرتك.</p>
+        <div class="chips-row"><button type="button" class="chip" data-au="up" aria-pressed="${up}">حساب جديد</button><button type="button" class="chip" data-au="in" aria-pressed="${!up}">تسجيل دخول</button></div>
+        <form id="au-form" style="display:grid;gap:10px">
+          ${up ? `<label class="field" style="max-width:none"><span>اسم المستخدم (إنجليزي، 3-20 حرف)</span><span class="inwrap"><input id="au-user" autocomplete="username" dir="ltr" placeholder="hunter_01" maxlength="20" value="${esc(S().name && USER_RE.test(S().name) ? S().name : '')}"></span></label>
+          <label class="field" style="max-width:none"><span>الدولة</span>${countrySelect('au-cc', 'SA')}</label>` : ''}
+          <label class="field" style="max-width:none"><span>الإيميل</span><span class="inwrap"><input id="au-email" type="email" autocomplete="email" dir="ltr" placeholder="you@example.com"></span></label>
+          <label class="field" style="max-width:none"><span>كلمة المرور</span><span class="inwrap"><input id="au-pass" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" dir="ltr" minlength="6"></span></label>
+          <button class="btn" type="submit">${up ? 'سوّ الحساب' : 'دخول'}</button>
+        </form></div>`, msg);
+  }
+  function drawProfileForm(msg) {
+    let pend = {}; try { pend = JSON.parse(localStorage.getItem('arise-pending-profile') || '{}'); } catch {}
+    arenaShell(`
+      <div class="sect"><h3>كمّل ملفك</h3>
+        <form id="pf-form2" style="display:grid;gap:10px">
+          <label class="field" style="max-width:none"><span>اسم المستخدم (إنجليزي، 3-20 حرف)</span><span class="inwrap"><input id="au-user" dir="ltr" maxlength="20" value="${esc(pend.username || '')}"></span></label>
+          <label class="field" style="max-width:none"><span>الدولة</span>${countrySelect('au-cc', pend.country || 'SA')}</label>
+          <button class="btn" type="submit">احفظ</button>
+        </form>
+        <button class="btn ghost" type="button" data-arena="out">تسجيل خروج</button></div>`, msg);
+  }
+  async function createProfile(username, country) {
+    const { error } = await sb.from('profiles').insert({ id: sbUser.id, username, country: country || null, ...myStats() });
+    if (error) throw error;
+    try { localStorage.removeItem('arise-pending-profile'); } catch {}
+    await loadProfile(); lastPush = '';
+  }
+  const VIEWS = [['week', 'الأسبوع'], ['league', 'دوري رتبتك'], ['friends', 'الأصدقاء'], ['country', 'دولتك'], ['world', 'العالم']];
+  async function fetchBoard(view) {
+    const ws = weekStart(todayStr()), cols = 'id,username,country,level,rank,total_xp,week_xp,week_start,streak';
+    const me = sbProfile;
+    const wk = (r) => (r.week_start === ws ? r.week_xp : 0);
+    if (view === 'friends') {
+      const { data: fr, error } = await sb.from('friendships').select('requester,addressee,status').or(`requester.eq.${me.id},addressee.eq.${me.id}`);
+      if (error) throw error;
+      const ids = [me.id].concat((fr || []).filter((f) => f.status === 'accepted').map((f) => (f.requester === me.id ? f.addressee : f.requester)));
+      const { data, error: e2 } = await sb.from('profiles').select(cols).in('id', ids);
+      if (e2) throw e2;
+      return { rows: (data || []).map((r) => ({ ...r, v: wk(r) })).sort((a, b) => b.v - a.v), unit: 'XP هذا الأسبوع', fr: fr || [] };
+    }
+    let q = sb.from('profiles').select(cols);
+    if (view === 'week' || view === 'league') { q = q.eq('week_start', ws).order('week_xp', { ascending: false }); if (view === 'league') q = q.eq('rank', me.rank); }
+    else { if (view === 'country') { if (!me.country) return { rows: [], unit: '' }; q = q.eq('country', me.country); } q = q.order('total_xp', { ascending: false }); }
+    const { data, error } = await q.limit(50);
+    if (error) throw error;
+    const weekly = view === 'week' || view === 'league';
+    const rows = (data || []).map((r) => ({ ...r, v: weekly ? wk(r) : r.total_xp }));
+    // where am I if I'm outside the top 50?
+    let mine = rows.findIndex((r) => r.id === me.id) + 1;
+    if (!mine) {
+      let c = sb.from('profiles').select('id', { count: 'exact', head: true });
+      if (weekly) { c = c.eq('week_start', ws).gt('week_xp', me.week_xp || 0); if (view === 'league') c = c.eq('rank', me.rank); }
+      else { if (view === 'country') c = c.eq('country', me.country); c = c.gt('total_xp', me.total_xp || 0); }
+      const { count } = await c;
+      if (count != null) mine = count + 1;
+    }
+    return { rows, unit: weekly ? 'XP هذا الأسبوع' : 'XP', mine };
+  }
+  async function drawBoard(msg) {
+    const me = sbProfile, rk = RANKS.find((r) => r[1] === me.rank) || RANKS[0];
+    const head = `
+      <div class="sect">
+        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+          <div><b style="font-size:17px" dir="ltr">${esc(me.username)}</b> ${flag(me.country)}<div class="hint">رتبة ${esc(me.rank)} · ${esc(rk[2])} · مستوى ${me.level} · سلسلة ${me.streak}</div></div>
+          <button class="btn ghost" type="button" data-arena="refresh">تحديث</button>
+        </div>
+        <div class="chips-row">${VIEWS.map(([k, n]) => `<button type="button" class="chip" data-av="${k}" aria-pressed="${k === arenaView}">${k === 'league' ? `دوري رتبة ${esc(me.rank)}` : n}</button>`).join('')}</div>
+      </div>
+      <div id="ar-board"><p class="hint">جاري التحميل…</p></div>
+      <div class="sect">
+        <h3>الأصدقاء</h3>
+        <form class="inc-form" id="fr-form"><label class="field" style="flex:2 1 160px"><span>أضف صديق باسم المستخدم</span><span class="inwrap"><input id="fr-user" dir="ltr" autocomplete="off" placeholder="username"></span></label><button class="btn" type="submit">أرسل طلب</button></form>
+        <ul class="inc-list" id="fr-list"></ul>
+      </div>
+      <div class="sect"><p class="hint">الأسبوع يبدأ الأحد. دوري الرتبة يجمعك مع اللي بنفس رتبتك (E إلى S)، وكل ما ترتفع رتبتك تدخل دوري أقوى.</p>
+        <button class="btn ghost" type="button" data-arena="out">تسجيل خروج</button></div>`;
+    arenaShell(head, msg);
+    try {
+      const b = await fetchBoard(arenaView);
+      if (!$('#ar-board')) return;
+      const list = b.rows.length ? `<ol class="inc-list">${b.rows.map((r, i) => `<li${r.id === me.id ? ' style="outline:1px solid var(--ok)"' : ''}><span class="amt" style="min-width:28px;color:${i < 3 ? 'var(--gold)' : 'var(--muted)'}">${i + 1}</span><span class="note" style="color:var(--fg)"><span dir="ltr">${esc(r.username)}</span> ${flag(r.country)} <small style="color:var(--muted)">· ${esc(r.rank)} · مستوى ${r.level}</small></span><span class="amt">${fmt(r.v)}</span></li>`).join('')}</ol>`
+        : `<p class="hint">${arenaView === 'country' && !me.country ? 'ما اخترت دولة.' : 'ما فيه أحد هنا للحين. ادعُ أصحابك!'}</p>`;
+      $('#ar-board').innerHTML = `<div class="sect"><div class="hint">${esc(VIEWS.find((v) => v[0] === arenaView)[1])}${arenaView === 'country' && me.country ? ' · ' + flag(me.country) + ' ' + esc(countryName(me.country)) : ''} · ${esc(b.unit)}${b.mine ? ` · ترتيبك <b>#${b.mine}</b>` : ''}</div>${list}</div>`;
+    } catch (e) { if ($('#ar-board')) $('#ar-board').innerHTML = `<p class="hint">${esc(authErr(e))}</p>`; }
+    drawFriends();
+  }
+  async function drawFriends() {
+    const me = sbProfile, el = $('#fr-list'); if (!el) return;
+    try {
+      const { data: fr, error } = await sb.from('friendships').select('requester,addressee,status').or(`requester.eq.${me.id},addressee.eq.${me.id}`);
+      if (error) throw error;
+      const other = (f) => (f.requester === me.id ? f.addressee : f.requester);
+      const ids = (fr || []).map(other);
+      let names = {};
+      if (ids.length) { const { data } = await sb.from('profiles').select('id,username,country').in('id', ids); for (const p of data || []) names[p.id] = p; }
+      const nm = (id) => names[id] ? `<span dir="ltr">${esc(names[id].username)}</span> ${flag(names[id].country)}` : '—';
+      const inc = (fr || []).filter((f) => f.status === 'pending' && f.addressee === me.id);
+      const out = (fr || []).filter((f) => f.status === 'pending' && f.requester === me.id);
+      const acc = (fr || []).filter((f) => f.status === 'accepted');
+      el.innerHTML = inc.map((f) => `<li><span class="note" style="color:var(--fg)">${nm(f.requester)} <small>يبي يضيفك</small></span><button class="btn" type="button" data-fr-ok="${f.requester}">قبول</button><button class="btn ghost" type="button" data-fr-del="${f.requester}|${f.addressee}">رفض</button></li>`).join('')
+        + acc.map((f) => `<li><span class="note" style="color:var(--fg)">${nm(other(f))}</span><button class="btn ghost" type="button" data-fr-del="${f.requester}|${f.addressee}">حذف</button></li>`).join('')
+        + out.map((f) => `<li><span class="note">${nm(f.addressee)} <small>· بانتظار القبول</small></span><button class="btn ghost" type="button" data-fr-del="${f.requester}|${f.addressee}">إلغاء</button></li>`).join('')
+        || '<li><span class="note">ما عندك أصدقاء للحين. أرسل لهم اسمك: <b dir="ltr">' + esc(me.username) + '</b></span></li>';
+    } catch (e) { el.innerHTML = `<li><span class="note">${esc(authErr(e))}</span></li>`; }
+  }
+  async function arenaAct(fn) {
+    if (arenaBusy) return; arenaBusy = true;
+    try { await fn(); } catch (e) { await renderArena(authErr(e)); } finally { arenaBusy = false; }
+  }
+  document.addEventListener('submit', (ev) => {
+    const f = ev.target;
+    if (f.id === 'au-form') {
+      ev.preventDefault();
+      arenaAct(async () => {
+        const email = $('#au-email').value.trim(), password = $('#au-pass').value;
+        if (!email || !password) { await renderArena('اكتب الإيميل وكلمة المرور.'); return; }
+        if (arenaAuth === 'up') {
+          const username = $('#au-user').value.trim(), country = $('#au-cc').value;
+          if (!USER_RE.test(username)) { await renderArena('اسم المستخدم لازم يكون إنجليزي (حروف وأرقام و _ .) من 3 إلى 20.'); return; }
+          if (password.length < 6) { await renderArena('كلمة المرور لازم تكون 6 أحرف أو أكثر.'); return; }
+          try { localStorage.setItem('arise-pending-profile', JSON.stringify({ username, country })); } catch {}
+          const { data, error } = await sb.auth.signUp({ email, password });
+          if (error) throw error;
+          if (!data.session) { arenaAuth = 'in'; await renderArena('تم إنشاء الحساب. أكّد إيميلك من الرسالة اللي وصلتك، وبعدها سجّل دخول.'); return; }
+          sbUser = data.session.user;
+          try { await createProfile(username, country); } catch (e) { sbProfile = null; await renderArena(authErr(e)); return; }
+          toast('ARISE', `أهلًا ${username}! دخلت المنافسة.`, 'gold');
+        } else {
+          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          sbUser = data.user; await loadProfile();
+        }
+        await renderArena();
+      });
+    }
+    if (f.id === 'pf-form2') {
+      ev.preventDefault();
+      arenaAct(async () => {
+        const username = $('#au-user').value.trim(), country = $('#au-cc').value;
+        if (!USER_RE.test(username)) { await renderArena('اسم المستخدم لازم يكون إنجليزي (حروف وأرقام و _ .) من 3 إلى 20.'); return; }
+        await createProfile(username, country); await renderArena();
+      });
+    }
+    if (f.id === 'fr-form') {
+      ev.preventDefault();
+      arenaAct(async () => {
+        const u = $('#fr-user').value.trim(); if (!u) return;
+        const { data, error } = await sb.from('profiles').select('id,username').ilike('username', u.replace(/[%_\\]/g, '\\$&')).limit(1);
+        if (error) throw error;
+        const p = (data || [])[0];
+        if (!p) { toast('خطأ', 'ما لقيت أحد بهذا الاسم.', 'bad'); return; }
+        if (p.id === sbProfile.id) { toast('خطأ', 'هذا أنت 😄', 'bad'); return; }
+        // they already asked me? then accept instead
+        const { data: back } = await sb.from('friendships').select('status').eq('requester', p.id).eq('addressee', sbProfile.id).maybeSingle();
+        if (back) { await sb.from('friendships').update({ status: 'accepted' }).eq('requester', p.id).eq('addressee', sbProfile.id); toast('FRIENDS', `صرت أنت و${p.username} أصدقاء.`); }
+        else {
+          const { error: e2 } = await sb.from('friendships').insert({ requester: sbProfile.id, addressee: p.id });
+          if (e2 && !/duplicate|23505/.test(e2.message + e2.code)) throw e2;
+          toast('FRIENDS', `أرسلت طلب صداقة لـ ${p.username}.`);
+        }
+        await drawFriends();
+      });
+    }
+  });
+  document.addEventListener('click', (ev) => {
+    const t = ev.target.closest('[data-au],[data-av],[data-arena],[data-fr-ok],[data-fr-del]'); if (!t || !t.closest('#arena')) return;
+    if (t.dataset.au) { arenaAuth = t.dataset.au; drawAuth(); return; }
+    if (t.dataset.av) { arenaView = t.dataset.av; arenaAct(() => drawBoard()); return; }
+    if (t.dataset.arena === 'refresh') { arenaAct(async () => { await pushStats(); await loadProfile(); await drawBoard(); }); return; }
+    if (t.dataset.arena === 'out') { arenaAct(async () => { await sb.auth.signOut(); sbUser = null; sbProfile = null; lastPush = ''; await renderArena(); }); return; }
+    if (t.dataset.frOk) { arenaAct(async () => { const { error } = await sb.from('friendships').update({ status: 'accepted' }).eq('requester', t.dataset.frOk).eq('addressee', sbProfile.id); if (error) throw error; await drawBoard(); }); return; }
+    if (t.dataset.frDel) { const [a, b] = t.dataset.frDel.split('|'); arenaAct(async () => { const { error } = await sb.from('friendships').delete().eq('requester', a).eq('addressee', b); if (error) throw error; await drawBoard(); }); }
+  });
+  // signed in before? reconnect quietly and keep the leaderboard numbers fresh
+  async function arenaBoot() {
+    if (!hasSession() || !navigator.onLine) return;
+    try { await sbInit(); if (sbUser) { await loadProfile(); queuePush(); } } catch {}
+  }
+
   // ---------- boot ----------
   applyAuto(); cacheLocal();
   fillSettings(); fillMonth(); buildDaily(); render(false);
@@ -3027,6 +3286,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   runCheckin();
   if (!S().onboarded) openOnboard();
   initStore();
+  setTimeout(arenaBoot, 1500);
   if (NATIVE) { setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
 })();
 </script>

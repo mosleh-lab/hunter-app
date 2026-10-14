@@ -6,3 +6,4 @@
 - **English model (`tesseract/lang/eng.traineddata.gz`)** — @tesseract.js-data/eng 1.0.0 (tessdata best_int), Apache License 2.0 / MIT packaging.
 - **Food data (`../data/usda.json`)** — USDA National Nutrient Database for Standard Reference, Release 28 (public domain, U.S. Department of Agriculture, Agricultural Research Service). Arabic names are machine-assembled translations.
 - **Barcode lookups** — Open Food Facts (https://world.openfoodfacts.org), data under the Open Database License (ODbL).
+- **Supabase client (`supabase.js`)** — @supabase/supabase-js 2.117.2 (UMD build), MIT License. https://github.com/supabase/supabase-js
