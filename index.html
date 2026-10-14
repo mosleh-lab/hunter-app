@@ -1709,6 +1709,16 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
       if (list.length) await nativeCall('LocalNotifications', 'schedule', { notifications: list });
     } catch {}
   }
+  // new iPhone build published? (the release notes carry the commit it was built from)
+  async function checkAppUpdate() {
+    const mine = window.ARISE_BUILD; if (!NATIVE || !mine) return;
+    try {
+      const r = await fetch('https://api.github.com/repos/mosleh-lab/hunter-app/releases/tags/ios-latest', { cache: 'no-store' });
+      if (!r.ok) return;
+      const m = String((await r.json()).body || '').match(/build of ([0-9a-f]{7,})/);
+      if (m && !m[1].startsWith(mine) && !mine.startsWith(m[1])) toast('UPDATE', 'فيه نسخة جديدة من التطبيق. ثبّتها من Sideloadly بنفس الطريقة (بياناتك تبقى).', 'gold');
+    } catch {}
+  }
   if (NATIVE) {
     document.documentElement.classList.add('native');
     $('#healthBtn').textContent = 'مزامنة Apple Health';
@@ -2716,6 +2726,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   const labelCount = (label) => { const l = normAr(label); const m = l.match(/(\d+(?:\.\d+)?)/); if (m) return +m[1]; if (/[½]|نص/.test(l)) return 0.5; if (/[¼]|ربع/.test(l)) return 0.25; if (/تين\b|ين\b/.test(l.split(' ')[0])) return 2; return 1; };
   function splitMeals(text) {
     const chunks = [];
+    let partNo = 0;
     text = String(text).replace(/([\d٠-٩]+(?:[.٫][\d٠-٩]+)?)(?=[^\d٠-٩\s.,٫،])/g, '$1 '); // «330مل» -> «330 مل»
     for (const part of String(text).split(/[\n،,+;]|\s+و\s+|\s+مع\s+/)) {
       let cur = [];
@@ -2728,6 +2739,8 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         cur.push(t);
       }
       if (cur.length) chunks.push(cur);
+      chunks.forEach((c) => { if (c.part == null) c.part = partNo; });
+      partNo++;
     }
     for (let i = chunks.length - 1; i >= 0; i--) if (chunks[i].every((x) => STOPW.has(normAr(x)))) chunks.splice(i, 1);
     // "ماء 330 مل": a chunk that is only a quantity belongs to the food written just before it
@@ -2735,10 +2748,15 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
     const out = [];
     for (const c of chunks) {
       const prev = out[out.length - 1];
-      if (prev && c.every(isQ) && !prev.some(isQ)) prev.push(...c); else out.push(c);
+      const sameP = prev && prev.part === c.part && !prev.some(isQ);
+      // «حليب ندى 30 جرام بروتين»: the protein amount describes the drink, it isn't a scoop of whey
+      const proDesc = sameP && c.length >= 2 && c.slice(0, -1).every(isQ) && normAr(c[c.length - 1]) === 'بروتين' && prev.some((x) => /حليب|ندى|شيك|مشروب|لبن/.test(normAr(x)));
+      if (sameP && (c.every(isQ) || proDesc)) prev.push(...c); else out.push(c);
     }
     return out;
   }
+  // the whole word appears in some food name as-is (so «بروتين» isn't read as a dual like «بيضتين»)
+  const exactWord = (w) => (window.HUNTER_FOODS || []).concat(usda || []).some((f) => wordHit(searchKey(f), w));
   function parseMeal(text) {
     return splitMeals(text).map((toks) => {
       let qty = null, unit = null; const food = [];
@@ -2748,7 +2766,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
         const w = normAr(t); if (STOPW.has(w)) continue;
         if (unit === 'tbsp' && /^(صغيره|شاي)$/.test(w)) { unit = 'tsp'; continue; }
         if (unit === 'tbsp' && /^(كبيره|اكل)$/.test(w)) continue;
-        if (/تين$/.test(w) && w.length > 4 && qty == null) { qty = 2; food.push(w.slice(0, -3)); continue; }
+        if (/تين$/.test(w) && w.length > 4 && qty == null && !exactWord(w)) { qty = 2; food.push(w.slice(0, -3)); continue; }
         food.push(w);
       }
       const raw = toks.join(' ');
@@ -2769,6 +2787,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   function gramsFor(f, r) {
     if (!f) return { grams: 0, label: '' };
     const q = r.qty ?? 1;
+    if (f.pg && r.unit === 'g') { const m = f.pg.find(([g]) => g === q); if (m) { const u = f.u[m[1]]; return { grams: u[1], label: `1 × ${u[0]}` }; } }
     if (r.unit === 'g') return { grams: q, label: `${r1(q)} جم` };
     if (r.unit === 'kg') return { grams: q * 1000, label: `${r1(q)} كيلو` };
     if (r.unit === 'ml') return { grams: q, label: `${r1(q)} مل` };
@@ -3008,7 +3027,7 @@ select { background: rgba(0,0,0,0.25); border: 1px solid var(--line-soft); borde
   runCheckin();
   if (!S().onboarded) openOnboard();
   initStore();
-  if (NATIVE) setTimeout(() => nativeHealthSync(true), 800);
+  if (NATIVE) { setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
 })();
 </script>
 </body>
