@@ -2265,9 +2265,15 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
     if (food.na != null) e.na = Math.round(food.na * x);
     return e;
   }
+  // water logged as food (plain or sparkling water) also counts toward the water quest
+  const isWaterFood = (e) => /^water/.test(e.fid || '') || /^Beverages, water, (tap|bottled)/i.test((foodById(e.fid) || {}).en || '');
+  const waterMl = (list) => (list || []).filter(isWaterFood).reduce((a, e) => a + (e.g || 0), 0);
   function setFood(list) {
-    const t = foodTotals(list);
-    act(() => setDay({ food: list, cal: Math.round(t.k), protein: Math.round(t.p), carbs: Math.round(t.c), fat: Math.round(t.f) }));
+    const t = foodTotals(list), d = getDay(viewDate) || {};
+    const dw = (waterMl(list) - waterMl(d.food)) / 1000;
+    const patch = { food: list, cal: Math.round(t.k), protein: Math.round(t.p), carbs: Math.round(t.c), fat: Math.round(t.f) };
+    if (dw) patch.water = Math.max(0, Math.round(((d.water || 0) + dw) * 100) / 100);
+    act(() => setDay(patch));
     buildDaily(); renderFood();
   }
   const favs = () => S().favFoods || [];
@@ -3467,9 +3473,7 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
       if (ev.target.id !== 'ft-add') return;
       const m = $('#ft-m').value, add = rows.filter((r) => r.on && r.alts[r.pick] && r.grams > 0).map((r) => makeEntry(r.alts[r.pick], r.grams, r.label, m));
       if (!add.length) return;
-      const ml = rows.filter((r) => r.on && r.alts[r.pick] && /^water/.test(r.alts[r.pick].id)).reduce((a, r) => a + r.grams, 0);
       closeSheet();
-      if (ml > 0) { const d = getDay(viewDate) || {}; act(() => setDay({ water: Math.round(((d.water || 0) + ml / 1000) * 100) / 100 })); }
       setFood(((getDay(viewDate) || {}).food || []).concat(add));
       toast('FOOD', `أضفت ${add.length} أصناف · ${fmt(add.reduce((a, e) => a + e.k, 0))} سعرة`);
     });
