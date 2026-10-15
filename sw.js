@@ -1,5 +1,5 @@
 // Offline support: app shell is cached on install; Google Fonts are cached on first use.
-const CACHE = 'arise-v18';
+const CACHE = 'arise-v19';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'js/prayer.js', 'data/foods.js', 'data/exercises.js', 'data/cities.js', 'data/usda.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {

@@ -60,3 +60,15 @@ create or replace function public.touch_updated_at() returns trigger language pl
 begin new.updated_at := now(); return new; end $$;
 drop trigger if exists profiles_touch on public.profiles;
 create trigger profiles_touch before update on public.profiles for each row execute function public.touch_updated_at();
+
+-- Backups: one private copy of each player's progress (only they can read or write it).
+create table if not exists public.backups (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.backups enable row level security;
+drop policy if exists "backups: own" on public.backups;
+create policy "backups: own" on public.backups for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+revoke all on public.backups from anon;
+grant select, insert, update, delete on public.backups to authenticated;

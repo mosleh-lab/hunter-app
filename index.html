@@ -347,6 +347,10 @@ html.native .web-only-inline { display: none; }
 .ex-card.ss-next { margin-bottom: -4px; border-end-start-radius: 0; border-end-end-radius: 0; }
 .ss-tag { font-size: 11px; color: #c9a2ff; font-weight: 700; }
 .mv { display: inline-flex; gap: 2px; flex: none; }
+.drag { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; background: none; border: 0; color: var(--dim); font-size: 20px; line-height: 1; padding: 4px 6px; min-width: 30px; min-height: 30px; display: inline-grid; place-items: center; flex: none; }
+.drag:active { cursor: grabbing; color: var(--glow-2); }
+.dragging { position: relative; z-index: 30; opacity: .92; box-shadow: 0 10px 30px rgba(0,0,0,.55), 0 0 0 1px var(--glow-2); transition: none !important; }
+body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
 .mv button, .tool { background: rgba(255,255,255,.04); border: 1px solid var(--line-soft); color: var(--muted); border-radius: 6px; min-width: 30px; min-height: 30px; padding: 0 6px; font-size: 14px; cursor: pointer; }
 .mv button:disabled { opacity: .3; }
 .tool[aria-pressed="true"] { color: #c9a2ff; border-color: #c9a2ff; }
@@ -357,6 +361,14 @@ html.native .web-only-inline { display: none; }
 .plate-out { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; min-height: 60px; }
 .plate { display: grid; place-items: center; border-radius: 4px; font-family: var(--f-num); font-weight: 700; font-size: 12px; color: #04121f; width: 30px; }
 .chart-wrap svg { width: 100%; height: auto; display: block; }
+.photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.photo-grid button { position: relative; padding: 0; border: 2px solid transparent; border-radius: 6px; overflow: hidden; background: #000; aspect-ratio: 3 / 4; cursor: pointer; }
+.photo-grid button[aria-pressed="true"] { border-color: var(--gold); }
+.photo-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-grid small { position: absolute; inset: auto 0 0 0; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; padding: 2px 4px; font-family: var(--f-num); }
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cmp img { width: 100%; border-radius: 6px; display: block; }
+.cmp div { text-align: center; font-size: 12px; color: var(--muted); }
 .chart-wrap .ln { fill: none; stroke: var(--glow, #57b8ff); stroke-width: 2; }
 .chart-wrap .dt { fill: var(--glow, #57b8ff); }
 .chart-wrap text { fill: var(--muted); font-size: 10px; font-family: var(--f-num); }
@@ -367,8 +379,17 @@ html.native .web-only-inline { display: none; }
 .star[aria-pressed="true"] { color: var(--gold); border-color: rgba(255,210,122,.5); }
 .rc-list { display: grid; gap: 6px; }
 .rc-row { display: grid; grid-template-columns: minmax(0, 1fr) 84px 50px 30px; gap: 6px; align-items: center; font-size: 13px; }
+.micro-row { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); justify-content: center; }
+.micro-row b { color: var(--fg); font-family: var(--f-num); }
+.micro-row small { flex-basis: 100%; text-align: center; color: var(--dim); }
+.coach-charts summary { cursor: pointer; color: var(--glow-2); font-size: 13px; padding: 4px 0; }
+.coach-charts .chart-wrap { margin-top: 6px; }
 .rc-row .kc { font-family: var(--f-num); color: var(--muted); text-align: center; }
 .set-row.head { font-size: 11px; color: var(--dim); }
+.set-row.rpe { grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 54px 40px 30px; }
+.set-row select { padding: 6px 2px; font-size: 13px; min-width: 0; }
+.sugg { display: flex; gap: 8px; align-items: center; justify-content: space-between; background: rgba(255,210,122,.07); border: 1px solid rgba(255,210,122,.3); border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.sugg .btn { min-height: 30px; padding: 2px 10px; font-size: 12px; }
 .set-row .no { font-family: var(--f-num); color: var(--muted); text-align: center; }
 .set-row .inwrap input { padding: 7px 8px; text-align: center; }
 .set-ok { width: 40px; height: 36px; border-radius: var(--r); border: 1px solid var(--line-soft); background: transparent; color: var(--muted); font-size: 16px; }
@@ -600,6 +621,20 @@ html.native .web-only-inline { display: none; }
       <div id="wChart"></div>
       <div class="legend" id="wStats"></div>
     </div>
+    <div class="sect" id="measSect">
+      <h3>قياسات الجسم</h3>
+      <p class="hint">قيس الصبح قبل الأكل، مرة بالأسبوع. الشريط على أعرض نقطة (الخصر عند السرة).</p>
+      <div class="set-grid" id="measForm"></div>
+      <div class="backup"><button class="btn" type="button" id="measSave">سجّل قياسات اليوم</button></div>
+      <div class="chips-row" id="measChips"></div>
+      <div id="measChart"></div>
+    </div>
+    <div class="sect" id="photoSect">
+      <h3>صور التقدم</h3>
+      <p class="hint">الصور تنحفظ داخل التطبيق على جوالك بس، ما تطلع لأي سيرفر. صوّر بنفس المكان والإضاءة كل أسبوعين.</p>
+      <div class="backup"><label class="btn" for="photoIn" style="display:inline-flex;align-items:center;cursor:pointer">📷 أضف صورة</label><input id="photoIn" type="file" accept="image/*" capture="environment" hidden><button class="btn ghost" type="button" id="photoCompare">قارن صورتين</button></div>
+      <div class="photo-grid" id="photoGrid"></div>
+    </div>
     <div class="sect">
       <h3>قوانين النظام</h3>
       <ul class="rules">
@@ -667,6 +702,9 @@ html.native .web-only-inline { display: none; }
         <label class="field"><span>النادي أسبوعيًا</span><span class="inwrap"><input id="s-gym" data-s="gym" inputmode="numeric"><em>مرات</em></span></label>
         <label class="field"><span>أيام التعافي شهريًا</span><span class="inwrap"><input id="s-restMax" data-s="restMax" inputmode="numeric"><em>أيام</em></span></label>
       </div>
+      <h3 class="sub" style="margin-top:6px">توزيع السعرات على الأسبوع</h3>
+      <p class="hint">سعرات أكثر في أيام التمرين (من جدولك) وأقل في أيام الراحة، والمجموع الأسبوعي نفسه. يساعد على أداء أقوى في النادي.</p>
+      <div class="chips-row" id="cycleChips"></div>
     </div>
     <div class="sect">
       <h3>الأهداف المالية الشهرية</h3>
@@ -719,6 +757,7 @@ html.native .web-only-inline { display: none; }
         <label class="btn ghost" for="importFile" style="display:inline-flex;align-items:center;cursor:pointer">استرجاع نسخة</label>
         <input type="file" id="importFile" accept="application/json,.json" hidden>
       </div>
+      <div id="cloudBox"></div>
       <div class="confirm" id="resetBox">
         <button class="btn danger" id="resetBtn">مسح كل التقدم</button>
       </div>
@@ -922,8 +961,22 @@ html.native .web-only-inline { display: none; }
     return st;
   }
 
+  // Calorie cycling: more on training days, less on rest days, same weekly total.
+  function isTrainDay(date) {
+    const d = getDay(date) || {};
+    if (d.gym || (d.workout && d.workout.done)) return true;
+    return !!(S().schedule || {})[parseDs(date).getDay()];
+  }
+  function dayS(date) {
+    const s = S();
+    if (!s.cycle || !(s.cycleKcal > 0)) return s;
+    const sch = s.schedule || {}, n = Object.values(sch).filter(Boolean).length || Math.min(6, s.gym || 4);
+    const delta = isTrainDay(date) ? s.cycleKcal : -Math.round(s.cycleKcal * n / Math.max(1, 7 - n));
+    return { ...s, cal: s.cal + delta, carbs: s.autoMacros ? s.carbs : Math.max(0, s.carbs + Math.round(delta / 4)), _delta: delta };
+  }
+  const calFor = (date) => dayS(date).cal;
   function dayEval(date) {
-    const s = S(), d = getDay(date) || {};
+    const s = dayS(date), d = getDay(date) || {};
     const q = [];
     const p = d.p || {}, pc = PRAYERS.filter(([k]) => p[k]).length;
     const muslim = s.muslim !== false;
@@ -1019,6 +1072,7 @@ html.native .web-only-inline { display: none; }
   function touchStart() { if (!S().start) { S().start = todayStr(); save('settings'); } }
   function save(docId) {
     cacheLocal();
+    try { queueBackup(); } catch {}
     if (!colRef) return;
     clearTimeout(timers[docId]);
     timers[docId] = setTimeout(() => flush(docId), 600);
@@ -1115,7 +1169,7 @@ html.native .web-only-inline { display: none; }
   let viewDate = todayStr();
   const statName = (k) => k;
   function questMeta(q) {
-    const s = S();
+    const s = dayS(viewDate);
     switch (q.id) {
       case 'prayer': return ['الصلوات الخمس', 'في وقتها، كل صلاة 10 XP'];
       case 'quran': return ['ورد القرآن', `${s.quran} صفحة على الأقل`];
@@ -1178,7 +1232,7 @@ html.native .web-only-inline { display: none; }
   }
 
   function refreshDaily() {
-    const e = dayEval(viewDate), d = getDay(viewDate) || {}, s = S();
+    const e = dayEval(viewDate), d = getDay(viewDate) || {}, s = dayS(viewDate);
     for (const q of e.q) {
       const el = document.querySelector(`.quest[data-q="${CSS.escape(q.id)}"]`);
       if (!el) continue;
@@ -1426,7 +1480,73 @@ html.native .web-only-inline { display: none; }
   });
 
   // ---------- UI: log ----------
+  // ---------- body measurements ----------
+  const MEAS = [['waist', 'الخصر', 'سم'], ['chest', 'الصدر', 'سم'], ['arm', 'الذراع', 'سم'], ['thigh', 'الفخذ', 'سم'], ['hips', 'الورك', 'سم'], ['neck', 'الرقبة', 'سم'], ['bf', 'نسبة الدهون', '٪']];
+  let measPick = 'waist';
+  function measHistory(k) { return allDays().filter(([, r]) => r.meas && r.meas[k] > 0).map(([d, r]) => [d, r.meas[k]]).sort((a, b) => (a[0] < b[0] ? -1 : 1)); }
+  function renderMeas() {
+    if (!$('#measForm')) return;
+    const today = (getDay(todayStr()) || {}).meas || {};
+    $('#measForm').innerHTML = MEAS.map(([k, n, u]) => { const h = measHistory(k), last = h.length ? h[h.length - 1][1] : ''; return `<label class="field"><span>${n}</span><span class="inwrap"><input inputmode="decimal" data-meas="${k}" value="${today[k] ?? ''}" placeholder="${last || '—'}"><em>${u}</em></span></label>`; }).join('');
+    $('#measChips').innerHTML = MEAS.map(([k, n]) => `<button type="button" class="chip" data-meas-pick="${k}" aria-pressed="${k === measPick}">${n}</button>`).join('');
+    const h = measHistory(measPick), m = MEAS.find((x) => x[0] === measPick);
+    $('#measChart').innerHTML = h.length >= 2 ? lineChart(h.slice(-24).map(([d, v]) => [d.slice(5).replace('-', '/'), v]), `${m[1]} (${m[2]}) · التغير ${r1(h[h.length - 1][1] - h[0][1]) > 0 ? '+' : ''}${r1(h[h.length - 1][1] - h[0][1])} ${m[2]}`)
+      : `<p class="hint">${h.length ? 'سجّل مرة ثانية عشان يطلع لك الرسم.' : 'ما فيه قياسات للحين.'}</p>`;
+  }
+  $('#measSave').addEventListener('click', () => {
+    const v = {}; document.querySelectorAll('[data-meas]').forEach((i) => { const n = num(i.value); if (n > 0) v[i.dataset.meas] = r1(n); });
+    if (!Object.keys(v).length) { toast('خطأ', 'اكتب قياس واحد على الأقل.', 'bad'); return; }
+    setDayAt(todayStr(), { meas: { ...((getDay(todayStr()) || {}).meas || {}), ...v } }); renderMeas(); toast('SYSTEM', 'سجلت قياساتك.');
+  });
+  $('#measChips').addEventListener('click', (ev) => { const b = ev.target.closest('[data-meas-pick]'); if (b) { measPick = b.dataset.measPick; renderMeas(); } });
+
+  // ---------- progress photos (IndexedDB, never leaves the phone) ----------
+  let photoDb = null, photoSel = [];
+  function pdb() {
+    if (photoDb) return photoDb;
+    photoDb = new Promise((res, rej) => { const r = indexedDB.open('arise-photos', 1); r.onupgradeneeded = () => r.result.createObjectStore('p', { keyPath: 'id' }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    return photoDb;
+  }
+  const ptx = async (mode, fn) => { const db = await pdb(); return new Promise((res, rej) => { const t = db.transaction('p', mode), st = t.objectStore('p'); const r = fn(st); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); }); };
+  async function photoList() { try { return ((await ptx('readonly', (st) => st.getAll())) || []).sort((a, b) => (a.d < b.d ? 1 : -1)); } catch { return []; } }
+  async function renderPhotos() {
+    const g = $('#photoGrid'); if (!g) return;
+    const list = await photoList();
+    g.innerHTML = list.map((p) => `<button type="button" data-photo="${p.id}" aria-pressed="${photoSel.includes(p.id)}"><img src="${p.img}" alt="${p.d}" loading="lazy"><small>${p.d}</small></button>`).join('') || '<p class="hint" style="grid-column:1/-1">ما فيه صور للحين.</p>';
+  }
+  function shrink(file) {
+    return new Promise((res, rej) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => { const max = 1080, sc = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.8)); };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+      img.src = url;
+    });
+  }
+  $('#photoIn').addEventListener('change', async (ev) => {
+    const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return;
+    try { const img = await shrink(f); await ptx('readwrite', (st) => st.put({ id: uid(), d: todayStr(), img })); renderPhotos(); toast('SYSTEM', 'حفظت الصورة على جوالك.'); }
+    catch { toast('خطأ', 'ما قدرت أحفظ الصورة.', 'bad'); }
+  });
+  $('#photoGrid').addEventListener('click', async (ev) => {
+    const b = ev.target.closest('[data-photo]'); if (!b) return;
+    const id = b.dataset.photo;
+    if (photoSel.length) { photoSel = photoSel.includes(id) ? photoSel.filter((x) => x !== id) : photoSel.concat([id]).slice(-2); renderPhotos(); return; }
+    const p = (await photoList()).find((x) => x.id === id); if (!p) return;
+    openSheet(p.d, `<img src="${p.img}" alt="" style="width:100%;border-radius:6px"><div class="backup"><button class="btn danger" type="button" id="ph-del">حذف الصورة</button></div>`);
+    $('#ph-del').addEventListener('click', async (e) => { if (!e.currentTarget.dataset.sure) { e.currentTarget.dataset.sure = '1'; e.currentTarget.textContent = 'متأكد؟'; return; } await ptx('readwrite', (st) => st.delete(id)); closeSheet(); renderPhotos(); });
+  });
+  $('#photoCompare').addEventListener('click', async () => {
+    const list = await photoList();
+    if (photoSel.length === 2) {
+      const [a, b] = photoSel.map((id) => list.find((p) => p.id === id)).sort((x, y) => (x.d < y.d ? -1 : 1));
+      photoSel = []; renderPhotos();
+      openSheet('قبل وبعد', `<div class="cmp"><div><img src="${a.img}" alt="">${a.d}</div><div><img src="${b.img}" alt="">${b.d}</div></div>`); return;
+    }
+    if (list.length < 2) { toast('SYSTEM', 'تحتاج صورتين على الأقل.'); return; }
+    photoSel = [list[list.length - 1].id]; renderPhotos(); toast('SYSTEM', 'اختر الصورة الثانية من تحت، وبعدها اضغط «قارن صورتين» مرة ثانية.');
+  });
   function renderLog() {
+    renderMeas(); if (curTab === 'log') renderPhotos();
     const t = todayStr(), start = startDate();
     const first = weekStart(addDays(t, -34));
     let html = DAY_SHORT.map((n) => `<div class="h">${n}</div>`).join('');
@@ -1683,8 +1803,9 @@ html.native .web-only-inline { display: none; }
     if (name === 'food') renderFood();
     if (name === 'train') renderTrain();
     if (name === 'store') renderStore();
-    if (name === 'settings') fillPrayerSettings();
+    if (name === 'settings') { fillPrayerSettings(); renderCycle(); try { renderCloudBox(); } catch {} }
     if (name === 'arena') renderArena();
+    if (name === 'log') renderPhotos();
     if (changed) window.scrollTo(0, 0);
     try { sessionStorage.setItem('hunter-tab', name); } catch {}
   }
@@ -2138,7 +2259,11 @@ html.native .web-only-inline { display: none; }
   const foodTotals = (list) => (list || []).reduce((a, e) => ({ k: a.k + (e.k || 0), p: a.p + (e.p || 0), c: a.c + (e.c || 0), f: a.f + (e.f || 0) }), { k: 0, p: 0, c: 0, f: 0 });
   function makeEntry(food, grams, label, meal) {
     const x = grams / 100;
-    return { id: uid(), fid: food.id, n: food.n, meal, g: r1(grams), label, k: r1(food.k * x), p: r1(food.p * x), c: r1(food.c * x), f: r1(food.f * x) };
+    const e = { id: uid(), fid: food.id, n: food.n, meal, g: r1(grams), label, k: r1(food.k * x), p: r1(food.p * x), c: r1(food.c * x), f: r1(food.f * x) };
+    if (food.fib != null) e.fib = r1(food.fib * x);
+    if (food.sug != null) e.sug = r1(food.sug * x);
+    if (food.na != null) e.na = Math.round(food.na * x);
+    return e;
   }
   function setFood(list) {
     const t = foodTotals(list);
@@ -2159,7 +2284,7 @@ html.native .web-only-inline { display: none; }
   }
   function renderFood() {
     renderCoach();
-    const d = getDay(viewDate) || {}, s = S(), list = d.food || [], t = foodTotals(list);
+    const d = getDay(viewDate) || {}, s = dayS(viewDate), list = d.food || [], t = foodTotals(list);
     const mt = macroT(s), wg = waterT(s), wa = d.water || 0;
     $('#foodDay').textContent = dayLabel(viewDate);
     $('#foodPrev').disabled = viewDate <= addDays(todayStr(), -30);
@@ -2167,19 +2292,22 @@ html.native .web-only-inline { display: none; }
     const left = s.cal - t.k;
     const bar = (v, tg) => `<div class="bar"><i style="width:${Math.min(100, tg ? (v / tg) * 100 : 0).toFixed(0)}%"></i></div>`;
     $('#foodSummary').innerHTML = `
-      <div class="kcal-big"><b>${fmt(Math.abs(left))}</b><span>${left >= 0 ? 'سعرة باقية' : 'سعرة زيادة'}</span><small>أكلت ${fmt(t.k)} من ${fmt(s.cal)}${d.cheat ? ' · 🍔 وجبة حرة مفعّلة' : ''}</small></div>
+      <div class="kcal-big"><b>${fmt(Math.abs(left))}</b><span>${left >= 0 ? 'سعرة باقية' : 'سعرة زيادة'}</span><small>أكلت ${fmt(t.k)} من ${fmt(s.cal)}${s._delta ? ` · ${s._delta > 0 ? 'يوم تمرين +' : 'يوم راحة '}${fmt(s._delta)}` : ''}${d.cheat ? ' · 🍔 وجبة حرة مفعّلة' : ''}</small></div>
       <div class="macro-grid">
         <div><span>بروتين</span><b>${fmt(t.p)}<small>/${fmt(s.protein)}g</small></b>${bar(t.p, s.protein)}</div>
         <div><span>كارب</span><b>${fmt(t.c)}<small>/${fmt(mt.carbs)}g</small></b>${bar(t.c, mt.carbs)}</div>
         <div><span>دهون</span><b>${fmt(t.f)}<small>/${fmt(mt.fat)}g</small></b>${bar(t.f, mt.fat)}</div>
       </div>
+      ${(() => { const withD = list.filter((e) => e.fib != null || e.na != null); if (!withD.length) return ''; const sm = (k) => withD.reduce((a, e) => a + (e[k] || 0), 0);
+        const fibT = Math.round(calFor(viewDate) / 1000 * 14), sugT = Math.round(calFor(viewDate) * 0.1 / 4);
+        return `<div class="micro-row"><span>ألياف <b>${r1(sm('fib'))}</b>/${fibT}g</span><span>سكر <b${sm('sug') > sugT ? ' style="color:var(--bad)"' : ''}>${r1(sm('sug'))}</b>/${sugT}g</span><span>صوديوم <b${sm('na') > 2300 ? ' style="color:var(--bad)"' : ''}>${fmt(sm('na'))}</b>/2,300mg</span>${withD.length < list.length ? `<small>من ${withD.length} من ${list.length} أصناف فيها بيانات</small>` : ''}</div>`; })()}
       <div class="water-row"><span>الماء <b>${wa}</b> / ${wg} لتر</span><button class="chip" type="button" data-water="0.25">+ كوب</button><button class="chip" type="button" data-water="0.5">+ قارورة</button><button class="chip" type="button" data-water="-0.25" aria-label="إنقاص كوب">−</button></div>`;
     $('#meals').innerHTML = Object.entries(MEALS).map(([mk, mn]) => {
       const items = list.filter((e) => (e.meal || 's') === mk), mtot = foodTotals(items);
       return `<div class="meal">
         <div class="meal-head"><h3>${mn}</h3><span class="kc">${fmt(mtot.k)} سعرة</span></div>
         ${items.map((e) => `<div class="entry"><button type="button" class="nm" data-edit="${e.id}">${esc(e.n)}<small>${esc(e.label || '')} · ب ${fmt(e.p)} · ك ${fmt(e.c)} · د ${fmt(e.f)}</small></button><span class="kc">${fmt(e.k)}</span><button class="x" type="button" data-del-food="${e.id}" aria-label="حذف">×</button></div>`).join('')}
-        <div class="meal-actions"><button class="btn ghost" type="button" data-add-meal="${mk}">+ أضف ${MEALS_TO[mk]}</button>${((getDay(addDays(viewDate, -1)) || {}).food || []).some((e) => (e.meal || 's') === mk) ? `<button class="btn ghost" type="button" data-copy-meal="${mk}">↺ نفس أمس</button>` : ''}</div>
+        <div class="meal-actions"><button class="btn ghost" type="button" data-add-meal="${mk}">+ أضف ${MEALS_TO[mk]}</button>${((getDay(addDays(viewDate, -1)) || {}).food || []).some((e) => (e.meal || 's') === mk) ? `<button class="btn ghost" type="button" data-copy-meal="${mk}">↺ نفس أمس</button>` : ''}${items.length > 1 ? `<button class="btn ghost" type="button" data-save-meal="${mk}">💾 احفظ الوجبة</button>` : ''}</div>
       </div>`;
     }).join('');
   }
@@ -2189,6 +2317,17 @@ html.native .web-only-inline { display: none; }
     const w = ev.target.closest('[data-water]');
     if (w) { const d = getDay(viewDate) || {}; act(() => setDay({ water: Math.max(0, Math.round(((d.water || 0) + Number(w.dataset.water)) * 100) / 100) })); renderFood(); return; }
     const add = ev.target.closest('[data-add-meal]'); if (add) { foodSearch(add.dataset.addMeal); return; }
+    const sm = ev.target.closest('[data-save-meal]');
+    if (sm) {
+      const mk = sm.dataset.saveMeal, items = ((getDay(viewDate) || {}).food || []).filter((e) => (e.meal || 's') === mk);
+      openSheet('احفظ الوجبة', `<p class="q-desc">${items.map((e) => esc(e.n)).join('، ')}</p><label class="field" style="max-width:none"><span>اسم الوجبة</span><span class="inwrap"><input id="sm-n" style="direction:rtl" value="${esc(MEALS[mk])} المعتاد"></span></label><button class="btn" type="button" id="sm-save">احفظ</button>`);
+      $('#sm-save').addEventListener('click', () => {
+        const n = $('#sm-n').value.trim() || MEALS[mk];
+        S().savedMeals = [{ id: 'm' + uid(), n: n.slice(0, 40), items: items.map(({ id, meal, ...e }) => e) }].concat(S().savedMeals || []).slice(0, 30); save('settings');
+        closeSheet(); toast('FOOD', `حفظت «${n}». تلقاها في «وجباتي» لما تضيف أكل.`);
+      });
+      return;
+    }
     const cm = ev.target.closest('[data-copy-meal]');
     if (cm) { const mk = cm.dataset.copyMeal, y = ((getDay(addDays(viewDate, -1)) || {}).food || []).filter((e) => (e.meal || 's') === mk); setFood(((getDay(viewDate) || {}).food || []).concat(y.map((e) => ({ ...e, id: uid() })))); toast('FOOD', `نسخت ${MEALS[mk]} أمس (${y.length} أصناف).`); return; }
     const del = ev.target.closest('[data-del-food]');
@@ -2209,7 +2348,7 @@ html.native .web-only-inline { display: none; }
 
   function foodSearch(meal, cat) {
     cat = cat || 'recent';
-    const cats = [['recent', 'الأخيرة'], ['fav', '⭐ المفضلة'], ['all', 'الكل'], ['mine', 'أكلاتي']].concat(Object.entries(FOOD_CATS));
+    const cats = [['recent', 'الأخيرة'], ['fav', '⭐ المفضلة'], ['meals', '🍱 وجباتي'], ['all', 'الكل'], ['mine', 'أكلاتي']].concat(Object.entries(FOOD_CATS));
     openSheet(`أضف ${MEALS_TO[meal]}`, `
       <div class="backup"><button class="btn" type="button" id="fs-text">✍️ اكتب وش أكلت</button><button class="btn ghost" type="button" id="fs-bc">▥ باركود</button></div>
       <div class="inwrap"><input id="fs-q" type="search" placeholder="ابحث بالعربي أو الإنجليزي: دجاج، chicken، لبن…" autocomplete="off" style="direction:rtl"></div>
@@ -2220,6 +2359,12 @@ html.native .web-only-inline { display: none; }
     let cur = cat;
     const draw = () => {
       const q = normAr($('#fs-q').value);
+      if (cur === 'meals') {
+        const ms = (S().savedMeals || []).filter((m) => !q || normAr(m.n).includes(q));
+        $('#fs-count').textContent = '';
+        $('#fs-list').innerHTML = ms.map((m) => { const t = foodTotals(m.items); return `<li class="row"><button type="button" class="star" data-meal-del="${m.id}" aria-label="حذف" style="font-size:14px">×</button><button type="button" data-meal-add="${m.id}"><span>${esc(m.n)}<small style="display:block">${m.items.map((e) => esc(e.n)).join('، ')}</small></span><small>${fmt(t.k)} سعرة · ب ${fmt(t.p)}</small></button></li>`; }).join('') || '<li class="empty">ما عندك وجبات محفوظة. سجّل وجبة واضغط «💾 احفظ الوجبة» تحتها.</li>';
+        return;
+      }
       let list;
       if (cur === 'recent' && !q) list = recentFoods();
       else if (cur === 'fav') list = favs().map(foodById).filter(Boolean).filter((f) => !q || searchKey(f).includes(q));
@@ -2236,6 +2381,12 @@ html.native .web-only-inline { display: none; }
     $('#fs-text').addEventListener('click', () => foodText(meal));
     $('#fs-bc').addEventListener('click', () => barcodeSheet(meal));
     $('#fs-cats').addEventListener('click', (ev) => { const b = ev.target.closest('[data-cat]'); if (!b) return; cur = b.dataset.cat; document.querySelectorAll('#fs-cats .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b))); draw(); });
+    $('#fs-list').addEventListener('click', (ev) => {
+      const ma = ev.target.closest('[data-meal-add]');
+      if (ma) { const m = (S().savedMeals || []).find((x) => x.id === ma.dataset.mealAdd); if (!m) return; closeSheet(); setFood(((getDay(viewDate) || {}).food || []).concat(m.items.map((e) => ({ ...e, id: uid(), meal })))); toast('FOOD', `${m.n} · ${fmt(foodTotals(m.items).k)} سعرة`); return; }
+      const md = ev.target.closest('[data-meal-del]');
+      if (md) { if (!md.dataset.sure) { md.dataset.sure = '1'; md.textContent = '؟'; return; } S().savedMeals = (S().savedMeals || []).filter((x) => x.id !== md.dataset.mealDel); save('settings'); draw(); return; }
+    });
     $('#fs-list').addEventListener('click', (ev) => { const fv = ev.target.closest('[data-fav]'); if (fv) { fv.setAttribute('aria-pressed', String(toggleFav(fv.dataset.fav))); return; } const b = ev.target.closest('[data-pick]'); if (!b) return; const f = foodById(b.dataset.pick); if (f) foodQty(f, meal); });
     $('#fs-custom').addEventListener('click', () => foodCustom(meal));
     $('#fs-quick').addEventListener('click', () => foodQuick(meal));
@@ -2295,7 +2446,7 @@ html.native .web-only-inline { display: none; }
       </div>
       <div class="calc" id="rc-tot"></div>
       <button class="btn" type="button" id="rc-save">احفظ الوصفة</button>`);
-    const tot = () => items.reduce((a, it) => ({ g: a.g + it.g, k: a.k + it.k * it.g / 100, p: a.p + it.p * it.g / 100, c: a.c + it.c * it.g / 100, f: a.f + it.f * it.g / 100 }), { g: 0, k: 0, p: 0, c: 0, f: 0 });
+    const tot = () => items.reduce((a, it) => ({ g: a.g + it.g, k: a.k + it.k * it.g / 100, p: a.p + it.p * it.g / 100, c: a.c + it.c * it.g / 100, f: a.f + it.f * it.g / 100, fib: a.fib + (it.fib || 0) * it.g / 100, sug: a.sug + (it.sug || 0) * it.g / 100, na: a.na + (it.na || 0) * it.g / 100 }), { g: 0, k: 0, p: 0, c: 0, f: 0, fib: 0, sug: 0, na: 0 });
     const draw = () => {
       $('#rc-list').innerHTML = items.map((it, i) => `<div class="rc-row"><span>${esc(it.n)}</span><span class="inwrap"><input inputmode="decimal" data-rcg="${i}" value="${it.g}"><em>جم</em></span><span class="kc">${fmt(it.k * it.g / 100)}</span><button class="x" type="button" data-rcx="${i}" aria-label="حذف">×</button></div>`).join('') || '<p class="hint">ما فيه مكونات للحين.</p>';
       drawTot();
@@ -2315,7 +2466,7 @@ html.native .web-only-inline { display: none; }
       const b = ev.target.closest('[data-rcadd]'); if (!b) return;
       const f = foodById(b.dataset.rcadd); if (!f) return;
       const g = (f.u || []).length ? Math.round(f.u[0][1] / labelCount(f.u[0][0])) : 100;
-      items.push({ fid: f.id, n: f.n, g, k: f.k, p: f.p, c: f.c, f: f.f });
+      items.push({ fid: f.id, n: f.n, g, k: f.k, p: f.p, c: f.c, f: f.f, fib: f.fib, sug: f.sug, na: f.na });
       $('#rc-q').value = ''; res(); draw();
     });
     $('#rc-list').addEventListener('input', (ev) => { const i = ev.target.dataset.rcg; if (i == null) return; const it = items[+i]; it.g = Math.max(0, num(ev.target.value)); ev.target.closest('.rc-row').querySelector('.kc').textContent = fmt(it.k * it.g / 100); drawTot(); });
@@ -2326,6 +2477,7 @@ html.native .web-only-inline { display: none; }
       const sv = Math.max(1, num($('#rc-sv').value) || 1), cooked = num($('#rc-cw').value) > 0 ? num($('#rc-cw').value) : 0, total = cooked || t.g, per = 100 / total;
       const food = { id: existing ? existing.id : 'rc' + uid(), cat: 'meal', n: n.slice(0, 60), k: r1(t.k * per), p: r1(t.p * per), c: r1(t.c * per), f: r1(t.f * per),
         u: [['حصة', r1(total / sv)], ['الوصفة كاملة', r1(total)]], recipe: { items, servings: sv, cooked } };
+      if (items.every((it) => it.fib != null)) { food.fib = r1(t.fib * per); food.sug = r1(t.sug * per); food.na = Math.round(t.na * per); }
       const mine = (S().myFoods || []).filter((f) => f.id !== food.id); mine.unshift(food); S().myFoods = mine; save('settings');
       toast('FOOD', existing ? 'تم تعديل الوصفة.' : `حفظت «${food.n}» في أكلاتي.`);
       foodQty(food, meal);
@@ -2378,6 +2530,7 @@ html.native .web-only-inline { display: none; }
   const MUSCLES = window.HUNTER_MUSCLES || {};
   const allEx = () => (S().myEx || []).concat(window.HUNTER_EXERCISES || []);
   const exById = (id) => allEx().find((e) => e.id === id) || { id, n: 'تمرين محذوف', m: 'abs', kind: 'w' };
+  const exTip = (ex) => (EN_MODE ? ex.tipEn || ex.tip : ex.tip) || '';
   const exKnown = (id) => allEx().some((e) => e.id === id);
   const e1rm = (w, r) => w * (1 + r / 30);
   // set types: normal, warm-up (W), drop set (D), to failure (F). Warm-ups don't count for volume or records.
@@ -2402,6 +2555,18 @@ html.native .web-only-inline { display: none; }
   const cardioMin = (w) => w ? w.ex.reduce((a, x) => a + (exById(x.id).m === 'cardio' ? x.sets.reduce((b, s) => b + (s.ok ? s.r || 0 : 0), 0) : 0), 0) : 0;
   const routines = () => S().routines || [];
   function setWorkout(w) { setDayAt(todayStr(), { workout: w }); }
+  // Progressive overload: if every working set last time reached the top of the rep target, add weight.
+  const BIG_LIFTS = new Set(['squat', 'front_squat', 'deadlift', 'rdl', 'leg_press', 'hip_thrust']);
+  function suggestNext(x) {
+    const ex = exById(x.id); if (ex.kind !== 'w') return null;
+    const last = (lastSets(x.id, todayStr()) || []).filter((s) => s.type !== 'w' && s.w > 0 && s.r > 0); if (!last.length) return null;
+    const m = String(x.target || '').match(/(\d+)(?:\s*-\s*(\d+))?/); if (!m) return null;
+    const lo = +m[1], hi = +(m[2] || m[1]), top = Math.max(...last.map((s) => s.w));
+    const topSets = last.filter((s) => s.w === top);
+    if (topSets.every((s) => s.r >= hi)) return { w: top + (BIG_LIFTS.has(x.id) ? 5 : 2.5), r: lo, why: 'خلصت كل العدات آخر مرة' };
+    if (topSets.some((s) => s.r < lo)) return { w: top, r: lo, why: 'ثبّت الوزن لين توصل للعدات المطلوبة' };
+    return null;
+  }
   function startWorkout(rid) {
     const r = routines().find((x) => x.id === rid), t = todayStr();
     const ex = (r ? r.ex : []).map((x) => {
@@ -2486,16 +2651,18 @@ html.native .web-only-inline { display: none; }
         const lastTxt = last ? 'آخر مرة: ' + last.map((s) => kind === 't' ? `${s.r} د` : kind === 'bw' && !s.w ? `${s.r}` : `${s.w}×${s.r}`).join('، ') : 'أول مرة';
         const inSS = x.ss || (xi > 0 && w.ex[xi - 1].ss), note = (S().exNotes || {})[x.id] || '';
         let n = 0;
-        return `<div class="ex-card${inSS ? ' ss' : ''}">
-          <div class="ex-head"><div><h4>${esc(ex.n)}</h4><small>${MUSCLES[ex.m] || ''}${x.target ? ` · الهدف ${x.sets.length} × ${esc(x.target)}${kind === 't' ? ' د' : ''}` : ''}</small>${inSS ? '<div class="ss-tag">سوبر سِت</div>' : ''}</div>
-            <div class="ex-tools"><span class="mv"><button type="button" data-mv-ex="${xi}:-1" aria-label="فوق" ${xi === 0 ? 'disabled' : ''}>↑</button><button type="button" data-mv-ex="${xi}:1" aria-label="تحت" ${xi === w.ex.length - 1 ? 'disabled' : ''}>↓</button></span>${xi < w.ex.length - 1 ? `<button class="tool" type="button" data-ss="${xi}" aria-pressed="${x.ss ? 'true' : 'false'}" aria-label="سوبر سِت مع اللي تحته" title="سوبر سِت مع اللي تحته">🔗</button>` : ''}${kind === 'w' ? `<button class="tool" type="button" data-plates="${xi}" aria-label="حاسبة الأقراص" title="حاسبة الأقراص">⚖</button>` : ''}<button class="x" type="button" data-rm-ex="${xi}" aria-label="حذف التمرين">×</button></div></div>
+        return `<div class="ex-card${inSS ? ' ss' : ''}" data-dragitem="${xi}">
+          <div class="ex-head"><span class="drag" data-drag="sess" aria-label="اسحب لتغيير الترتيب" title="اسحب لتغيير الترتيب">≡</span><div><h4>${esc(ex.n)}</h4><small>${MUSCLES[ex.m] || ''}${x.target ? ` · الهدف ${x.sets.length} × ${esc(x.target)}${kind === 't' ? ' د' : ''}` : ''}</small>${inSS ? '<div class="ss-tag">سوبر سِت</div>' : ''}</div>
+            <div class="ex-tools">${exTip(ex) ? `<button class="tool" type="button" data-tip="${esc(x.id)}" aria-label="طريقة الأداء" title="طريقة الأداء">ⓘ</button>` : ''}${xi < w.ex.length - 1 ? `<button class="tool" type="button" data-ss="${xi}" aria-pressed="${x.ss ? 'true' : 'false'}" aria-label="سوبر سِت مع اللي تحته" title="سوبر سِت مع اللي تحته">🔗</button>` : ''}${kind === 'w' ? `<button class="tool" type="button" data-plates="${xi}" aria-label="حاسبة الأقراص" title="حاسبة الأقراص">⚖</button>` : ''}${kind !== 't' ? `<button class="tool" type="button" data-rpe-on="${xi}" aria-pressed="${x.rpe ? 'true' : 'false'}" title="RPE: صعوبة المجموعة من 10" style="font-size:11px">RPE</button>` : ''}<button class="x" type="button" data-rm-ex="${xi}" aria-label="حذف التمرين">×</button></div></div>
           <small class="hint">${lastTxt}</small>
+          ${(() => { const sg = suggestNext(x); return sg && !x.sets.some((s) => s.ok) ? `<div class="sugg"><span>💡 ${sg.w} كجم × ${sg.r}+ · ${sg.why}</span><button class="btn ghost" type="button" data-sugg="${xi}:${sg.w}">طبّق</button></div>` : ''; })()}
           <textarea class="ex-note" rows="1" data-note="${esc(x.id)}" placeholder="ملاحظة (مثلًا: ارتفاع الكرسي 4، قبضة واسعة)">${esc(note)}</textarea>
-          <div class="set-row head"><span>#</span><span>${kind === 't' ? '' : kind === 'bw' ? 'وزن إضافي' : 'الوزن (كجم)'}</span><span>${kind === 't' ? 'الدقائق' : 'العدات'}</span><span></span><span></span></div>
-          ${x.sets.map((s, si) => { if (s.type !== 'w') n++; return `<div class="set-row">
+          <div class="set-row head${x.rpe ? ' rpe' : ''}"><span>#</span><span>${kind === 't' ? '' : kind === 'bw' ? 'وزن إضافي' : 'الوزن (كجم)'}</span><span>${kind === 't' ? 'الدقائق' : 'العدات'}</span>${x.rpe ? '<span>RPE</span>' : ''}<span></span><span></span></div>
+          ${x.sets.map((s, si) => { if (s.type !== 'w') n++; return `<div class="set-row${x.rpe ? ' rpe' : ''}">
             <button type="button" class="no${s.type ? ' t' + s.type : ''}" data-stype="${xi}:${si}" aria-label="نوع المجموعة" title="اضغط: إحماء / دروب / فشل">${s.type ? SET_LBL[s.type] : n}</button>
             ${kind === 't' ? '<span></span>' : `<span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="w" value="${s.w === '' || s.w == null ? '' : s.w}" placeholder="${kind === 'bw' ? '0' : '—'}" aria-label="الوزن"></span>`}
             <span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="r" value="${s.r === '' || s.r == null ? '' : s.r}" placeholder="—" aria-label="${kind === 't' ? 'الدقائق' : 'العدات'}"></span>
+            ${x.rpe ? `<select data-rpe="${xi}:${si}" aria-label="RPE"><option value=""></option>${[6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10].map((v) => `<option value="${v}"${s.rpe === v ? ' selected' : ''}>${v}</option>`).join('')}</select>` : ''}
             <button type="button" class="set-ok" data-ok="${xi}:${si}" aria-pressed="${s.ok ? 'true' : 'false'}" aria-label="تم">✓</button>
             <button type="button" class="x" data-rm-set="${xi}:${si}" aria-label="حذف المجموعة">×</button>
           </div>`; }).join('')}
@@ -2506,6 +2673,41 @@ html.native .web-only-inline { display: none; }
       <div class="backup"><button class="btn ghost" type="button" id="sess-add-ex">+ أضف تمرين</button></div>
       <div class="backup" style="margin-top:6px"><button class="btn" type="button" id="sess-finish">إنهاء التمرين ✓</button><button class="btn danger" type="button" id="sess-cancel">إلغاء</button></div>`;
   }
+  // Drag to reorder: hold the ≡ handle and move. Works with touch and mouse.
+  function moveItem(list, from, to) { const [x] = list.splice(from, 1); list.splice(to, 0, x); }
+  function onDragDrop(kind, from, to) {
+    if (from === to) return;
+    if (kind === 'sess') { const w = JSON.parse(JSON.stringify((getDay(todayStr()) || {}).workout || null)); if (!w) return; moveItem(w.ex, from, to); setWorkout(w); }
+    else if (kind.startsWith('rt:')) { const r = routines().find((x) => x.id === kind.slice(3)); if (!r) return; moveItem(r.ex, from, to); saveRoutines(); }
+    renderTrain();
+  }
+  document.addEventListener('pointerdown', (ev) => {
+    const h = ev.target.closest('[data-drag]'); if (!h) return;
+    const item = h.closest('[data-dragitem]'), box = item && item.parentElement; if (!item) return;
+    ev.preventDefault();
+    const kind = h.dataset.drag, sibs = () => [...box.children].filter((c) => c.hasAttribute('data-dragitem'));
+    const from = sibs().indexOf(item), grab = ev.clientY - item.getBoundingClientRect().top;
+    let ty = 0, lastY = ev.clientY;
+    item.classList.add('dragging'); document.body.classList.add('drag-on');
+    try { h.setPointerCapture(ev.pointerId); } catch {}
+    const place = () => { const natural = item.getBoundingClientRect().top - ty; ty = lastY - grab - natural; item.style.transform = `translateY(${ty}px)`; };
+    const move = (e) => {
+      lastY = e.clientY;
+      if (lastY < 70) window.scrollBy(0, -12); else if (lastY > innerHeight - 140) window.scrollBy(0, 12);
+      const list = sibs(), i = list.indexOf(item), prev = list[i - 1], next = list[i + 1];
+      // move the neighbour rather than the dragged node, so the pointer stays attached to it
+      if (prev) { const r = prev.getBoundingClientRect(); if (lastY < r.top + r.height / 2) box.insertBefore(prev, item.nextSibling); }
+      if (next) { const r = next.getBoundingClientRect(); if (lastY > r.top + r.height / 2) box.insertBefore(next, item); }
+      place();
+    };
+    const end = () => {
+      document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', end); document.removeEventListener('pointercancel', end);
+      item.classList.remove('dragging'); item.style.transform = ''; document.body.classList.remove('drag-on');
+      try { navigator.vibrate && navigator.vibrate(10); } catch {}
+      onDragDrop(kind, from, sibs().indexOf(item));
+    };
+    document.addEventListener('pointermove', move); document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  });
   function plateCalc(weight) {
     const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25], COLORS = { 25: '#ff6b81', 20: '#57b8ff', 15: '#ffd27a', 10: '#5fe3ad', 5: '#e8eefc', 2.5: '#c9a2ff', 1.25: '#9fb3cc' };
     openSheet('حاسبة الأقراص', `
@@ -2549,7 +2751,7 @@ html.native .web-only-inline { display: none; }
     const rhtml = rs.map((r) => `<div class="ex-card" data-rid="${r.id}">
       <div class="ex-head"><span class="inwrap" style="flex:1"><input data-rname="${r.id}" value="${esc(r.n)}" aria-label="اسم البرنامج" style="direction:rtl"></span>
         ${routineDelete === r.id ? `<button class="btn danger" type="button" data-rdel-yes="${r.id}">احذف</button><button class="btn ghost" type="button" data-rdel-no>لا</button>` : `<button class="x" type="button" data-rdel="${r.id}" aria-label="حذف البرنامج">×</button>`}</div>
-      ${r.ex.map((x, i) => { const ex = exById(x.id); return `<div class="rt-row"><span class="mv"><button type="button" data-rx-mv="${r.id}:${i}:-1" aria-label="فوق" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" data-rx-mv="${r.id}:${i}:1" aria-label="تحت" ${i === r.ex.length - 1 ? 'disabled' : ''}>↓</button></span><span class="nm">${esc(ex.n)}${x.ss || (i > 0 && r.ex[i - 1].ss) ? ' <span class="ss-tag">🔗</span>' : ''}${i < r.ex.length - 1 ? ` <button class="link-btn" type="button" data-rx-ss="${r.id}:${i}" style="font-size:11px">${x.ss ? 'فك السوبر سِت' : '🔗 سوبر سِت مع اللي تحت'}</button>` : ''}</span><span class="inwrap"><input inputmode="numeric" data-rx="${r.id}:${i}" data-rf="sets" value="${x.sets}" aria-label="المجموعات"><em>×</em></span><span class="inwrap"><input data-rx="${r.id}:${i}" data-rf="reps" value="${esc(x.reps)}" aria-label="العدات" style="direction:ltr"><em>${ex.kind === 't' ? 'د' : 'عدة'}</em></span><button class="x" type="button" data-rx-del="${r.id}:${i}" aria-label="حذف">×</button></div>`; }).join('')}
+      ${r.ex.map((x, i) => { const ex = exById(x.id); return `<div class="rt-row" data-dragitem="${i}"><span class="drag" data-drag="rt:${r.id}" aria-label="اسحب لتغيير الترتيب">≡</span><span class="nm">${esc(ex.n)}${x.ss || (i > 0 && r.ex[i - 1].ss) ? ' <span class="ss-tag">🔗</span>' : ''}${i < r.ex.length - 1 ? ` <button class="link-btn" type="button" data-rx-ss="${r.id}:${i}" style="font-size:11px">${x.ss ? 'فك السوبر سِت' : '🔗 سوبر سِت مع اللي تحت'}</button>` : ''}</span><span class="inwrap"><input inputmode="numeric" data-rx="${r.id}:${i}" data-rf="sets" value="${x.sets}" aria-label="المجموعات"><em>×</em></span><span class="inwrap"><input data-rx="${r.id}:${i}" data-rf="reps" value="${esc(x.reps)}" aria-label="العدات" style="direction:ltr"><em>${ex.kind === 't' ? 'د' : 'عدة'}</em></span><button class="x" type="button" data-rx-del="${r.id}:${i}" aria-label="حذف">×</button></div>`; }).join('')}
       <button class="link-btn" type="button" data-rx-add="${r.id}">+ أضف تمرين</button>
     </div>`).join('');
     return `<div class="sect"><h3>الجدول الأسبوعي</h3>${rs.length ? sched : '<p class="empty">سوّ برنامج أو اختر برنامج جاهز تحت، وبعدها وزّعه على أيام الأسبوع.</p>'}</div>
@@ -2573,7 +2775,7 @@ html.native .web-only-inline { display: none; }
         }).filter((p) => p[1] > 0);
         const maxW = Math.max(0, ...sessions().flatMap(([, r]) => r.workout.ex.filter((x) => x.id === e.id).flatMap((x) => x.sets.filter(working).map((s) => s.w || 0))));
         const chart = lineChart(pts, e.kind === 't' ? 'الدقائق في كل حصة' : e.kind === 'bw' && !maxW ? 'أعلى عدات في كل حصة' : 'أفضل 1RM تقديري (كجم) في كل حصة');
-        detail = `${chart}${maxW ? `<div class="hint" style="padding:0 10px">أثقل وزن: <b>${maxW} كجم</b>${best ? ` · أفضل 1RM تقديري: <b>${Math.round(best)} كجم</b>` : ''}</div>` : ''}<div class="lib-detail">${hist.length ? hist.map(([d, r]) => { const x = r.workout.ex.find((y) => y.id === e.id); return `<div><b>${dayLabel(d)}</b> ${x.sets.filter((s) => s.ok).map((s) => (s.type ? SET_LBL[s.type] + ' ' : '') + (e.kind === 't' ? `${s.r} د` : `${s.w || 0}×${s.r}`)).join('، ')}</div>`; }).join('') : '<div class="empty">ما سجلت هذا التمرين للحين.</div>'}</div>`;
+        detail = `${exTip(e) ? `<p class="q-desc" style="padding:6px 10px 0;margin:0">ⓘ ${esc(exTip(e))}</p>` : ''}${chart}${maxW ? `<div class="hint" style="padding:0 10px">أثقل وزن: <b>${maxW} كجم</b>${best ? ` · أفضل 1RM تقديري: <b>${Math.round(best)} كجم</b>` : ''}</div>` : ''}<div class="lib-detail">${hist.length ? hist.map(([d, r]) => { const x = r.workout.ex.find((y) => y.id === e.id); return `<div><b>${dayLabel(d)}</b> ${x.sets.filter((s) => s.ok).map((s) => (s.type ? SET_LBL[s.type] + ' ' : '') + (e.kind === 't' ? `${s.r} د` : `${s.w || 0}×${s.r}`)).join('، ')}</div>`; }).join('') : '<div class="empty">ما سجلت هذا التمرين للحين.</div>'}</div>`;
       }
       return `<li><button type="button" data-lib="${e.id}"><span>${esc(e.n)}<small style="display:block">${esc(e.en || '')} · ${MUSCLES[e.m] || ''}</small></span><small>${best ? `أفضل 1RM ~${Math.round(best)} كجم` : ''}</small></button>${detail}</li>`;
     }).join('')}</ul>`;
@@ -2619,6 +2821,12 @@ html.native .web-only-inline { display: none; }
     if (stp && w) { const [xi, si] = stp.dataset.stype.split(':').map(Number); const s = w.ex[xi].sets[si]; const nx = SET_TYPES[(SET_TYPES.indexOf(s.type || '') + 1) % SET_TYPES.length]; if (nx) s.type = nx; else delete s.type; setWorkout(w); renderTrain(); return; }
     const mv = ev.target.closest('[data-mv-ex]');
     if (mv && w) { const [xi, dir] = mv.dataset.mvEx.split(':').map(Number), j = xi + dir; if (j < 0 || j >= w.ex.length) return; [w.ex[xi], w.ex[j]] = [w.ex[j], w.ex[xi]]; setWorkout(w); renderTrain(); return; }
+    const tipb = ev.target.closest('[data-tip]');
+    if (tipb) { const ex = exById(tipb.dataset.tip); toast(ex.n, exTip(ex)); return; }
+    const sgb = ev.target.closest('[data-sugg]');
+    if (sgb && w) { const [xi, wt] = sgb.dataset.sugg.split(':'); for (const s of w.ex[+xi].sets) if (s.type !== 'w' && !s.ok) s.w = +wt; setWorkout(w); renderTrain(); return; }
+    const rpo = ev.target.closest('[data-rpe-on]');
+    if (rpo && w) { const x = w.ex[+rpo.dataset.rpeOn]; x.rpe = !x.rpe; setWorkout(w); renderTrain(); return; }
     const ssb = ev.target.closest('[data-ss]');
     if (ssb && w) { const x = w.ex[+ssb.dataset.ss]; x.ss = !x.ss; setWorkout(w); renderTrain(); return; }
     const pl = ev.target.closest('[data-plates]');
@@ -2660,6 +2868,12 @@ html.native .web-only-inline { display: none; }
     // library
     const lm = ev.target.closest('[data-lm]'); if (lm) { libMuscle = lm.dataset.lm; libOpen = null; renderTrain(); return; }
     const lb = ev.target.closest('[data-lib]'); if (lb) { libOpen = libOpen === lb.dataset.lib ? null : lb.dataset.lib; renderTrain(); return; }
+  });
+  $('#trainBody').addEventListener('change', (ev) => {
+    const r = ev.target.closest('[data-rpe]'); if (!r) return;
+    const w = JSON.parse(JSON.stringify((getDay(todayStr()) || {}).workout || null)); if (!w) return;
+    const [xi, si] = r.dataset.rpe.split(':').map(Number); const v = num(r.value);
+    if (v) w.ex[xi].sets[si].rpe = v; else delete w.ex[xi].sets[si].rpe; setWorkout(w);
   });
   $('#trainBody').addEventListener('input', (ev) => {
     const i = ev.target;
@@ -2928,6 +3142,20 @@ html.native .web-only-inline { display: none; }
     const weeks = Math.ceil(left / m.kgWeek), dt = new Date(); dt.setDate(dt.getDate() + weeks * 7);
     return `توصل ${s.goalW} كجم بعد ~${weeks} أسبوع (${mFmt.format(dt)})`;
   }
+  // weekly averages for the last 8 weeks + the coach's burn estimates over time
+  function coachCharts() {
+    const t = todayStr(), weeks = [];
+    for (let i = 7; i >= 0; i--) {
+      const ws = addDays(weekStart(t), -7 * i); let kc = 0, kn = 0, wt = 0, wn = 0;
+      for (let k = 0; k < 7; k++) { const d = getDay(addDays(ws, k)) || {}; if (d.cal > 0) { kc += d.cal; kn++; } if (d.weight > 0) { wt += d.weight; wn++; } }
+      weeks.push({ l: ws.slice(5).replace('-', '/'), cal: kn ? kc / kn : 0, w: wn ? wt / wn : 0 });
+    }
+    const wPts = weeks.filter((x) => x.w).map((x) => [x.l, r1(x.w)]), cPts = weeks.filter((x) => x.cal).map((x) => [x.l, Math.round(x.cal)]);
+    const tPts = ((S().coach || {}).hist || []).slice(-12).filter((h) => h.tdee).map((h) => [h.d.slice(5).replace('-', '/'), h.tdee]);
+    if (wPts.length < 2 && cPts.length < 2 && tPts.length < 2) return '';
+    return `<details class="coach-charts"><summary>📈 الرسوم (آخر 8 أسابيع)</summary>
+      ${lineChart(wPts, 'متوسط وزنك الأسبوعي (كجم)')}${lineChart(cPts, 'متوسط أكلك اليومي لكل أسبوع (سعرة)')}${lineChart(tPts, 'حرقك الحقيقي حسب مراجعات الكوتش (سعرة)')}</details>`;
+  }
   function renderCoach() {
     const el = $('#coachCard'); if (!el) return;
     const s = S(), m = macros(s);
@@ -2951,6 +3179,7 @@ html.native .web-only-inline { display: none; }
       ${etaText(m, s) ? `<div class="hint">${etaText(m, s)}</div>` : ''}
       ${e.recent < 5 && e.logged ? '<div class="hint" style="color:var(--bad)">سجلت أقل من 5 أيام هالأسبوع. الكوتش يحتاج انتظام عشان يكون دقيق.</div>' : ''}
       ${last ? `<div class="hint">آخر مراجعة ${dayLabel(last.d)}: متوسط أكلك ${fmt(last.avg)} ووزنك ${last.perWeek > 0 ? '+' : ''}${last.perWeek}/أسبوع</div>` : ''}
+      ${coachCharts()}
       <form class="inc-form" id="coachW"><label class="field"><span>وزن اليوم</span><span class="inwrap"><input id="cw-in" inputmode="decimal" autocomplete="off" placeholder="${s.weight || '0.0'}" value="${tw || ''}"><em>كجم</em></span></label><button class="btn ghost" type="submit">${tw ? 'تحديث' : 'سجّل'}</button></form>
     </div>`;
   }
@@ -3077,7 +3306,7 @@ html.native .web-only-inline { display: none; }
   function loadUSDA() {
     if (usda) return Promise.resolve(usda);
     if (!usdaLoading) usdaLoading = fetch('data/usda.json').then((r) => { if (!r.ok) throw new Error('http'); return r.json(); })
-      .then((arr) => (usda = arr.map(([id, n, en, cat, k, p, c, f, u]) => { if (EN_MODE) EN[n] = en; return { id, n, en, cat, k, p, c, f, u: u || [], src: 'usda' }; })))
+      .then((arr) => (usda = arr.map(([id, n, en, cat, k, p, c, f, u, fib, sug, na]) => { if (EN_MODE) EN[n] = en; return { id, n, en, cat, k, p, c, f, u: u || [], fib, sug, na, src: 'usda' }; })))
       .catch(() => { usdaLoading = null; return []; });
     return usdaLoading;
   }
@@ -3615,11 +3844,11 @@ html.native .web-only-inline { display: none; }
           if (!data.session) { arenaAuth = 'in'; await renderArena('تم إنشاء الحساب. أكّد إيميلك من الرسالة اللي وصلتك، وبعدها سجّل دخول.'); return; }
           sbUser = data.session.user;
           try { await createProfile(username, country); } catch (e) { sbProfile = null; await renderArena(authErr(e)); return; }
-          toast('ARISE', `أهلًا ${username}! دخلت المنافسة.`, 'gold');
+          toast('ARISE', `أهلًا ${username}! دخلت المنافسة.`, 'gold'); renderCloudBox(); queueBackup();
         } else {
           const { data, error } = await sb.auth.signInWithPassword({ email, password });
           if (error) throw error;
-          sbUser = data.user; await loadProfile();
+          sbUser = data.user; await loadProfile(); renderCloudBox(); offerRestore();
         }
         await renderArena();
       });
@@ -3662,12 +3891,72 @@ html.native .web-only-inline { display: none; }
     if (t.dataset.frOk) { arenaAct(async () => { const { error } = await sb.from('friendships').update({ status: 'accepted' }).eq('requester', t.dataset.frOk).eq('addressee', sbProfile.id); if (error) throw error; await drawBoard(); }); return; }
     if (t.dataset.frDel) { const [a, b] = t.dataset.frDel.split('|'); arenaAct(async () => { const { error } = await sb.from('friendships').delete().eq('requester', a).eq('addressee', b); if (error) throw error; await drawBoard(); }); }
   });
+  // ---------- automatic online backup (needs the "backups" table from supabase/schema.sql) ----------
+  let backupTimer = null, backupState = { at: null, err: null };
+  function queueBackup() {
+    if (!sb || !sbUser) return;
+    clearTimeout(backupTimer);
+    backupTimer = setTimeout(pushBackup, 20000);
+  }
+  async function pushBackup() {
+    if (!sb || !sbUser || !navigator.onLine) return;
+    const { error } = await sb.from('backups').upsert({ user_id: sbUser.id, data: state, updated_at: new Date().toISOString() });
+    backupState = error ? { at: backupState.at, err: error.message } : { at: new Date(), err: null };
+    renderCloudBox();
+  }
+  async function fetchBackup() {
+    const { data, error } = await sb.from('backups').select('data,updated_at').eq('user_id', sbUser.id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  function restoreBackup(data) {
+    if (!data || !data.settings) return false;
+    state.settings = normSettings(data.settings); state.months = data.months || {};
+    cacheLocal(); location.reload(); return true;
+  }
+  function renderCloudBox() {
+    const el = $('#cloudBox'); if (!el) return;
+    if (!sbUser) { el.innerHTML = '<p class="hint">سجّل دخول من «المنافسة» وبيصير عندك نسخة احتياطية أونلاين تلقائية لكل تقدمك (غير الصور).</p>'; return; }
+    el.innerHTML = `<p class="hint">☁️ نسخة أونلاين تلقائية: ${backupState.err ? `<span style="color:var(--bad)">ما ضبطت (${esc(backupState.err)})</span>` : backupState.at ? `آخر حفظ ${backupState.at.toLocaleTimeString(LOC, { hour: 'numeric', minute: '2-digit' })}` : 'شغّالة'}</p>
+      <div class="backup"><button class="btn ghost" type="button" id="cloudNow">احفظ أونلاين الحين</button><button class="btn ghost" type="button" id="cloudRestore">استرجع من حسابي</button></div>`;
+  }
+  document.addEventListener('click', async (ev) => {
+    if (ev.target.closest('#cloudNow')) { clearTimeout(backupTimer); await pushBackup(); if (!backupState.err) toast('SYSTEM', 'حفظت تقدمك في حسابك.'); else toast('خطأ', backupState.err, 'bad'); return; }
+    const r = ev.target.closest('#cloudRestore'); if (!r) return;
+    try {
+      const b = await fetchBackup();
+      if (!b) { toast('SYSTEM', 'ما فيه نسخة في حسابك للحين.'); return; }
+      if (!r.dataset.sure) { r.dataset.sure = '1'; r.textContent = `متأكد؟ نسخة ${new Date(b.updated_at).toLocaleDateString(LOC)} بتستبدل اللي على الجوال`; return; }
+      restoreBackup(b.data);
+    } catch (e) { toast('خطأ', authErr(e), 'bad'); }
+  });
+  // after signing in on a fresh phone: offer to bring the progress back
+  async function offerRestore() {
+    try {
+      const b = await fetchBackup(); if (!b || !b.data) return;
+      const localDays = Object.values(state.months || {}).reduce((a, m) => a + Object.keys(m.days || {}).length, 0);
+      const cloudDays = Object.values(b.data.months || {}).reduce((a, m) => a + Object.keys(m.days || {}).length, 0);
+      if (cloudDays > localDays) {
+        openSheet('لقيت نسخة في حسابك', `<p class="q-desc">في حسابك نسخة فيها ${cloudDays} يوم مسجل (آخر حفظ ${new Date(b.updated_at).toLocaleDateString(LOC)})، وعلى هذا الجوال ${localDays} يوم. تبي تسترجعها؟</p><div class="backup"><button class="btn" type="button" id="or-yes">استرجعها</button><button class="btn ghost" type="button" id="or-no">لا، خلّ اللي على الجوال</button></div>`);
+        $('#or-yes').addEventListener('click', () => restoreBackup(b.data));
+        $('#or-no').addEventListener('click', () => { closeSheet(); queueBackup(); });
+      } else queueBackup();
+    } catch {}
+  }
   // signed in before? reconnect quietly and keep the leaderboard numbers fresh
   async function arenaBoot() {
     if (!hasSession() || !navigator.onLine) return;
-    try { await sbInit(); if (sbUser) { await loadProfile(); queuePush(); } } catch {}
+    try { await sbInit(); if (sbUser) { await loadProfile(); queuePush(); queueBackup(); renderCloudBox(); } } catch {}
   }
 
+  function renderCycle() {
+    const s = S(), el = $('#cycleChips'); if (!el) return;
+    el.innerHTML = [[0, 'ثابت كل يوم'], [100, '+100 يوم التمرين'], [200, '+200 يوم التمرين'], [300, '+300 يوم التمرين']].map(([v, n]) => `<button type="button" class="chip" data-cycle="${v}" aria-pressed="${(s.cycle ? s.cycleKcal : 0) === v}">${n}</button>`).join('');
+  }
+  document.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-cycle]'); if (!b) return;
+    const v = +b.dataset.cycle; S().cycle = v > 0; S().cycleKcal = v; save('settings'); renderCycle(); buildDaily(); render(false); renderFood();
+  });
   // language switch: saved with the settings, then the app reloads in the new language
   document.addEventListener('click', (ev) => {
     const b = ev.target.closest('[data-lang]'); if (!b) return;
