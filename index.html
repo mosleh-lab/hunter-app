@@ -3240,7 +3240,7 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
     const e = coachEstimate(); if (!e.ok) return null;
     const c = s.coach || (s.coach = { hist: [] });
     if (c.pending) return null;
-    if (c.at && daysBetween(c.at, todayStr()) < (s.coachDays || 7)) return null;
+    if (c.at && daysBetween(c.at, todayStr()) < 7) return null;
     const m0 = macros(s); if (!m0) return null;
     const est = Math.min(m0.bmr * 2.5, Math.max(m0.bmr * 1.1, e.tdee));
     const prev = c.tdee || m0.formulaTdee;
@@ -3311,7 +3311,7 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
     const goalRate = s.body === 'maintain' ? 'ثبات' : `${s.body === 'cut' ? '−' : '+'}${r1(m.kgWeek)}/أسبوع`;
     const learn = e.ok ? '' : `<div class="hint">يتعلم حرقك الحقيقي: <b>${Math.min(e.logged, COACH_DAYS)}/${COACH_DAYS}</b> يوم أكل مسجل · <b>${Math.min(e.weighs, 4)}/4</b> أوزان. سجّل أكلك كل يوم ووزنك الصبح.</div>
       <div class="bar"><i style="width:${Math.min(100, (Math.min(e.logged, COACH_DAYS) / COACH_DAYS * 70) + (Math.min(e.weighs, 4) / 4 * 30)).toFixed(0)}%"></i></div>`;
-    const nextIn = c.at ? Math.max(0, (s.coachDays || 7) - daysBetween(c.at, todayStr())) : null;
+    const nextIn = c.at ? Math.max(0, 7 - daysBetween(c.at, todayStr())) : null;
     const last = (c.hist || []).slice(-1)[0];
     el.innerHTML = `<div class="coach">
       <div class="coach-head"><b>الكوتش</b><span class="hint">${c.pending ? 'فيه مراجعة تنتظرك ⬇' : c.tdee ? (nextIn ? `المراجعة الجاية بعد ${daysAr(nextIn)}` : 'المراجعة جاهزة') : 'يستخدم المعادلة لين يجمع بيانات'}</span></div>
@@ -3331,7 +3331,7 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
         ${p.macros ? `<div class="hint">بروتين ${p.macros.p}g · كارب ${p.macros.c}g · دهون ${p.macros.f}g</div>` : ''}
         <ul class="coach-adv">${p.advice.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
         <div class="backup"><button class="btn" type="button" id="coachApply">طبّق التغييرات</button><button class="btn ghost" type="button" id="coachSkip">خلّها زي ما هي</button></div></div>`; })() : ''}
-      <div class="chips-row"><span class="hint" style="align-self:center">المراجعة كل:</span>${[7, 10, 14].map((v) => `<button type="button" class="chip" data-coach-days="${v}" aria-pressed="${(s.coachDays || 7) === v}">${v} أيام</button>`).join('')}</div>
+      <p class="hint">المراجعة كل 7 أيام، والحساب مبني على آخر 3 أسابيع من وزنك وأكلك عشان يكون دقيق وما يتأثر بتذبذب يوم أو يومين.</p>
       ${coachCharts()}
       <form class="inc-form" id="coachW"><label class="field"><span>وزن اليوم</span><span class="inwrap"><input id="cw-in" inputmode="decimal" autocomplete="off" placeholder="${s.weight || '0.0'}" value="${tw || ''}"><em>كجم</em></span></label><button class="btn ghost" type="submit">${tw ? 'تحديث' : 'سجّل'}</button></form>
     </div>`;
