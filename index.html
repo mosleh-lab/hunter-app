@@ -142,6 +142,13 @@ html[lang="en"] { --f-disp: "Chakra Petch", "IBM Plex Sans Arabic", "Segoe UI", 
 .penalty .win-title span { color: #ffd0d8; border-color: rgba(255,90,118,0.6); background: rgba(255,90,118,0.1); text-shadow: 0 0 10px rgba(255,90,118,0.7); }
 .penalty p { margin: 0 0 12px; text-align: center; }
 .penalty .pq { font-family: var(--f-disp); font-size: 17px; color: #ffd0d8; }
+.pen-list { display: grid; gap: 8px; margin-bottom: 12px; }
+.pen-item { display: flex; gap: 10px; align-items: flex-start; background: rgba(255,90,118,0.07); border: 1px solid rgba(255,90,118,0.35); border-radius: var(--r); padding: 8px 10px; text-align: start; }
+.pen-item input { width: 20px; height: 20px; flex: none; margin-top: 3px; accent-color: var(--bad); }
+.pen-item b { display: block; color: #ffd0d8; }
+.pen-item small { color: var(--muted); }
+.pen-item.auto small { color: var(--gold); }
+.pen-item.ok { border-color: rgba(95,227,173,0.5); background: rgba(95,227,173,0.07); }
 
 /* Tabs */
 .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
@@ -278,6 +285,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto 0; height: env(safe
 .native-only { display: none; }
 html.native .native-only { display: list-item; }
 html.native .web-only { display: none; }
+.native-only-inline, .native-only-block { display: none; }
+html.native .native-only-inline { display: inline-flex; }
+html.native .native-only-block { display: block; }
+html.native .web-only-inline { display: none; }
 .bottom-nav { position: fixed; inset-inline: 0; bottom: 0; z-index: 15; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: rgba(5, 10, 22, 0.95); border-top: 1px solid var(--line); backdrop-filter: blur(10px); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); }
 .bottom-nav button { background: none; border: 0; color: var(--muted); display: grid; justify-items: center; gap: 2px; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: var(--r); }
 .bottom-nav svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -444,9 +455,10 @@ html.native .web-only { display: none; }
 
   <section class="win penalty" id="penalty" hidden aria-live="polite">
     <div class="win-title"><span>منطقة العقاب</span></div>
-    <p>لم تُكمل المهمة اليومية أمس. خُصم <b>50 XP</b> وانكسرت السلسلة.</p>
-    <p class="pq">مهمة العقاب: 100 ضغط · 100 بطن · 100 سكوات</p>
-    <p><button class="btn danger" id="clearPenalty">أكملت مهمة العقاب (استرجاع 50 XP)</button></p>
+    <p>لم تُكمل المهمة اليومية أمس. خُصم <b>50 XP</b> وانكسرت السلسلة، و<b>المتجر مقفل</b> لين تسدد العقوبة.</p>
+    <p class="pq">مهمة العقاب (على حسب اللي فاتك أمس):</p>
+    <div class="pen-list" id="penList"></div>
+    <p><button class="btn danger" id="clearPenalty">سدّد العقوبة (استرجاع 50 XP)</button></p>
   </section>
 
   <section class="win" id="tab-daily" role="tabpanel">
@@ -563,7 +575,7 @@ html.native .web-only { display: none; }
       <h3>قوانين النظام</h3>
       <ul class="rules">
         <li>إكمال كل المهام الإجبارية في يوم = <b>+50 XP</b> مكافأة وسلسلة +1.</li>
-        <li>يوم ناقص = <b>-50 XP</b> ومنطقة العقاب. مهمة العقاب في اليوم التالي تسترجعها.</li>
+        <li>يوم ناقص = <b>-50 XP</b> ومنطقة العقاب: تعويض لكل مهمة فاتتك (خطوات أكثر، ماء أكثر، ورد مضاعف…) ودائرة تمارين قصيرة على قد مستواك، والمتجر مقفل لين تسددها وترجع لك الـ 50.</li>
         <li>يوم تعافي (مريض، مرهق، مسافر): المطلوب الصلاة بس، بدون عقوبة والسلسلة ما تنكسر ولا تزيد. لك <b id="ruleRest">4</b> أيام بالشهر.</li>
         <li>كل <b>20 XP</b> = عملة 🪙 تصرفها في المتجر. كل رقم قياسي في التمرين = <b>+15 XP</b> قوة.</li>
         <li>النادي <b id="ruleGym">4</b> مرات في الأسبوع (الأحد إلى السبت) = <b>+100 XP</b> قوة.</li>
@@ -603,11 +615,13 @@ html.native .web-only { display: none; }
       <div class="set-grid">
         <label class="field"><span>المدينة</span><select id="s-city"></select></label>
         <label class="field"><span>طريقة الحساب</span><select id="s-pmethod"></select></label>
-        <label class="field"><span>صلاة العصر</span><select id="s-asr"><option value="shafi">الجمهور</option><option value="hanafi">الحنفي</option></select></label>
+        <label class="field"><span>صلاة العصر</span><select id="s-asr"><option value="shafi">الجمهور (المعتمد في السعودية)</option><option value="hanafi">الحنفي (العصر متأخر)</option></select></label>
       </div>
-      <div class="backup"><button class="btn ghost" type="button" id="geoBtn">استخدم موقعي الحالي</button><button class="btn" type="button" id="adhanBtn">تفعيل تنبيه الأذان</button><button class="btn ghost" type="button" id="icsBtn">أضف الأوقات لتقويم الجوال</button></div>
+      <p class="hint">صلاة العصر: <b>الجمهور</b> (الشافعي والمالكي والحنبلي) يدخل وقتها لما يصير ظل الشي مثله، وهو المعتمد في السعودية والخليج. <b>الحنفي</b> لما يصير الظل مثلَيه، فيتأخر العصر تقريبًا ساعة. إذا ما تعرف، خلّه على الجمهور.</p>
+      <div class="backup"><button class="btn ghost" type="button" id="geoBtn">استخدم موقعي الحالي</button><button class="btn" type="button" id="adhanBtn">تفعيل تنبيه الأذان</button><button class="btn ghost web-only-inline" type="button" id="icsBtn">أضف الأوقات لتقويم الجوال</button><button class="btn ghost native-only-inline" type="button" id="adhanTest">جرّب الإشعار</button></div>
       <div class="pt-table" id="ptToday"></div>
-      <p class="q-desc">تنبيه الأذان يشتغل والتطبيق مفتوح. عشان يوصلك التنبيه والتطبيق مقفل، اضغط «أضف الأوقات لتقويم الجوال»: ينزل ملف فيه أوقات الصلاة لـ30 يوم مع تنبيه وقت كل أذان، افتحه واختر «إضافة الكل». كرره كل شهر.</p>
+      <p class="q-desc native-only-block">في التطبيق: إشعار الأذان يوصلك حتى والتطبيق مقفل، ويتجدد لحاله كل ما تفتح التطبيق (يغطي تقريبًا 12 يوم قدام). إذا ما وصلك، تأكد من <b>الإعدادات ← الإشعارات ← ARISE</b>.</p>
+      <p class="q-desc web-only">تنبيه الأذان يشتغل والتطبيق مفتوح. عشان يوصلك التنبيه والتطبيق مقفل، اضغط «أضف الأوقات لتقويم الجوال»: ينزل ملف فيه أوقات الصلاة لـ30 يوم مع تنبيه وقت كل أذان، افتحه واختر «إضافة الكل». كرره كل شهر.</p>
     </div>
     <div class="sect">
       <h3>الأهداف اليومية</h3>
@@ -1062,6 +1076,7 @@ html.native .web-only { display: none; }
     $('#pBody').textContent = s.weight > 0 ? `${(BODY[s.body] || BODY.cut).ar} · ${s.weight} كجم` : (BODY[s.body] || BODY.cut).ar;
     $('#setupCard').hidden = !!prof;
     $('#penalty').hidden = !C.penaltyActive || curTab !== 'daily';
+    renderPenalty();
     const cn = coins();
     $('#mCoins').textContent = fmt(cn.bal); $('#miniCoins').textContent = fmt(cn.bal);
     $('#miniLv').textContent = lv.L; $('#miniXp').style.width = (100 * lv.into / lv.need).toFixed(1) + '%';
@@ -1255,7 +1270,44 @@ html.native .web-only { display: none; }
   });
   $('#prevDay').addEventListener('click', () => { viewDate = addDays(viewDate, -1); buildDaily(); });
   $('#nextDay').addEventListener('click', () => { if (viewDate < todayStr()) { viewDate = addDays(viewDate, 1); buildDaily(); } });
+  // Realistic penalty: one make-up task for each required quest you missed yesterday, sized to you.
+  // Some are checked automatically from today's numbers; the rest are on your honour.
+  function penaltyTasks() {
+    const t = todayStr(), y = addDays(t, -1), e = C.evals[y]; if (!e) return [];
+    const s = S(), d = getDay(t) || {}, yd = getDay(y) || {}, missed = e.q.filter((q) => q.req && !q.done).map((q) => q.id);
+    const out = [];
+    if (missed.includes('prayer')) out.push({ id: 'prayer', t: 'اقضِ الصلوات اللي فاتتك أمس', n: 'وصفحة قرآن زيادة على وردك اليوم.' });
+    if (missed.includes('quran')) { const need = Math.max(1, s.quran) * 2; out.push({ id: 'quran', t: `اقرأ ${need} صفحات اليوم`, n: 'ورد أمس مع ورد اليوم.', auto: (d.quran || 0) >= need }); }
+    if (missed.includes('tasbeeh')) out.push({ id: 'tasbeeh', t: 'أذكار الصباح والمساء + 100 استغفار', n: 'اليوم قبل النوم.' });
+    if (missed.includes('steps')) { const extra = Math.min(4000, Math.max(1500, Math.round((s.steps - (yd.steps || 0)) / 2 / 500) * 500)); out.push({ id: 'steps', t: `امشِ ${fmt(s.steps + extra)} خطوة اليوم`, n: `هدفك + ${fmt(extra)} تعويض عن أمس.`, auto: (d.steps || 0) >= s.steps + extra }); }
+    if (missed.includes('diet')) out.push({ id: 'diet', t: 'يوم أكل نظيف كامل بدون أي حلى أو مشروب غازي', n: 'وامشِ 20 دقيقة بعد أكبر وجبة.' });
+    if (missed.includes('water')) { const need = Math.round((waterT(s) + 0.5) * 10) / 10; out.push({ id: 'water', t: `اشرب ${need} لتر اليوم`, n: 'هدفك + نص لتر.', auto: (d.water || 0) >= need }); }
+    if (missed.includes('sleep')) out.push({ id: 'sleep', t: 'الجوال بعيد عنك آخر 30 دقيقة قبل النوم الليلة', n: 'ونام بدري عشان توصل هدفك.' });
+    if (missed.includes('work')) out.push({ id: 'work', t: 'ساعة شغل أو تعلّم إضافية اليوم', n: 'عوّض اللي فاتك.' });
+    for (const q of e.q) if (q.custom && q.req && !q.done) out.push({ id: q.id, t: `سوِّ «${q.custom.n}» اليوم مرتين أو بجهد مضاعف`, n: 'مهمة مخصصة فاتتك.' });
+    // a short bodyweight circuit that scales with how many quests were missed and with your level
+    const rounds = Math.min(3, Math.max(1, Math.ceil(missed.length / 2))), lvl = C.lv.L;
+    const sq = lvl >= 20 ? 20 : lvl >= 10 ? 15 : 10, pu = lvl >= 20 ? 15 : lvl >= 10 ? 10 : 5, pl = lvl >= 20 ? 45 : 30;
+    out.push({ id: 'circuit', t: `دائرة العقاب: ${rounds} ${rounds === 1 ? 'جولة' : 'جولات'}`, n: `كل جولة: ${sq} سكوات · ${pu} ضغط (أو على الركب) · بلانك ${pl} ثانية.` });
+    const done = d.penDone || {};
+    return out.map((x) => ({ ...x, ok: x.auto != null ? x.auto : !!done[x.id] }));
+  }
+  function renderPenalty() {
+    const el = $('#penList'); if (!el || !C.penaltyActive) return;
+    const tasks = penaltyTasks();
+    el.innerHTML = tasks.map((x) => `<label class="pen-item${x.auto != null ? ' auto' : ''}${x.ok ? ' ok' : ''}">${x.auto != null ? `<input type="checkbox" disabled ${x.ok ? 'checked' : ''}>` : `<input type="checkbox" data-pen="${x.id}" ${x.ok ? 'checked' : ''}>`}<span><b>${esc(x.t)}</b><small>${esc(x.n)}${x.auto != null ? ' · يتحدد تلقائيًا من أرقام اليوم' : ''}</small></span></label>`).join('');
+    const left = tasks.filter((x) => !x.ok).length;
+    const b = $('#clearPenalty'); b.disabled = left > 0;
+    b.textContent = left ? `باقي ${left} من ${tasks.length}` : 'سدّد العقوبة (استرجاع 50 XP)';
+  }
+  $('#penList').addEventListener('change', (ev) => {
+    const i = ev.target.closest('[data-pen]'); if (!i) return;
+    const d = getDay(todayStr()) || {};
+    setDayAt(todayStr(), { penDone: { ...(d.penDone || {}), [i.dataset.pen]: i.checked } });
+    renderPenalty();
+  });
   $('#clearPenalty').addEventListener('click', () => {
+    if (penaltyTasks().some((x) => !x.ok)) return;
     const y = addDays(todayStr(), -1), mk = monthOf(y), m = ensureMonth(mk);
     m.days ||= {}; m.days[y] = { ...(m.days[y] || {}), penaltyCleared: true };
     save('m' + mk);
@@ -1793,7 +1845,9 @@ html.native .web-only { display: none; }
       return false;
     } finally { healthBusy = false; }
   }
-  async function scheduleNativeAdhan() {
+  let adhanQueue = Promise.resolve();
+  function scheduleNativeAdhan() { adhanQueue = adhanQueue.then(scheduleNativeAdhanNow, scheduleNativeAdhanNow); return adhanQueue; }
+  async function scheduleNativeAdhanNow() {
     if (!NATIVE) return;
     try {
       const ids = Array.from({ length: 64 }, (_, i) => ({ id: 1000 + i }));
@@ -1807,7 +1861,7 @@ html.native .web-only { display: none; }
         for (const k of PRAYER_KEYS) {
           const at = tt[k];
           if (!at || at <= now || list.length >= 60) continue;
-          list.push({ id: 1000 + list.length, title: 'ARISE', body: tr(`حان الآن وقت صلاة ${PRAYER_AR[k]}`), schedule: { at: at.toISOString(), allowWhileIdle: true } });
+          list.push({ id: 1000 + list.length, title: 'ARISE', body: tr(`حان الآن وقت صلاة ${PRAYER_AR[k]}`), schedule: { at: new Date(at.getTime()), allowWhileIdle: true } });
         }
       }
       if (list.length) await nativeCall('LocalNotifications', 'schedule', { notifications: list });
@@ -2017,9 +2071,19 @@ html.native .web-only { display: none; }
     if (s.adhan) { s.adhan = false; save('settings'); fillPrayerSettings(); toast('SYSTEM', 'تم إيقاف تنبيه الأذان.'); return; }
     if (!prayerLoc()) { toast('خطأ', 'حدد مدينتك أول.', 'bad'); return; }
     let perm = 'denied';
-    try { perm = 'Notification' in window ? await Notification.requestPermission() : 'unsupported'; } catch {}
+    if (NATIVE) { try { const r = await nativeCall('LocalNotifications', 'requestPermissions'); perm = r && r.display === 'granted' ? 'granted' : 'denied'; } catch {} }
+    else try { perm = 'Notification' in window ? await Notification.requestPermission() : 'unsupported'; } catch {}
     s.adhan = true; save('settings'); fillPrayerSettings(); scheduleAdhan(); chime();
     toast('SYSTEM', perm === 'granted' ? 'تم تفعيل تنبيه الأذان والإشعارات.' : 'تم تفعيل صوت الأذان داخل التطبيق. الإشعارات ما انسمح لها، فعّلها من إعدادات الجوال.');
+  });
+  $('#adhanTest').addEventListener('click', async () => {
+    if (!NATIVE) return;
+    try {
+      const r = await nativeCall('LocalNotifications', 'requestPermissions');
+      if (r && r.display && r.display !== 'granted') { toast('خطأ', 'الإشعارات مقفلة. افتح الإعدادات ← الإشعارات ← ARISE وشغّلها.', 'bad'); return; }
+      await nativeCall('LocalNotifications', 'schedule', { notifications: [{ id: 999, title: 'ARISE', body: tr('تجربة: هذا شكل إشعار الأذان.'), schedule: { at: new Date(Date.now() + 5000), allowWhileIdle: true } }] });
+      toast('SYSTEM', 'بيوصلك إشعار تجربة بعد 5 ثواني. سكّر التطبيق أو اقفل الشاشة عشان تشوفه.');
+    } catch (e) { toast('خطأ', 'ما قدرت أرسل الإشعار: ' + ((e && e.message) || e), 'bad'); }
   });
   $('#icsBtn').addEventListener('click', async () => {
     const ics = buildICS(); if (!ics) { toast('خطأ', 'حدد مدينتك أول.', 'bad'); return; }
@@ -2560,6 +2624,7 @@ html.native .web-only { display: none; }
   function itemState(it) {
     const last = (S().purchases || []).filter((p) => p.item === it.id).sort((a, b) => b.t - a.t)[0];
     const until = last ? last.t + it.cd * 86400e3 : 0;
+    if (C.penaltyActive) return { ok: false, why: 'penalty' };
     if (until > Date.now()) return { ok: false, why: 'cooldown', until };
     if (C.lv.L < (it.lvl || 1)) return { ok: false, why: 'level' };
     if (coins().bal < it.cost) return { ok: false, why: 'coins' };
@@ -2586,7 +2651,7 @@ html.native .web-only { display: none; }
     } else {
       $('#shop').innerHTML = storeItems().map((it) => {
         const st = itemState(it);
-        const lock = st.why === 'cooldown' ? `متاح بعد ${waitText(st.until - Date.now())}` : st.why === 'level' ? `يفتح في المستوى ${it.lvl}` : st.why === 'coins' ? `تحتاج ${fmt(it.cost - coins().bal)} عملة زيادة` : '';
+        const lock = st.why === 'penalty' ? 'المتجر مقفل لين تسدد العقوبة' : st.why === 'cooldown' ? `متاح بعد ${waitText(st.until - Date.now())}` : st.why === 'level' ? `يفتح في المستوى ${it.lvl}` : st.why === 'coins' ? `تحتاج ${fmt(it.cost - coins().bal)} عملة زيادة` : '';
         const btn = buyPending === it.id
           ? `<div class="confirm"><button class="btn" type="button" data-buy-yes="${it.id}">تأكيد الشراء</button><button class="btn ghost" type="button" data-buy-no>إلغاء</button></div>`
           : `<button class="btn${st.ok ? '' : ' ghost'}" type="button" data-buy="${it.id}" ${st.ok ? '' : 'disabled'}>${st.ok ? 'اشترِ' : st.why === 'cooldown' ? 'مقفل' : 'ما يمديك'}</button>`;
@@ -3475,6 +3540,7 @@ html.native .web-only { display: none; }
     try { CAP.nativeCallback('App', 'addListener', { eventName: 'appUrlOpen' }, (d) => handleAppUrl(d && d.url)); } catch {}
     nativeCall('App', 'getLaunchUrl').then((r) => r && r.url && setTimeout(() => handleAppUrl(r.url), 600)).catch(() => {});
   }
+  if (NATIVE && S().muslim !== false && prayerLoc() && !S().adhan) { let once = null; try { once = localStorage.getItem('arise-adhan-auto'); } catch {} if (!once) { S().adhan = true; save('settings'); try { localStorage.setItem('arise-adhan-auto', '1'); } catch {} fillPrayerSettings(); scheduleAdhan(); } }
   if (NATIVE) { renderHealthStatus(); setTimeout(() => nativeHealthSync(true), 800); setTimeout(checkAppUpdate, 4000); }
 })();
 </script>
