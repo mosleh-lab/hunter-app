@@ -338,13 +338,42 @@ html.native .web-only-inline { display: none; }
 .ex-card { border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--panel-2); padding: 10px 12px; display: grid; gap: 6px; }
 .ex-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
 .ex-head h4 { margin: 0; font-size: 15px; } .ex-head small { color: var(--muted); font-size: 12px; }
-.set-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) 40px 30px; gap: 6px; align-items: center; }
+.set-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(0, 1fr) 40px 30px; gap: 6px; align-items: center; }
+.set-row button.no { background: none; border: 1px solid transparent; border-radius: 6px; min-height: 30px; padding: 0; font-weight: 700; cursor: pointer; }
+.set-row button.no.tw { color: var(--gold); border-color: rgba(255,210,122,.45); }
+.set-row button.no.td { color: #c9a2ff; border-color: rgba(201,162,255,.45); }
+.set-row button.no.tf { color: var(--bad); border-color: rgba(255,90,118,.45); }
+.ex-card.ss { border-inline-start: 3px solid #c9a2ff; }
+.ex-card.ss-next { margin-bottom: -4px; border-end-start-radius: 0; border-end-end-radius: 0; }
+.ss-tag { font-size: 11px; color: #c9a2ff; font-weight: 700; }
+.mv { display: inline-flex; gap: 2px; flex: none; }
+.mv button, .tool { background: rgba(255,255,255,.04); border: 1px solid var(--line-soft); color: var(--muted); border-radius: 6px; min-width: 30px; min-height: 30px; padding: 0 6px; font-size: 14px; cursor: pointer; }
+.mv button:disabled { opacity: .3; }
+.tool[aria-pressed="true"] { color: #c9a2ff; border-color: #c9a2ff; }
+.ex-tools { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; flex: none; }
+.ex-head > div:first-child { flex: 1; min-width: 0; }
+.ex-tools .x { min-width: 28px; }
+.ex-note { width: 100%; background: rgba(0,0,0,.2); border: 1px dashed var(--line-soft); border-radius: 6px; color: var(--fg); padding: 6px 8px; font: inherit; font-size: 13px; resize: vertical; min-height: 34px; }
+.plate-out { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; min-height: 60px; }
+.plate { display: grid; place-items: center; border-radius: 4px; font-family: var(--f-num); font-weight: 700; font-size: 12px; color: #04121f; width: 30px; }
+.chart-wrap svg { width: 100%; height: auto; display: block; }
+.chart-wrap .ln { fill: none; stroke: var(--glow, #57b8ff); stroke-width: 2; }
+.chart-wrap .dt { fill: var(--glow, #57b8ff); }
+.chart-wrap text { fill: var(--muted); font-size: 10px; font-family: var(--f-num); }
+.chart-wrap .gl { stroke: var(--line-soft); stroke-width: 1; }
+.pick-list li.row { display: flex; align-items: stretch; gap: 4px; }
+.pick-list li.row > button[data-pick] { flex: 1; min-width: 0; }
+.star { background: none; border: 1px solid var(--line-soft); border-radius: var(--r); color: var(--dim); width: 40px; font-size: 18px; cursor: pointer; flex: none; }
+.star[aria-pressed="true"] { color: var(--gold); border-color: rgba(255,210,122,.5); }
+.rc-list { display: grid; gap: 6px; }
+.rc-row { display: grid; grid-template-columns: minmax(0, 1fr) 84px 50px 30px; gap: 6px; align-items: center; font-size: 13px; }
+.rc-row .kc { font-family: var(--f-num); color: var(--muted); text-align: center; }
 .set-row.head { font-size: 11px; color: var(--dim); }
 .set-row .no { font-family: var(--f-num); color: var(--muted); text-align: center; }
 .set-row .inwrap input { padding: 7px 8px; text-align: center; }
 .set-ok { width: 40px; height: 36px; border-radius: var(--r); border: 1px solid var(--line-soft); background: transparent; color: var(--muted); font-size: 16px; }
 .set-ok[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #062016; font-weight: 700; }
-.rt-row { display: grid; grid-template-columns: minmax(0, 1fr) 70px 90px 30px; gap: 6px; align-items: center; font-size: 13px; }
+.rt-row { display: grid; grid-template-columns: auto minmax(0, 1fr) 62px 80px 30px; gap: 6px; align-items: center; font-size: 13px; }
 .rt-row .nm { overflow-wrap: anywhere; } .rt-row .inwrap input { padding: 5px 6px; text-align: center; }
 .sched-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 14px; }
 .lib-detail { display: grid; gap: 4px; padding: 6px 10px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -376,7 +405,7 @@ html.native .web-only-inline { display: none; }
 .pt-table div { border: 1px solid var(--line-soft); border-radius: var(--r); padding: 6px 8px; text-align: center; font-size: 12px; color: var(--muted); }
 .pt-table b { display: block; font-family: var(--f-num); font-size: 15px; color: var(--fg); font-weight: 600; }
 .pt-table .now { border-color: var(--line); background: rgba(87,184,255,0.1); }
-@media (max-width: 520px) { .item .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rt-row { grid-template-columns: minmax(0, 1fr) 60px 80px 28px; } }
+@media (max-width: 520px) { .item .set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rt-row { grid-template-columns: auto minmax(0, 1fr) 54px 70px 28px; } }
 /* Onboarding & coach */
 .onboard { position: fixed; inset: 0; z-index: 50; background: radial-gradient(900px 500px at 50% -120px, rgba(60,130,255,0.25), transparent 70%), var(--bg); overflow-y: auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; align-items: flex-start; }
 .ob-box { width: 100%; max-width: 560px; display: grid; gap: 14px; margin-block: auto; }
@@ -2116,6 +2145,9 @@ html.native .web-only-inline { display: none; }
     act(() => setDay({ food: list, cal: Math.round(t.k), protein: Math.round(t.p), carbs: Math.round(t.c), fat: Math.round(t.f) }));
     buildDaily(); renderFood();
   }
+  const favs = () => S().favFoods || [];
+  const isFav = (id) => favs().includes(id);
+  function toggleFav(id) { S().favFoods = isFav(id) ? favs().filter((x) => x !== id) : favs().concat([id]); save('settings'); return isFav(id); }
   function recentFoods() {
     const seen = new Set(), out = [];
     for (const [, r] of allDays()) for (const e of (r.food || []).slice().reverse()) {
@@ -2147,7 +2179,7 @@ html.native .web-only-inline { display: none; }
       return `<div class="meal">
         <div class="meal-head"><h3>${mn}</h3><span class="kc">${fmt(mtot.k)} سعرة</span></div>
         ${items.map((e) => `<div class="entry"><button type="button" class="nm" data-edit="${e.id}">${esc(e.n)}<small>${esc(e.label || '')} · ب ${fmt(e.p)} · ك ${fmt(e.c)} · د ${fmt(e.f)}</small></button><span class="kc">${fmt(e.k)}</span><button class="x" type="button" data-del-food="${e.id}" aria-label="حذف">×</button></div>`).join('')}
-        <div class="meal-actions"><button class="btn ghost" type="button" data-add-meal="${mk}">+ أضف ${MEALS_TO[mk]}</button></div>
+        <div class="meal-actions"><button class="btn ghost" type="button" data-add-meal="${mk}">+ أضف ${MEALS_TO[mk]}</button>${((getDay(addDays(viewDate, -1)) || {}).food || []).some((e) => (e.meal || 's') === mk) ? `<button class="btn ghost" type="button" data-copy-meal="${mk}">↺ نفس أمس</button>` : ''}</div>
       </div>`;
     }).join('');
   }
@@ -2157,6 +2189,8 @@ html.native .web-only-inline { display: none; }
     const w = ev.target.closest('[data-water]');
     if (w) { const d = getDay(viewDate) || {}; act(() => setDay({ water: Math.max(0, Math.round(((d.water || 0) + Number(w.dataset.water)) * 100) / 100) })); renderFood(); return; }
     const add = ev.target.closest('[data-add-meal]'); if (add) { foodSearch(add.dataset.addMeal); return; }
+    const cm = ev.target.closest('[data-copy-meal]');
+    if (cm) { const mk = cm.dataset.copyMeal, y = ((getDay(addDays(viewDate, -1)) || {}).food || []).filter((e) => (e.meal || 's') === mk); setFood(((getDay(viewDate) || {}).food || []).concat(y.map((e) => ({ ...e, id: uid() })))); toast('FOOD', `نسخت ${MEALS[mk]} أمس (${y.length} أصناف).`); return; }
     const del = ev.target.closest('[data-del-food]');
     if (del) { setFood(((getDay(viewDate) || {}).food || []).filter((e) => e.id !== del.dataset.delFood)); return; }
     const ed = ev.target.closest('[data-edit]');
@@ -2175,25 +2209,26 @@ html.native .web-only-inline { display: none; }
 
   function foodSearch(meal, cat) {
     cat = cat || 'recent';
-    const cats = [['recent', 'الأخيرة'], ['all', 'الكل'], ['mine', 'أكلاتي']].concat(Object.entries(FOOD_CATS));
+    const cats = [['recent', 'الأخيرة'], ['fav', '⭐ المفضلة'], ['all', 'الكل'], ['mine', 'أكلاتي']].concat(Object.entries(FOOD_CATS));
     openSheet(`أضف ${MEALS_TO[meal]}`, `
       <div class="backup"><button class="btn" type="button" id="fs-text">✍️ اكتب وش أكلت</button><button class="btn ghost" type="button" id="fs-bc">▥ باركود</button></div>
       <div class="inwrap"><input id="fs-q" type="search" placeholder="ابحث بالعربي أو الإنجليزي: دجاج، chicken، لبن…" autocomplete="off" style="direction:rtl"></div>
       <p class="hint" id="fs-count"></p>
       <div class="chips-row" id="fs-cats">${cats.map(([k, n]) => `<button type="button" class="chip" data-cat="${k}" aria-pressed="${k === cat}">${n}</button>`).join('')}</div>
       <ul class="pick-list" id="fs-list"></ul>
-      <div class="backup"><button class="btn ghost" type="button" id="fs-custom">+ أكلة مو موجودة</button><button class="btn ghost" type="button" id="fs-quick">سعرات سريعة</button></div>`);
+      <div class="backup"><button class="btn ghost" type="button" id="fs-custom">+ أكلة مو موجودة</button><button class="btn ghost" type="button" id="fs-recipe">🍲 وصفة جديدة</button><button class="btn ghost" type="button" id="fs-quick">سعرات سريعة</button></div>`);
     let cur = cat;
     const draw = () => {
       const q = normAr($('#fs-q').value);
       let list;
       if (cur === 'recent' && !q) list = recentFoods();
+      else if (cur === 'fav') list = favs().map(foodById).filter(Boolean).filter((f) => !q || searchKey(f).includes(q));
       else if (!q && cur === 'all') list = (S().myFoods || []).concat(window.HUNTER_FOODS || []);
-      else list = searchFoods(q, cur === 'recent' ? 'all' : cur);
+      else list = searchFoods(q, cur === 'recent' || cur === 'fav' ? 'all' : cur);
       const total = (usda ? usda.length : 0) + (window.HUNTER_FOODS || []).length + (S().myFoods || []).length;
       $('#fs-count').textContent = usda ? (q ? `${fmt(list.length)} نتيجة من ${fmt(total)} صنف` : `ابحث في ${fmt(total)} صنف (مطبوخ ونيّ، وكل القطع)`) : 'جاري تحميل المكتبة الكبيرة…';
-      $('#fs-list').innerHTML = list.slice(0, 80).map((f) => `<li><button type="button" data-pick="${esc(f.id)}"><span>${esc(f.n)}${f.brand ? ` · ${esc(f.brand)}` : ''}${f.en ? `<small style="display:block">${esc(f.en)}</small>` : ''}</span><small>${fmt(f.k)} سعرة · ب ${r1(f.p)} / 100جم</small></button></li>`).join('')
-        || `<li class="empty">${cur === 'recent' && !q ? 'لسا ما سجلت أكل. ابحث أو اختر «الكل».' : 'ما لقيت شي. جرب كلمة ثانية أو أضفها من «أكلة مو موجودة».'}</li>`;
+      $('#fs-list').innerHTML = list.slice(0, 80).map((f) => `<li class="row"><button type="button" class="star" data-fav="${esc(f.id)}" aria-pressed="${isFav(f.id)}" aria-label="المفضلة">★</button><button type="button" data-pick="${esc(f.id)}"><span>${esc(f.n)}${f.brand ? ` · ${esc(f.brand)}` : ''}${f.en ? `<small style="display:block">${esc(f.en)}</small>` : ''}</span><small>${fmt(f.k)} سعرة · ب ${r1(f.p)} / 100جم</small></button></li>`).join('')
+        || `<li class="empty">${cur === 'fav' ? 'ما عندك مفضلة. اضغط ★ جنب أي أكلة تاكلها كثير.' : cur === 'recent' && !q ? 'لسا ما سجلت أكل. ابحث أو اختر «الكل».' : 'ما لقيت شي. جرب كلمة ثانية أو أضفها من «أكلة مو موجودة».'}</li>`;
     };
     draw();
     if (!usda) loadUSDA().then(() => { if ($('#fs-list')) draw(); });
@@ -2201,13 +2236,16 @@ html.native .web-only-inline { display: none; }
     $('#fs-text').addEventListener('click', () => foodText(meal));
     $('#fs-bc').addEventListener('click', () => barcodeSheet(meal));
     $('#fs-cats').addEventListener('click', (ev) => { const b = ev.target.closest('[data-cat]'); if (!b) return; cur = b.dataset.cat; document.querySelectorAll('#fs-cats .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b))); draw(); });
-    $('#fs-list').addEventListener('click', (ev) => { const b = ev.target.closest('[data-pick]'); if (!b) return; const f = foodById(b.dataset.pick); if (f) foodQty(f, meal); });
+    $('#fs-list').addEventListener('click', (ev) => { const fv = ev.target.closest('[data-fav]'); if (fv) { fv.setAttribute('aria-pressed', String(toggleFav(fv.dataset.fav))); return; } const b = ev.target.closest('[data-pick]'); if (!b) return; const f = foodById(b.dataset.pick); if (f) foodQty(f, meal); });
     $('#fs-custom').addEventListener('click', () => foodCustom(meal));
     $('#fs-quick').addEventListener('click', () => foodQuick(meal));
+    $('#fs-recipe').addEventListener('click', () => recipeSheet(meal));
   }
   function foodQty(food, meal, entry) {
     const units = (food.u || []).map(([n, g], i) => `<option value="${i}">${esc(n)} (${r1(g)} جم)</option>`).join('') + '<option value="g">جرام</option>';
     openSheet(entry ? 'تعديل الكمية' : food.n, `
+      <div class="backup" style="margin:0"><button type="button" class="star" id="fq-fav" aria-pressed="${isFav(food.id)}" aria-label="المفضلة" style="width:auto;padding:4px 12px;font-size:14px">★ ${isFav(food.id) ? 'في المفضلة' : 'أضف للمفضلة'}</button>${food.recipe ? '<button type="button" class="btn ghost" id="fq-recipe">تعديل الوصفة</button>' : ''}</div>
+      ${food.recipe ? `<p class="hint">وصفة: ${food.recipe.items.map((it) => esc(it.n)).join('، ')}</p>` : ''}
       ${food.en ? `<p class="hint">${esc(food.en)}</p>` : ''}${food.brand ? `<p class="hint">${esc(food.brand)}</p>` : ''}
       <p class="q-desc">${esc(food.n)} · لكل 100 جم: ${fmt(food.k)} سعرة · بروتين ${r1(food.p)} · كارب ${r1(food.c)} · دهون ${r1(food.f)}</p>
       <div class="set-grid">
@@ -2218,6 +2256,8 @@ html.native .web-only-inline { display: none; }
       <div class="calc" id="fq-prev"></div>
       <button class="btn" type="button" id="fq-add">${entry ? 'حفظ' : 'أضف'}</button>`);
     $('#fq-m').value = meal || 's';
+    $('#fq-fav').addEventListener('click', (ev) => { const on = toggleFav(food.id); ev.currentTarget.setAttribute('aria-pressed', String(on)); ev.currentTarget.textContent = '★ ' + (on ? 'في المفضلة' : 'أضف للمفضلة'); });
+    if (food.recipe) $('#fq-recipe').addEventListener('click', () => recipeSheet(meal, food));
     if (entry) { $('#fq-u').value = 'g'; $('#fq-n').value = entry.g; }
     else if (!(food.u || []).length) { $('#fq-u').value = 'g'; $('#fq-n').value = 100; }
     const grams = () => { const n = num($('#fq-n').value), u = $('#fq-u').value; return u === 'g' ? n : n * food.u[+u][1]; };
@@ -2240,6 +2280,57 @@ html.native .web-only-inline { display: none; }
     });
   }
   function foodCustom(meal) { return productForm(meal); }
+  // Recipes: build a dish from ingredients once, then log it by servings or grams like any food.
+  function recipeSheet(meal, existing) {
+    const items = existing ? existing.recipe.items.map((x) => ({ ...x })) : [];
+    openSheet(existing ? 'تعديل الوصفة' : 'وصفة جديدة', `
+      <p class="q-desc">ضيف مكونات الأكلة بالجرامات (نيّة أو مثل ما تطبخها)، وبعدها اكتب كم حصة تطلع. تنحفظ في «أكلاتي».</p>
+      <label class="field" style="max-width:none"><span>اسم الوصفة</span><span class="inwrap"><input id="rc-n" autocomplete="off" style="direction:rtl" placeholder="مثال: كبسة البيت" value="${esc(existing ? existing.n : '')}"></span></label>
+      <div class="rc-list" id="rc-list"></div>
+      <div class="inwrap"><input id="rc-q" type="search" placeholder="+ ابحث عن مكوّن: رز، دجاج، زيت…" autocomplete="off" style="direction:rtl"></div>
+      <ul class="pick-list" id="rc-res"></ul>
+      <div class="set-grid">
+        <label class="field"><span>عدد الحصص</span><span class="inwrap"><input id="rc-sv" inputmode="decimal" value="${existing ? existing.recipe.servings : 4}"></span></label>
+        <label class="field"><span>وزنها بعد الطبخ (اختياري)</span><span class="inwrap"><input id="rc-cw" inputmode="decimal" value="${existing && existing.recipe.cooked ? existing.recipe.cooked : ''}" placeholder="تلقائي"><em>جم</em></span></label>
+      </div>
+      <div class="calc" id="rc-tot"></div>
+      <button class="btn" type="button" id="rc-save">احفظ الوصفة</button>`);
+    const tot = () => items.reduce((a, it) => ({ g: a.g + it.g, k: a.k + it.k * it.g / 100, p: a.p + it.p * it.g / 100, c: a.c + it.c * it.g / 100, f: a.f + it.f * it.g / 100 }), { g: 0, k: 0, p: 0, c: 0, f: 0 });
+    const draw = () => {
+      $('#rc-list').innerHTML = items.map((it, i) => `<div class="rc-row"><span>${esc(it.n)}</span><span class="inwrap"><input inputmode="decimal" data-rcg="${i}" value="${it.g}"><em>جم</em></span><span class="kc">${fmt(it.k * it.g / 100)}</span><button class="x" type="button" data-rcx="${i}" aria-label="حذف">×</button></div>`).join('') || '<p class="hint">ما فيه مكونات للحين.</p>';
+      drawTot();
+    };
+    const drawTot = () => {
+      const t = tot(), sv = Math.max(1, num($('#rc-sv').value) || 1);
+      $('#rc-tot').innerHTML = `<div class="hl"><b>${fmt(t.k / sv)}</b><span>سعرة للحصة</span></div><div><b>${r1(t.p / sv)}g</b><span>بروتين</span></div><div><b>${r1(t.c / sv)}g</b><span>كارب</span></div><div><b>${r1(t.f / sv)}g</b><span>دهون</span></div><div><b>${fmt(t.k)}</b><span>الوصفة كاملة</span></div>`;
+    };
+    const res = () => {
+      const q = $('#rc-q').value.trim();
+      $('#rc-res').innerHTML = q ? searchFoods(normAr(q)).filter((f) => !f.recipe).slice(0, 8).map((f) => `<li><button type="button" data-rcadd="${esc(f.id)}"><span>${esc(f.n)}</span><small>${fmt(f.k)} / 100جم</small></button></li>`).join('') || '<li class="empty">ما لقيت شي.</li>' : '';
+    };
+    draw(); loadUSDA();
+    $('#rc-q').addEventListener('input', res);
+    $('#rc-sv').addEventListener('input', draw);
+    $('#rc-res').addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-rcadd]'); if (!b) return;
+      const f = foodById(b.dataset.rcadd); if (!f) return;
+      const g = (f.u || []).length ? Math.round(f.u[0][1] / labelCount(f.u[0][0])) : 100;
+      items.push({ fid: f.id, n: f.n, g, k: f.k, p: f.p, c: f.c, f: f.f });
+      $('#rc-q').value = ''; res(); draw();
+    });
+    $('#rc-list').addEventListener('input', (ev) => { const i = ev.target.dataset.rcg; if (i == null) return; const it = items[+i]; it.g = Math.max(0, num(ev.target.value)); ev.target.closest('.rc-row').querySelector('.kc').textContent = fmt(it.k * it.g / 100); drawTot(); });
+    $('#rc-list').addEventListener('click', (ev) => { const x = ev.target.closest('[data-rcx]'); if (x) { items.splice(+x.dataset.rcx, 1); draw(); } });
+    $('#rc-save').addEventListener('click', () => {
+      const n = $('#rc-n').value.trim(); if (!n) { $('#rc-n').focus(); return; }
+      const t = tot(); if (!(t.g > 0)) { $('#rc-q').focus(); return; }
+      const sv = Math.max(1, num($('#rc-sv').value) || 1), cooked = num($('#rc-cw').value) > 0 ? num($('#rc-cw').value) : 0, total = cooked || t.g, per = 100 / total;
+      const food = { id: existing ? existing.id : 'rc' + uid(), cat: 'meal', n: n.slice(0, 60), k: r1(t.k * per), p: r1(t.p * per), c: r1(t.c * per), f: r1(t.f * per),
+        u: [['حصة', r1(total / sv)], ['الوصفة كاملة', r1(total)]], recipe: { items, servings: sv, cooked } };
+      const mine = (S().myFoods || []).filter((f) => f.id !== food.id); mine.unshift(food); S().myFoods = mine; save('settings');
+      toast('FOOD', existing ? 'تم تعديل الوصفة.' : `حفظت «${food.n}» في أكلاتي.`);
+      foodQty(food, meal);
+    });
+  }
   function foodCustomOld(meal) {
     openSheet('أكلة جديدة', `
       <p class="q-desc">اكتب القيم من ملصق المنتج أو من تطبيق ثاني. تنحفظ في «أكلاتي» وتقدر تستخدمها كل مرة.</p>
@@ -2289,6 +2380,11 @@ html.native .web-only-inline { display: none; }
   const exById = (id) => allEx().find((e) => e.id === id) || { id, n: 'تمرين محذوف', m: 'abs', kind: 'w' };
   const exKnown = (id) => allEx().some((e) => e.id === id);
   const e1rm = (w, r) => w * (1 + r / 30);
+  // set types: normal, warm-up (W), drop set (D), to failure (F). Warm-ups don't count for volume or records.
+  const SET_TYPES = ['', 'w', 'd', 'f'], SET_LBL = { w: 'W', d: 'D', f: 'F' };
+  const working = (s) => s.ok && s.type !== 'w';
+  // the last exercise of a superset group that starts at or before xi
+  function ssEnd(list, xi) { let i = xi; while (i < list.length - 1 && list[i].ss) i++; return i; }
   let trainView = 'today', restLeft = 0, restTimer = null, libMuscle = 'all', libOpen = null, routineDelete = null, templatePending = null;
   function sessions(beforeDate) {
     return allDays().filter(([d, r]) => r.workout && r.workout.done && (!beforeDate || d < beforeDate));
@@ -2299,10 +2395,10 @@ html.native .web-only-inline { display: none; }
   }
   function bestE1(exId, beforeDate) {
     let best = 0;
-    for (const [, r] of sessions(beforeDate)) for (const x of r.workout.ex) if (x.id === exId) for (const s of x.sets) if (s.ok && s.w > 0 && s.r > 0) best = Math.max(best, e1rm(s.w, s.r));
+    for (const [, r] of sessions(beforeDate)) for (const x of r.workout.ex) if (x.id === exId) for (const s of x.sets) if (working(s) && s.w > 0 && s.r > 0) best = Math.max(best, e1rm(s.w, s.r));
     return best;
   }
-  const volume = (w) => w.ex.reduce((a, x) => a + (exById(x.id).kind === 't' ? 0 : x.sets.reduce((b, s) => b + (s.ok ? (s.w || 0) * (s.r || 0) : 0), 0)), 0);
+  const volume = (w) => w.ex.reduce((a, x) => a + (exById(x.id).kind === 't' ? 0 : x.sets.reduce((b, s) => b + (working(s) ? (s.w || 0) * (s.r || 0) : 0), 0)), 0);
   const cardioMin = (w) => w ? w.ex.reduce((a, x) => a + (exById(x.id).m === 'cardio' ? x.sets.reduce((b, s) => b + (s.ok ? s.r || 0 : 0), 0) : 0), 0) : 0;
   const routines = () => S().routines || [];
   function setWorkout(w) { setDayAt(todayStr(), { workout: w }); }
@@ -2310,7 +2406,7 @@ html.native .web-only-inline { display: none; }
     const r = routines().find((x) => x.id === rid), t = todayStr();
     const ex = (r ? r.ex : []).map((x) => {
       const prev = lastSets(x.id, t) || [];
-      return { id: x.id, target: x.reps, sets: Array.from({ length: Math.max(1, x.sets || 3) }, (_, i) => { const p = prev[i] || prev[prev.length - 1]; return { w: p ? p.w : '', r: p ? p.r : '', ok: false }; }) };
+      return { id: x.id, target: x.reps, ss: !!x.ss, sets: Array.from({ length: Math.max(1, x.sets || 3) }, (_, i) => { const p = prev[i] || prev[prev.length - 1]; return { w: p ? p.w : '', r: p ? p.r : '', ok: false, type: p && p.type === 'w' ? 'w' : undefined }; }) };
     });
     setWorkout({ rid: r ? r.id : null, n: r ? r.n : 'تمرين حر', t0: Date.now(), done: false, ex });
     renderTrain();
@@ -2324,7 +2420,7 @@ html.native .web-only-inline { display: none; }
     for (const x of w.ex) {
       const ex = exById(x.id); if (ex.kind === 't') continue;
       const before = bestE1(x.id, t);
-      const top = x.sets.filter((s) => s.ok && s.w > 0 && s.r > 0).sort((a, b) => e1rm(b.w, b.r) - e1rm(a.w, a.r))[0];
+      const top = x.sets.filter((s) => working(s) && s.w > 0 && s.r > 0).sort((a, b) => e1rm(b.w, b.r) - e1rm(a.w, a.r))[0];
       if (top && before > 0 && e1rm(top.w, top.r) > before + 0.01) { prs++; toast('NEW RECORD', `رقم قياسي في ${ex.n}: ${top.w} كجم × ${top.r}`, 'gold'); }
     }
     w.done = true; w.t1 = Date.now();
@@ -2333,19 +2429,24 @@ html.native .web-only-inline { display: none; }
     stopRest(); renderTrain(); buildDaily();
     toast('WORKOUT', `خلص التمرين · ${Math.round((w.t1 - w.t0) / 60000)} دقيقة · حجم ${fmt(volume(w))} كجم`, 'gold');
   }
+  function restNotify() {
+    if (!NATIVE) return;
+    nativeCall('LocalNotifications', 'cancel', { notifications: [{ id: 900 }] }).catch(() => {});
+    if (restLeft > 3) nativeCall('LocalNotifications', 'schedule', { notifications: [{ id: 900, title: 'ARISE', body: tr('خلصت الراحة، المجموعة الجاية!'), schedule: { at: new Date(Date.now() + restLeft * 1000), allowWhileIdle: true } }] }).catch(() => {});
+  }
   function startRest() {
-    restLeft = S().restSec || 90; $('#restBar').hidden = false; drawRest();
+    restLeft = S().restSec || 90; $('#restBar').hidden = false; drawRest(); restNotify();
     clearInterval(restTimer);
     restTimer = setInterval(() => {
       restLeft--; drawRest();
       if (restLeft <= 0) { stopRest(); chime(); try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {} toast('REST', 'خلصت الراحة، المجموعة الجاية!'); }
     }, 1000);
   }
-  function stopRest() { clearInterval(restTimer); restTimer = null; $('#restBar').hidden = true; }
+  function stopRest() { clearInterval(restTimer); restTimer = null; $('#restBar').hidden = true; if (NATIVE) nativeCall('LocalNotifications', 'cancel', { notifications: [{ id: 900 }] }).catch(() => {}); }
   function drawRest() { $('#restTime').textContent = `${Math.floor(Math.max(0, restLeft) / 60)}:${pad(Math.max(0, restLeft) % 60)}`; }
   $('#restBar').addEventListener('click', (ev) => {
     if (ev.target.closest('#restSkip')) stopRest();
-    else if (ev.target.closest('#restPlus')) { restLeft += 15; drawRest(); }
+    else if (ev.target.closest('#restPlus')) { restLeft += 15; drawRest(); restNotify(); }
   });
 
   function renderTrain() {
@@ -2379,25 +2480,61 @@ html.native .web-only-inline { display: none; }
   function sessionHTML(w) {
     const t = todayStr();
     return `<div class="session-head"><div><span class="hint">جاري التمرين</span><h3>${esc(w.n)}</h3></div><span class="timer-sm" id="sessClock"></span></div>
+      <p class="hint" style="margin:0">اضغط رقم المجموعة لتغيير نوعها: <b style="color:var(--gold)">W</b> إحماء · <b style="color:#c9a2ff">D</b> دروب سِت · <b style="color:var(--bad)">F</b> لين الفشل. و🔗 يربط التمرين باللي تحته سوبر سِت.</p>
       ${w.ex.map((x, xi) => {
         const ex = exById(x.id), last = lastSets(x.id, t), kind = ex.kind;
         const lastTxt = last ? 'آخر مرة: ' + last.map((s) => kind === 't' ? `${s.r} د` : kind === 'bw' && !s.w ? `${s.r}` : `${s.w}×${s.r}`).join('، ') : 'أول مرة';
-        return `<div class="ex-card">
-          <div class="ex-head"><div><h4>${esc(ex.n)}</h4><small>${MUSCLES[ex.m] || ''}${x.target ? ` · الهدف ${x.sets.length} × ${esc(x.target)}${kind === 't' ? ' د' : ''}` : ''}</small></div><button class="x" type="button" data-rm-ex="${xi}" aria-label="حذف التمرين">×</button></div>
+        const inSS = x.ss || (xi > 0 && w.ex[xi - 1].ss), note = (S().exNotes || {})[x.id] || '';
+        let n = 0;
+        return `<div class="ex-card${inSS ? ' ss' : ''}">
+          <div class="ex-head"><div><h4>${esc(ex.n)}</h4><small>${MUSCLES[ex.m] || ''}${x.target ? ` · الهدف ${x.sets.length} × ${esc(x.target)}${kind === 't' ? ' د' : ''}` : ''}</small>${inSS ? '<div class="ss-tag">سوبر سِت</div>' : ''}</div>
+            <div class="ex-tools"><span class="mv"><button type="button" data-mv-ex="${xi}:-1" aria-label="فوق" ${xi === 0 ? 'disabled' : ''}>↑</button><button type="button" data-mv-ex="${xi}:1" aria-label="تحت" ${xi === w.ex.length - 1 ? 'disabled' : ''}>↓</button></span>${xi < w.ex.length - 1 ? `<button class="tool" type="button" data-ss="${xi}" aria-pressed="${x.ss ? 'true' : 'false'}" aria-label="سوبر سِت مع اللي تحته" title="سوبر سِت مع اللي تحته">🔗</button>` : ''}${kind === 'w' ? `<button class="tool" type="button" data-plates="${xi}" aria-label="حاسبة الأقراص" title="حاسبة الأقراص">⚖</button>` : ''}<button class="x" type="button" data-rm-ex="${xi}" aria-label="حذف التمرين">×</button></div></div>
           <small class="hint">${lastTxt}</small>
+          <textarea class="ex-note" rows="1" data-note="${esc(x.id)}" placeholder="ملاحظة (مثلًا: ارتفاع الكرسي 4، قبضة واسعة)">${esc(note)}</textarea>
           <div class="set-row head"><span>#</span><span>${kind === 't' ? '' : kind === 'bw' ? 'وزن إضافي' : 'الوزن (كجم)'}</span><span>${kind === 't' ? 'الدقائق' : 'العدات'}</span><span></span><span></span></div>
-          ${x.sets.map((s, si) => `<div class="set-row">
-            <span class="no">${si + 1}</span>
+          ${x.sets.map((s, si) => { if (s.type !== 'w') n++; return `<div class="set-row">
+            <button type="button" class="no${s.type ? ' t' + s.type : ''}" data-stype="${xi}:${si}" aria-label="نوع المجموعة" title="اضغط: إحماء / دروب / فشل">${s.type ? SET_LBL[s.type] : n}</button>
             ${kind === 't' ? '<span></span>' : `<span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="w" value="${s.w === '' || s.w == null ? '' : s.w}" placeholder="${kind === 'bw' ? '0' : '—'}" aria-label="الوزن"></span>`}
             <span class="inwrap"><input inputmode="decimal" data-sx="${xi}" data-ss="${si}" data-sf="r" value="${s.r === '' || s.r == null ? '' : s.r}" placeholder="—" aria-label="${kind === 't' ? 'الدقائق' : 'العدات'}"></span>
             <button type="button" class="set-ok" data-ok="${xi}:${si}" aria-pressed="${s.ok ? 'true' : 'false'}" aria-label="تم">✓</button>
             <button type="button" class="x" data-rm-set="${xi}:${si}" aria-label="حذف المجموعة">×</button>
-          </div>`).join('')}
+          </div>`; }).join('')}
+
           <button class="link-btn" type="button" data-add-set="${xi}">+ مجموعة</button>
         </div>`;
       }).join('')}
       <div class="backup"><button class="btn ghost" type="button" id="sess-add-ex">+ أضف تمرين</button></div>
       <div class="backup" style="margin-top:6px"><button class="btn" type="button" id="sess-finish">إنهاء التمرين ✓</button><button class="btn danger" type="button" id="sess-cancel">إلغاء</button></div>`;
+  }
+  function plateCalc(weight) {
+    const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25], COLORS = { 25: '#ff6b81', 20: '#57b8ff', 15: '#ffd27a', 10: '#5fe3ad', 5: '#e8eefc', 2.5: '#c9a2ff', 1.25: '#9fb3cc' };
+    openSheet('حاسبة الأقراص', `
+      <div class="set-grid">
+        <label class="field"><span>الوزن الكلي</span><span class="inwrap"><input id="pc-w" inputmode="decimal" value="${weight || ''}" placeholder="100"><em>كجم</em></span></label>
+        <label class="field"><span>البار</span><select id="pc-b"><option value="20">بار أولمبي 20</option><option value="15">بار 15</option><option value="10">بار EZ / قصير 10</option><option value="0">بدون بار (جهاز)</option></select></label>
+      </div>
+      <div class="plate-out" id="pc-out"></div><p class="hint" id="pc-txt" style="text-align:center"></p>`);
+    const draw = () => {
+      const total = num($('#pc-w').value), bar = +$('#pc-b').value;
+      let side = (total - bar) / 2; const use = [];
+      if (!(total > 0)) { $('#pc-out').innerHTML = ''; $('#pc-txt').textContent = 'اكتب الوزن اللي تبيه.'; return; }
+      if (side < 0) { $('#pc-out').innerHTML = ''; $('#pc-txt').textContent = 'الوزن أقل من البار نفسه.'; return; }
+      for (const p of PLATES) while (side >= p - 1e-9) { use.push(p); side -= p; }
+      $('#pc-out').innerHTML = use.map((p) => `<span class="plate" style="background:${COLORS[p]};height:${30 + p * 2}px">${p}</span>`).join('') || '<span class="hint">البار لحاله</span>';
+      $('#pc-txt').textContent = (use.length ? `في كل جهة: ${use.join(' + ')} كجم` : '') + (side > 0.01 ? ` · يبقى ${r1(side * 2)} كجم ما يتوزع بالأقراص المتوفرة` : '');
+    };
+    $('#pc-w').addEventListener('input', draw); $('#pc-b').addEventListener('change', draw); draw();
+  }
+  // simple line chart: points = [[label, value], ...] oldest first
+  function lineChart(points, unit) {
+    if (points.length < 2) return '';
+    const W = 320, H = 130, P = 26, vals = points.map((p) => p[1]), lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+    const x = (i) => P + (i * (W - P * 1.6)) / (points.length - 1), y = (v) => H - 20 - ((v - lo) / span) * (H - 40);
+    const d = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');
+    return `<div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="رسم التقدم"><line class="gl" x1="${P}" x2="${W - 4}" y1="${y(hi)}" y2="${y(hi)}"/><line class="gl" x1="${P}" x2="${W - 4}" y1="${y(lo)}" y2="${y(lo)}"/>
+      <text x="2" y="${y(hi) + 3}">${Math.round(hi)}</text><text x="2" y="${y(lo) + 3}">${Math.round(lo)}</text>
+      <path class="ln" d="${d}"/>${points.map((p, i) => `<circle class="dt" cx="${x(i).toFixed(1)}" cy="${y(p[1]).toFixed(1)}" r="3"/>`).join('')}
+      <text x="${P}" y="${H - 4}">${esc(points[0][0])}</text><text x="${W - 4}" y="${H - 4}" text-anchor="end">${esc(points[points.length - 1][0])}</text></svg><div class="hint" style="text-align:center">${esc(unit)}</div></div>`;
   }
   function historyHTML() {
     const list = sessions().slice(0, 12);
@@ -2412,7 +2549,7 @@ html.native .web-only-inline { display: none; }
     const rhtml = rs.map((r) => `<div class="ex-card" data-rid="${r.id}">
       <div class="ex-head"><span class="inwrap" style="flex:1"><input data-rname="${r.id}" value="${esc(r.n)}" aria-label="اسم البرنامج" style="direction:rtl"></span>
         ${routineDelete === r.id ? `<button class="btn danger" type="button" data-rdel-yes="${r.id}">احذف</button><button class="btn ghost" type="button" data-rdel-no>لا</button>` : `<button class="x" type="button" data-rdel="${r.id}" aria-label="حذف البرنامج">×</button>`}</div>
-      ${r.ex.map((x, i) => { const ex = exById(x.id); return `<div class="rt-row"><span class="nm">${esc(ex.n)}</span><span class="inwrap"><input inputmode="numeric" data-rx="${r.id}:${i}" data-rf="sets" value="${x.sets}" aria-label="المجموعات"><em>×</em></span><span class="inwrap"><input data-rx="${r.id}:${i}" data-rf="reps" value="${esc(x.reps)}" aria-label="العدات" style="direction:ltr"><em>${ex.kind === 't' ? 'د' : 'عدة'}</em></span><button class="x" type="button" data-rx-del="${r.id}:${i}" aria-label="حذف">×</button></div>`; }).join('')}
+      ${r.ex.map((x, i) => { const ex = exById(x.id); return `<div class="rt-row"><span class="mv"><button type="button" data-rx-mv="${r.id}:${i}:-1" aria-label="فوق" ${i === 0 ? 'disabled' : ''}>↑</button><button type="button" data-rx-mv="${r.id}:${i}:1" aria-label="تحت" ${i === r.ex.length - 1 ? 'disabled' : ''}>↓</button></span><span class="nm">${esc(ex.n)}${x.ss || (i > 0 && r.ex[i - 1].ss) ? ' <span class="ss-tag">🔗</span>' : ''}${i < r.ex.length - 1 ? ` <button class="link-btn" type="button" data-rx-ss="${r.id}:${i}" style="font-size:11px">${x.ss ? 'فك السوبر سِت' : '🔗 سوبر سِت مع اللي تحت'}</button>` : ''}</span><span class="inwrap"><input inputmode="numeric" data-rx="${r.id}:${i}" data-rf="sets" value="${x.sets}" aria-label="المجموعات"><em>×</em></span><span class="inwrap"><input data-rx="${r.id}:${i}" data-rf="reps" value="${esc(x.reps)}" aria-label="العدات" style="direction:ltr"><em>${ex.kind === 't' ? 'د' : 'عدة'}</em></span><button class="x" type="button" data-rx-del="${r.id}:${i}" aria-label="حذف">×</button></div>`; }).join('')}
       <button class="link-btn" type="button" data-rx-add="${r.id}">+ أضف تمرين</button>
     </div>`).join('');
     return `<div class="sect"><h3>الجدول الأسبوعي</h3>${rs.length ? sched : '<p class="empty">سوّ برنامج أو اختر برنامج جاهز تحت، وبعدها وزّعه على أيام الأسبوع.</p>'}</div>
@@ -2429,7 +2566,14 @@ html.native .web-only-inline { display: none; }
       let detail = '';
       if (open) {
         const hist = sessions().filter(([, r]) => r.workout.ex.some((x) => x.id === e.id)).slice(0, 6);
-        detail = `<div class="lib-detail">${hist.length ? hist.map(([d, r]) => { const x = r.workout.ex.find((y) => y.id === e.id); return `<div><b>${dayLabel(d)}</b> ${x.sets.filter((s) => s.ok).map((s) => e.kind === 't' ? `${s.r} د` : `${s.w || 0}×${s.r}`).join('، ')}</div>`; }).join('') : '<div class="empty">ما سجلت هذا التمرين للحين.</div>'}</div>`;
+        const pts = sessions().filter(([, r]) => r.workout.ex.some((x) => x.id === e.id)).slice(0, 20).reverse().map(([d, r]) => {
+          const sets = r.workout.ex.filter((x) => x.id === e.id).flatMap((x) => x.sets.filter(working));
+          const v = e.kind === 't' ? sets.reduce((a, s) => a + (s.r || 0), 0) : e.kind === 'bw' && !sets.some((s) => s.w > 0) ? Math.max(0, ...sets.map((s) => s.r || 0)) : Math.max(0, ...sets.map((s) => e1rm(s.w || 0, s.r || 0)));
+          return [d.slice(5).replace('-', '/'), r1(v)];
+        }).filter((p) => p[1] > 0);
+        const maxW = Math.max(0, ...sessions().flatMap(([, r]) => r.workout.ex.filter((x) => x.id === e.id).flatMap((x) => x.sets.filter(working).map((s) => s.w || 0))));
+        const chart = lineChart(pts, e.kind === 't' ? 'الدقائق في كل حصة' : e.kind === 'bw' && !maxW ? 'أعلى عدات في كل حصة' : 'أفضل 1RM تقديري (كجم) في كل حصة');
+        detail = `${chart}${maxW ? `<div class="hint" style="padding:0 10px">أثقل وزن: <b>${maxW} كجم</b>${best ? ` · أفضل 1RM تقديري: <b>${Math.round(best)} كجم</b>` : ''}</div>` : ''}<div class="lib-detail">${hist.length ? hist.map(([d, r]) => { const x = r.workout.ex.find((y) => y.id === e.id); return `<div><b>${dayLabel(d)}</b> ${x.sets.filter((s) => s.ok).map((s) => (s.type ? SET_LBL[s.type] + ' ' : '') + (e.kind === 't' ? `${s.r} د` : `${s.w || 0}×${s.r}`)).join('، ')}</div>`; }).join('') : '<div class="empty">ما سجلت هذا التمرين للحين.</div>'}</div>`;
       }
       return `<li><button type="button" data-lib="${e.id}"><span>${esc(e.n)}<small style="display:block">${esc(e.en || '')} · ${MUSCLES[e.m] || ''}</small></span><small>${best ? `أفضل 1RM ~${Math.round(best)} كجم` : ''}</small></button>${detail}</li>`;
     }).join('')}</ul>`;
@@ -2470,7 +2614,15 @@ html.native .web-only-inline { display: none; }
     if (ev.target.closest('#tr-start-pick')) { startWorkout($('#tr-pick').value || null); return; }
     const t = todayStr(), w = JSON.parse(JSON.stringify((getDay(t) || {}).workout || null));
     const ok = ev.target.closest('[data-ok]');
-    if (ok && w) { const [xi, si] = ok.dataset.ok.split(':').map(Number); const s = w.ex[xi].sets[si]; s.ok = !s.ok; setWorkout(w); renderTrain(); if (s.ok) startRest(); return; }
+    if (ok && w) { const [xi, si] = ok.dataset.ok.split(':').map(Number); const s = w.ex[xi].sets[si]; s.ok = !s.ok; setWorkout(w); renderTrain(); if (s.ok && ssEnd(w.ex, xi) === xi && s.type !== 'w') startRest(); return; }
+    const stp = ev.target.closest('[data-stype]');
+    if (stp && w) { const [xi, si] = stp.dataset.stype.split(':').map(Number); const s = w.ex[xi].sets[si]; const nx = SET_TYPES[(SET_TYPES.indexOf(s.type || '') + 1) % SET_TYPES.length]; if (nx) s.type = nx; else delete s.type; setWorkout(w); renderTrain(); return; }
+    const mv = ev.target.closest('[data-mv-ex]');
+    if (mv && w) { const [xi, dir] = mv.dataset.mvEx.split(':').map(Number), j = xi + dir; if (j < 0 || j >= w.ex.length) return; [w.ex[xi], w.ex[j]] = [w.ex[j], w.ex[xi]]; setWorkout(w); renderTrain(); return; }
+    const ssb = ev.target.closest('[data-ss]');
+    if (ssb && w) { const x = w.ex[+ssb.dataset.ss]; x.ss = !x.ss; setWorkout(w); renderTrain(); return; }
+    const pl = ev.target.closest('[data-plates]');
+    if (pl && w) { const x = w.ex[+pl.dataset.plates]; const last = x.sets.slice().reverse().find((s) => s.w > 0); plateCalc(last ? last.w : ''); return; }
     const as = ev.target.closest('[data-add-set]');
     if (as && w) { const x = w.ex[+as.dataset.addSet], l = x.sets[x.sets.length - 1] || {}; x.sets.push({ w: l.w ?? '', r: l.r ?? '', ok: false }); setWorkout(w); renderTrain(); return; }
     const rs = ev.target.closest('[data-rm-set]');
@@ -2499,6 +2651,10 @@ html.native .web-only-inline { display: none; }
     if (ry) { const id = ry.dataset.rdelYes; S().routines = routines().filter((r) => r.id !== id); const sch = { ...(S().schedule || {}) }; for (const k in sch) if (sch[k] === id) delete sch[k]; S().schedule = sch; routineDelete = null; saveRoutines(); renderTrain(); return; }
     const xa = ev.target.closest('[data-rx-add]');
     if (xa) { const rid = xa.dataset.rxAdd; exPicker((id) => { const r = routines().find((x) => x.id === rid); if (!r) return; r.ex.push({ id, sets: exById(id).kind === 't' ? 1 : 3, reps: exById(id).kind === 't' ? '20' : '8-12' }); saveRoutines(); renderTrain(); }); return; }
+    const rmv = ev.target.closest('[data-rx-mv]');
+    if (rmv) { const [rid, i, dir] = rmv.dataset.rxMv.split(':'); const r = routines().find((x) => x.id === rid); const a = +i, b = a + +dir; if (r && b >= 0 && b < r.ex.length) { [r.ex[a], r.ex[b]] = [r.ex[b], r.ex[a]]; saveRoutines(); renderTrain(); } return; }
+    const rss = ev.target.closest('[data-rx-ss]');
+    if (rss) { const [rid, i] = rss.dataset.rxSs.split(':'); const r = routines().find((x) => x.id === rid); if (r) { r.ex[+i].ss = !r.ex[+i].ss; saveRoutines(); renderTrain(); } return; }
     const xd = ev.target.closest('[data-rx-del]');
     if (xd) { const [rid, i] = xd.dataset.rxDel.split(':'); const r = routines().find((x) => x.id === rid); if (r) { r.ex.splice(+i, 1); saveRoutines(); renderTrain(); } return; }
     // library
@@ -2507,6 +2663,7 @@ html.native .web-only-inline { display: none; }
   });
   $('#trainBody').addEventListener('input', (ev) => {
     const i = ev.target;
+    if (i.dataset.note != null) { S().exNotes = { ...(S().exNotes || {}), [i.dataset.note]: i.value.slice(0, 200) }; if (!i.value.trim()) delete S().exNotes[i.dataset.note]; save('settings'); return; }
     if (i.dataset.sx != null) {
       const t = todayStr(), w = JSON.parse(JSON.stringify((getDay(t) || {}).workout || null)); if (!w) return;
       const v = i.value.trim() === '' ? '' : num(i.value);
