@@ -3499,7 +3499,8 @@ body.drag-on { user-select: none; -webkit-user-select: none; overflow: hidden; }
       const key = searchKey(f);
       if (toks.length && !toks.every((t) => wordHit(key, t) || wordHit(key, stemAr(t)) || wordHit(key, stemEn(t)))) continue;
       const nameHit = toks.length && (normAr(f.n).startsWith(toks[0]) || (f.en || '').toLowerCase().startsWith(toks[0]) || (f.en || '').toLowerCase().startsWith(stemEn(toks[0]))) ? 0 : 1;
-      out.push([f, tier * 1000 + nameHit * 500 + (tier === 2 ? f.n.length : (f._i ??= (window.HUNTER_FOODS || []).indexOf(f)))]);
+      const exact = toks.length && toks.every((t) => key.includes(' ' + t + ' ') || key.includes(' ' + stemAr(t) + ' ')) ? 0 : 1;
+      out.push([f, exact * 3000 + tier * 1000 + nameHit * 500 + (tier === 2 ? f.n.length : (f._i ??= (window.HUNTER_FOODS || []).indexOf(f)))]);
     }
     return out.sort((a, b) => a[1] - b[1]).map((x) => x[0]);
   }
