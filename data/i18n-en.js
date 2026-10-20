@@ -295,9 +295,9 @@ window.ARISE_EN = {
 "سعرات": "calories",
 "أكل نظيف": "Clean eating",
 "وجبة حرة مفعّلة من المتجر": "Free meal active from the store",
-"بروتين": "protein",
-"كارب": "carbs",
-"دهون": "fat",
+"بروتين": "Protein",
+"كارب": "Carbs",
+"دهون": "Fat",
 "شرب الماء": "Drink water",
 "لتر على الأقل": "L at least",
 "كوب": "cup",
@@ -1473,5 +1473,9 @@ window.ARISE_EN = {
 "استوردت": "Imported",
 "تمرين من Strong": "workouts from Strong",
 "وأضفت": "and added",
-"تمارين جديدة للمكتبة": "new exercises to the library"
+"تمارين جديدة للمكتبة": "new exercises to the library",
+"↺ أكل أمس كامل": "↺ All of yesterday's food",
+"🧭 الكوتش ·": "🧭 Coach ·",
+"لكل 100 جم": "per 100 g",
+"لكل 100 جم:": "Per 100 g:"
 };
